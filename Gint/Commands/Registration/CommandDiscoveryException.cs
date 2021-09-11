@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Gint.Registration
+namespace Gint
 {
     public class CommandDiscoveryException : Exception
     {

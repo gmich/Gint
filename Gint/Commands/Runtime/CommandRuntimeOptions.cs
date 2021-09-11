@@ -1,8 +1,4 @@
-﻿using Gint;
-using System;
-using System.IO;
-
-namespace Gint
+﻿namespace Gint
 {
     public class CommandRuntimeOptions
     {
