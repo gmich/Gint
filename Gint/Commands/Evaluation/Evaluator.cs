@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace Gint
 {
@@ -12,6 +13,7 @@ namespace Gint
 
         private int executionId = 1;
         private int GetExecutionId => executionId++;
+        private string[] boundOptionsCache = Array.Empty<string>();
 
         private Evaluator(CommandExecutionContext commandExecutionContext)
         {
@@ -38,7 +40,7 @@ namespace Gint
             finally
             {
                 var stream = evaluator.GetStream();
-                evaluator.commandExecutionContext.Info.WriteLine(stream);
+                evaluator.commandExecutionContext.Info.WriteRaw(stream.Raw).WriteLine();
                 evaluator.commandExecutionContext.Info.Flush();
                 if (evaluator.evaluationChain.Error)
                 {
@@ -55,8 +57,7 @@ namespace Gint
             var suffix = command[errorSpan.End..];
 
             commandExecutionContext.Error
-                .Write("Execution error")
-                .WriteLine()
+                .Write("error: ")
                 .Write(prefix)
                 .WriteFormatted(error, FormatType.ForegroundRed)
                 .Write(suffix)
@@ -100,27 +101,31 @@ namespace Gint
 
         private void EvaluateVariableOption(BoundVariableOption boundVariableOption)
         {
+            var capturedBoundOptions = BoundOptionsCopy;
             evaluationChain.Add(async () =>
             {
-                var output = await boundVariableOption.VariableOption.Callback.Invoke(new CommandInput(GetExecutionId, boundVariableOption.Variable, GetStream()), commandExecutionContext, Next);
+                var output = await boundVariableOption.VariableOption.Callback.Invoke(new CommandInput(GetExecutionId, boundVariableOption.Variable, GetStream(), capturedBoundOptions), commandExecutionContext, Next);
                 OnExecutionEnd(output);
             }, boundVariableOption.TextSpanWithVariable);
         }
 
         private void EvaluateOption(BoundOption boundOption)
         {
+            var capturedBoundOptions = BoundOptionsCopy;
             evaluationChain.Add(async () =>
             {
-                var output = await boundOption.Option.Callback.Invoke(new CommandInput(GetExecutionId, string.Empty, GetStream()), commandExecutionContext, Next);
+                var output = await boundOption.Option.Callback.Invoke(new CommandInput(GetExecutionId, string.Empty, GetStream(), capturedBoundOptions), commandExecutionContext, Next);
                 OnExecutionEnd(output);
             }, boundOption.TextSpan);
         }
 
         private void EvaluateCommand(BoundCommand boundCommand)
         {
+            boundOptionsCache = boundCommand.BoundOptions.Select(c => c.Argument).ToArray();
+            var capturedBoundOptions = BoundOptionsCopy;
             evaluationChain.Add(async () =>
             {
-                var output = await boundCommand.Command.Callback.Invoke(new CommandInput(GetExecutionId, string.Empty, GetStream()), commandExecutionContext, Next);
+                var output = await boundCommand.Command.Callback.Invoke(new CommandInput(GetExecutionId, string.Empty, GetStream(), capturedBoundOptions), commandExecutionContext, Next);
                 OnExecutionEnd(output);
             }, boundCommand.TextSpan);
 
@@ -129,6 +134,8 @@ namespace Gint
                 EvaluateNode(opt);
             }
         }
+
+        private string[] BoundOptionsCopy => boundOptionsCache.ToArray();
 
         private Func<Task> Next => () =>
         {
@@ -150,7 +157,7 @@ namespace Gint
             Next();
         }
 
-        private string GetStream()
+        private InputStream GetStream()
         {
             commandExecutionContext.OutStream.Flush();
             var stream = buffer.Drain();

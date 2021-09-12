@@ -98,16 +98,16 @@ namespace Gint
             if (option == null)
             {
                 diagnostics.ReportOptionUnknown(n.OptionToken.Span, optionName);
-                return new BoundVariableOption(0, new VariableOption(0, optionName, optionName, NoopExecutionBlock, NoopHelp), string.Empty, n);
+                return new BoundVariableOption(string.Empty, 0, new VariableOption(0, optionName, optionName, NoopExecutionBlock, NoopHelp), string.Empty, n);
             }
             else if (option is VariableOption vop)
             {
-                return new BoundVariableOption(option.Priority, vop, n.VariableToken.Value, n);
+                return new BoundVariableOption(vop.Argument, option.Priority, vop, n.VariableToken.Value, n);
             }
             else
             {
                 diagnostics.ReportUnecessaryVariable(n.OptionToken.Span);
-                return new BoundVariableOption(0, new VariableOption(0,optionName, optionName, NoopExecutionBlock, NoopHelp), string.Empty, n);
+                return new BoundVariableOption(string.Empty, 0, new VariableOption(0, optionName, optionName, NoopExecutionBlock, NoopHelp), string.Empty, n);
             }
         }
 
@@ -119,16 +119,16 @@ namespace Gint
             if (option == null)
             {
                 diagnostics.ReportOptionUnknown(n.OptionToken.Span, optionName);
-                return new BoundOption(0, new Option(0, optionName, optionName, NoopExecutionBlock, NoopHelp), n);
+                return new BoundOption(string.Empty, 0, new Option(0, optionName, optionName, NoopExecutionBlock, NoopHelp), n);
             }
             else if (option is VariableOption vop)
             {
                 diagnostics.ReportMissingVariable(n.Span);
-                return new BoundOption(0, new Option(0, optionName, optionName, NoopExecutionBlock, NoopHelp), n);
+                return new BoundOption(string.Empty, 0, new Option(0, optionName, optionName, NoopExecutionBlock, NoopHelp), n);
             }
             else
             {
-                return new BoundOption(option.Priority, option, n);
+                return new BoundOption(option.Argument, option.Priority, option, n);
             }
         }
     }

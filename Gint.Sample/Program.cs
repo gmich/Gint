@@ -30,8 +30,8 @@ namespace Gint.Sample
             };
 
             //log interpretater results details
-            runtime.Options.LogBindTree = true;
-            runtime.Options.LogParseTree = true;
+            //runtime.Options.LogBindTree = true;
+            //runtime.Options.LogParseTree = true;
             runtime.Options.Out.AddWriter(consoleOutputWriter);
 
             while (true)

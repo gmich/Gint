@@ -110,6 +110,12 @@ namespace Gint
             return this;
         }
 
+        public Out Intent()
+        {
+            Write("    ");
+            return this;
+        }
+
         public Out WriteFormatted(string text, params FormatType[] outputEncodingTokens)
         {
             Format(outputEncodingTokens);

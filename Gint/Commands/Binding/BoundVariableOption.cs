@@ -2,7 +2,7 @@
 {
     internal sealed class BoundVariableOption : BoundOptionExpression
     {
-        public BoundVariableOption(int priority, VariableOption option, string variable, VariableOptionExpressionSyntax optionExpression)
+        public BoundVariableOption(string argument, int priority, VariableOption option, string variable, VariableOptionExpressionSyntax optionExpression) : base(argument)
         {
             Priority = priority;
             VariableOption = option;

@@ -2,7 +2,7 @@
 {
     internal class BoundOption : BoundOptionExpression
     {
-        public BoundOption(int priority, Option option, OptionExpressionSyntax optionExpression)
+        public BoundOption(string argument, int priority, Option option, OptionExpressionSyntax optionExpression) : base(argument)
         {
             Priority = priority;
             Option = option;

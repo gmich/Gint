@@ -3,7 +3,8 @@
     public interface ICommandInput
     {
         string Variable { get; }
-        string Stream { get; }
+        InputStream Stream { get; }
         int ExecutionId { get; }
+        string[] Options { get; }
     }
 }

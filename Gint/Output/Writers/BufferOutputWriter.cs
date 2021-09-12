@@ -5,18 +5,22 @@ namespace Gint
 {
     internal class ExecutionBuffer
     {
-        public StringBuilder Builder { get; } = new StringBuilder();
+        public StringBuilder RawBuilder { get; } = new StringBuilder();
+        public StringBuilder BuilderWithoutFormat { get; } = new StringBuilder();
 
         public override string ToString()
         {
-            return Builder.ToString();
+            return RawBuilder.ToString();
         }
 
-        public string Drain()
+        public InputStream Drain()
         {
-            var text= Builder.ToString();
-            Builder.Clear();
-            return text;
+            var stream = new InputStream(RawBuilder.ToString(), BuilderWithoutFormat.ToString());
+
+            RawBuilder.Clear();
+            BuilderWithoutFormat.Clear();
+
+            return stream;
         }
     }
 
@@ -34,7 +38,8 @@ namespace Gint
     {
         private readonly ExecutionBuffer buffer;
         public event EventHandler<BufferOutputEventArgs> OnBufferStreamEnd;
-        private readonly StringBuilder builder = new StringBuilder();
+        private readonly StringBuilder rawBuilder = new StringBuilder();
+        private readonly StringBuilder builderWithoutFormat = new StringBuilder();
 
         public BufferOutputWriter(ExecutionBuffer buffer)
         {
@@ -43,22 +48,27 @@ namespace Gint
 
         public override void Flush()
         {
-            buffer.Builder.Append(builder.ToString());
-            builder.Clear();
+            buffer.BuilderWithoutFormat.Append(builderWithoutFormat.ToString());
+            buffer.RawBuilder.Append(rawBuilder.ToString());
+            rawBuilder.Clear();
+            builderWithoutFormat.Clear();
         }
 
         protected override void Format(OutputSyntaxToken token)
         {
+            rawBuilder.Append(token.Text);
         }
 
         protected override void NewLine(OutputSyntaxToken token)
         {
-            builder.AppendLine();
+            builderWithoutFormat.AppendLine();
+            rawBuilder.AppendLine();
         }
 
         protected override void PrintText(OutputSyntaxToken token)
         {
-            builder.Append(token.Value);
+            builderWithoutFormat.AppendLine(token.Value);
+            rawBuilder.Append(token.Value);
         }
 
         protected override void EndOfStream(OutputSyntaxToken token)
