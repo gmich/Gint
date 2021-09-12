@@ -91,14 +91,14 @@ namespace Gint
 
             if (isToConsole)
                 Console.ForegroundColor = ConsoleColor.DarkGray;
-            @out?.Format(FormatType.ForegroundDarkGray);
+            @out?.Format(FormatType.DarkGrayForeground);
 
             writer.Write(indent);
             writer.Write(marker);
 
             if (isToConsole)
                 Console.ForegroundColor = node is CommandSyntaxToken ? ConsoleColor.Yellow : ConsoleColor.Cyan;
-            @out?.Format(node is CommandSyntaxToken ? FormatType.ForegroundYellow : FormatType.ForegroundCyan);
+            @out?.Format(node is CommandSyntaxToken ? FormatType.YellowForeground : FormatType.CyanForeground);
 
 
             writer.Write(node.Kind);

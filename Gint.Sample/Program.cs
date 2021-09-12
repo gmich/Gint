@@ -38,7 +38,7 @@ namespace Gint.Sample
             {
                 //print prompt
                 runtime.Options.Out
-                    .Format(FormatType.ForegroundGreen)
+                    .Format(FormatType.GreenForeground)
                     .WriteLine($"{Environment.MachineName} cli »")
                     .WriteLine()
                     .Flush();

@@ -31,7 +31,7 @@ namespace Gint
             {
                 if (Options.LogParseTree)
                 {
-                    Options.Out.WriteLine().WriteFormatted("Parse tree", FormatType.ForegroundMagenta).WriteLine();
+                    Options.Out.WriteLine().WriteFormatted("Parse tree", FormatType.MagentaForeground).WriteLine();
                     parserRes.Root.WriteTo(OutAdapter);
                     Options.Out.WriteLine().Flush();
                 }
@@ -45,7 +45,7 @@ namespace Gint
                 {
                     if (Options.LogBindTree)
                     {
-                        Options.Out.WriteFormatted("Bind tree", FormatType.ForegroundMagenta)
+                        Options.Out.WriteFormatted("Bind tree", FormatType.MagentaForeground)
                             .WriteLine();
                         boundNode.WriteTo(OutAdapter);
                         Options.Out.WriteLine().Flush();
@@ -66,7 +66,7 @@ namespace Gint
                 var prefix = text.Substring(0, diagnostic.Location.Start);
                 var suffix = text[diagnostic.Location.End..];
                 Options.Out.Write(prefix)
-                    .WriteFormatted(error, FormatType.ForegroundRed)
+                    .WriteFormatted(error, FormatType.RedForeground)
                     .WriteLine(suffix)
                     .WriteLine(diagnostic.Message)
                     .WriteLine()

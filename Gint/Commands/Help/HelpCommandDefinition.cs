@@ -43,7 +43,7 @@ namespace Gint
             PrintCommandOptions(ctx, cmd, false);
             ctx.OutStream.WriteLine()
                 .Intent()
-                .Format(FormatType.ForegroundYellow);
+                .Format(FormatType.YellowForeground);
             entry.Command.HelpCallback(ctx.OutStream);
             ctx.OutStream.WriteLine().ClearFormat();
         }
@@ -102,7 +102,7 @@ namespace Gint
                 ctx.OutStream.Write($"[{option.Argument} / {option.LongArgument}");
 
                 if (needsArgument != null)
-                    ctx.OutStream.WriteFormatted(needsArgument, FormatType.ForegroundDarkGray);
+                    ctx.OutStream.WriteFormatted(needsArgument, FormatType.DarkGrayForeground);
 
                 ctx.OutStream.Write("]");
 
@@ -114,7 +114,7 @@ namespace Gint
 
                 if (detailed)
                 {
-                    ctx.OutStream.Intent().Format(FormatType.ForegroundYellow);
+                    ctx.OutStream.Intent().Format(FormatType.YellowForeground);
                     option.HelpCallback(ctx.OutStream);
                     ctx.OutStream.ClearFormat().WriteLine();
                 }

@@ -71,14 +71,14 @@ namespace Gint
 
             if (isToConsole)
                 Console.ForegroundColor = ConsoleColor.DarkGray;
-            @out?.Format(FormatType.ForegroundDarkGray);
+            @out?.Format(FormatType.DarkGrayForeground);
 
             writer.Write(indent);
             writer.Write(marker);
 
             if (isToConsole)
                 Console.ForegroundColor = (node is BoundNode) ? ConsoleColor.Cyan : ConsoleColor.Yellow;
-            @out?.Format((node is BoundNode) ? FormatType.ForegroundCyan : FormatType.ForegroundYellow);
+            @out?.Format((node is BoundNode) ? FormatType.CyanForeground : FormatType.YellowForeground);
 
             var text = GetText(node);
             writer.Write(text);
@@ -93,7 +93,7 @@ namespace Gint
                 {
                     if (isToConsole)
                         Console.ForegroundColor = ConsoleColor.DarkGray;
-                    @out?.Format(FormatType.ForegroundDarkGray);
+                    @out?.Format(FormatType.DarkGrayForeground);
 
                     writer.Write(",");
                 }
@@ -102,19 +102,19 @@ namespace Gint
 
                 if (isToConsole)
                     Console.ForegroundColor = ConsoleColor.Yellow;
-                @out?.Format(FormatType.ForegroundYellow);
+                @out?.Format(FormatType.YellowForeground);
 
                 writer.Write(p.Name);
 
                 if (isToConsole)
                     Console.ForegroundColor = ConsoleColor.DarkGray;
-                @out?.Format(FormatType.ForegroundDarkGray);
+                @out?.Format(FormatType.DarkGrayForeground);
 
                 writer.Write(" = ");
 
                 if (isToConsole)
                     Console.ForegroundColor = ConsoleColor.DarkYellow;
-                @out?.Format(FormatType.ForegroundDarkYellow);
+                @out?.Format(FormatType.DarkYellowForeground);
 
                 writer.Write(p.Value);
             }

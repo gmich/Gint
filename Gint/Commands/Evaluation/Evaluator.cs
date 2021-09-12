@@ -59,7 +59,7 @@ namespace Gint
             commandExecutionContext.Error
                 .Write("error: ")
                 .Write(prefix)
-                .WriteFormatted(error, FormatType.ForegroundRed)
+                .WriteFormatted(error, FormatType.RedForeground)
                 .Write(suffix)
                 .WriteLine()
                 .Flush();
