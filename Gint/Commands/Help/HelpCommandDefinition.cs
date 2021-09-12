@@ -14,8 +14,8 @@ namespace Gint
 
             registry.Add(
                   new Command("help", HelpHelp, Help),
-                  new Option(1, "-d", "--detail", Detail, DetailHelp),
-                  new VariableOption(2, "-c", "--command", Command, CommandHelp)
+                  new Option(1, "-d", "--detail", false, Detail, DetailHelp),
+                  new VariableOption(2, "-c", "--command", true, Command, CommandHelp)
               );
         }
 
@@ -32,7 +32,7 @@ namespace Gint
             return CommandOutput.SuccessfulTask;
         }
 
-        private static void PrintCommand(CommandExecutionContext ctx,CommandEntry cmd)
+        private static void PrintCommand(CommandExecutionContext ctx, CommandEntry cmd)
         {
             var entry = cmd;
             ctx.OutStream.Write(entry.Command.CommandName).WriteWhitespace();

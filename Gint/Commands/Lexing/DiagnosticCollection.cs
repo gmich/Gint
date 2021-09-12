@@ -68,5 +68,11 @@ namespace Gint
             var message = $"Unterminated pipeline, expected command.";
             ReportError(span, message);
         }
+
+        internal void ReportMultipleOptionsNotAllowed(TextSpan span)
+        {
+            var message = $"Multiple calls to this option are not allowed.";
+            ReportError(span, message);
+        }
     }
 }

@@ -93,13 +93,13 @@ namespace Gint
                     var optAttr = m.GetCustomAttribute(typeof(OptionAttribute));
                     if (optAttr is OptionAttribute oatrr)
                     {
-                        options.Add(new Option(oatrr.Priority, oatrr.Argument, oatrr.LongArgument, GetExecutionBlock(), GetHelpCallback(oatrr.HelpCallbackMethodName)));
+                        options.Add(new Option(oatrr.Priority, oatrr.Argument, oatrr.LongArgument, oatrr.AllowMultiple, GetExecutionBlock(), GetHelpCallback(oatrr.HelpCallbackMethodName)));
                         continue;
                     }
                     var voptAttr = m.GetCustomAttribute(typeof(VariableOptionAttribute));
                     if (voptAttr is VariableOptionAttribute voattr)
                     {
-                        options.Add(new VariableOption(voattr.Priority, voattr.Argument, voattr.LongArgument, GetExecutionBlock(), GetHelpCallback(voattr.HelpCallbackMethodName)));
+                        options.Add(new VariableOption(voattr.Priority, voattr.Argument, voattr.LongArgument, voattr.AllowMultiple, GetExecutionBlock(), GetHelpCallback(voattr.HelpCallbackMethodName)));
                         continue;
                     }
                 }

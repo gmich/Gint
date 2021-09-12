@@ -2,11 +2,11 @@
 {
     internal sealed class BoundVariableOption : BoundOptionExpression
     {
-        public BoundVariableOption(string argument, int priority, VariableOption option, string variable, VariableOptionExpressionSyntax optionExpression) : base(argument)
+        public BoundVariableOption(string argument, int priority, bool allowMultiple, VariableOption option, string variable, VariableOptionExpressionSyntax optionExpression) 
+            : base(argument, allowMultiple, optionExpression.Span)
         {
             Priority = priority;
             VariableOption = option;
-            TextSpan = optionExpression.Span;
             TextSpanWithVariable = TextSpan.FromBounds(TextSpan.Start, optionExpression.VariableToken.Span.End);
             Variable = variable;
         }
@@ -15,7 +15,6 @@
         public override int Priority { get; }
         public VariableOption VariableOption { get; }
         public string Variable { get; }
-        public TextSpan TextSpan { get; }
         public TextSpan TextSpanWithVariable { get; }
     }
 }

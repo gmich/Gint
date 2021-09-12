@@ -75,6 +75,16 @@ namespace Gint
                 .OrderBy(c => c.Priority)
                 .ToArray();
 
+            //Check for multiples
+            var groups = boundOptions.GroupBy(c => c.Argument);
+            foreach (var g in groups)
+            {
+                if (g.Count() > 1 && !g.First().AllowMultiple)
+                {
+                    foreach (var item in g)
+                        diagnostics.ReportMultipleOptionsNotAllowed(item.TextSpan);
+                }
+            }
             return new BoundCommand(cmd.Command, n.CommandToken, boundOptions);
         }
 
@@ -98,16 +108,16 @@ namespace Gint
             if (option == null)
             {
                 diagnostics.ReportOptionUnknown(n.OptionToken.Span, optionName);
-                return new BoundVariableOption(string.Empty, 0, new VariableOption(0, optionName, optionName, NoopExecutionBlock, NoopHelp), string.Empty, n);
+                return new BoundVariableOption(string.Empty, 0, true, new VariableOption(0, optionName, optionName, true, NoopExecutionBlock, NoopHelp), string.Empty, n);
             }
             else if (option is VariableOption vop)
             {
-                return new BoundVariableOption(vop.Argument, option.Priority, vop, n.VariableToken.Value, n);
+                return new BoundVariableOption(vop.Argument, option.Priority, option.AllowMultiple, vop, n.VariableToken.Value, n);
             }
             else
             {
                 diagnostics.ReportUnecessaryVariable(n.OptionToken.Span);
-                return new BoundVariableOption(string.Empty, 0, new VariableOption(0, optionName, optionName, NoopExecutionBlock, NoopHelp), string.Empty, n);
+                return new BoundVariableOption(string.Empty, 0, true, new VariableOption(0, optionName, optionName, true, NoopExecutionBlock, NoopHelp), string.Empty, n);
             }
         }
 
@@ -119,16 +129,16 @@ namespace Gint
             if (option == null)
             {
                 diagnostics.ReportOptionUnknown(n.OptionToken.Span, optionName);
-                return new BoundOption(string.Empty, 0, new Option(0, optionName, optionName, NoopExecutionBlock, NoopHelp), n);
+                return new BoundOption(string.Empty, 0, true, new Option(0, optionName, optionName, true, NoopExecutionBlock, NoopHelp), n);
             }
             else if (option is VariableOption vop)
             {
                 diagnostics.ReportMissingVariable(n.Span);
-                return new BoundOption(string.Empty, 0, new Option(0, optionName, optionName, NoopExecutionBlock, NoopHelp), n);
+                return new BoundOption(string.Empty, 0, true, new Option(0, optionName, optionName, true, NoopExecutionBlock, NoopHelp), n);
             }
             else
             {
-                return new BoundOption(option.Argument, option.Priority, option, n);
+                return new BoundOption(option.Argument, option.Priority, option.AllowMultiple, option, n);
             }
         }
     }
