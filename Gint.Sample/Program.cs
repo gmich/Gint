@@ -20,6 +20,21 @@ namespace Gint.Sample
                     return ctx;
                 });
 
+            runtime.CommandRegistry
+                .AddCommand("cpu", o => o.Write("Cpu utilities"),
+                    (input, ctx, next) =>
+                    {
+                        ctx.OutStream.Write("CPU utilities");
+                        return CommandOutput.SuccessfulTask;
+                    })
+                .AddOption(1, "-c", "--count", false, o => o.Write("Machine cpu count"),
+                    (input, ctx, next) =>
+                    {
+                        ctx.OutStream.Write("CPU count: ")
+                        .WriteFormatted($"{Environment.ProcessorCount}", FormatType.DarkGrayForeground);
+                        return CommandOutput.SuccessfulTask;
+                    });
+
             //cancel command on control + c
             runtime.OnCommandExecuting += (sender, args) =>
             {

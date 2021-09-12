@@ -11,7 +11,7 @@ namespace Gint
         }
 
         public Command Command { get; }
-        public Option[] Options { get; }
+        public Option[] Options { get; internal set; }
 
     }
 }
