@@ -14,7 +14,7 @@ namespace Gint
 
             registry.Add(
                   new Command("help", HelpHelp, Help),
-                  new Option(1, "-d", "--detail", false, Detail, DetailHelp),
+                  new Option(1, "-d", "--detailed", false, Detail, DetailHelp),
                   new VariableOption(2, "-c", "--command", true, Command, CommandHelp)
               );
         }
@@ -23,9 +23,13 @@ namespace Gint
         {
             if (!input.Options.Any())
             {
+                var count = 0;
                 foreach (var cmd in registry.Registry)
                 {
                     PrintCommand(ctx, cmd.Value);
+                    count++;
+                    if (count < registry.Registry.Count)
+                        ctx.OutStream.WriteLine();
                 }
             }
 
@@ -36,31 +40,37 @@ namespace Gint
         {
             var entry = cmd;
             ctx.OutStream.Write(entry.Command.CommandName).WriteWhitespace();
-            foreach (var option in entry.Options)
-            {
-                ctx.OutStream.Write($"[{option.Argument} / {option.LongArgument}]").WriteWhitespace();
-            }
+            PrintCommandOptions(ctx, cmd, false);
             ctx.OutStream.WriteLine()
                 .Intent()
                 .Format(FormatType.ForegroundYellow);
             entry.Command.HelpCallback(ctx.OutStream);
-            ctx.OutStream.ClearFormat();
+            ctx.OutStream.WriteLine().ClearFormat();
         }
 
         private void HelpHelp(Out @out)
         {
-            @out.WriteLine("Help on command usage and examples.");
+            @out.Write("Help on command usage and examples.");
         }
 
         private Task<ICommandOutput> Detail(ICommandInput input, CommandExecutionContext ctx, Func<Task> next)
         {
-            ctx.Info.WriteLine($"not implemented yet :p");
+            var count = 0;
+            foreach (var cmd in registry.Registry)
+            {
+                PrintCommand(ctx, cmd.Value);
+                PrintCommandOptions(ctx, cmd.Value, true);
+                count++;
+                if (count < registry.Registry.Count)
+                    ctx.OutStream.WriteLine();
+            }
+
             return CommandOutput.SuccessfulTask;
         }
 
         private void DetailHelp(Out @out)
         {
-            @out.Write("Details.");
+            @out.Write("Includes options details.");
         }
 
         private Task<ICommandOutput> Command(ICommandInput input, CommandExecutionContext ctx, Func<Task> next)
@@ -70,16 +80,7 @@ namespace Gint
                 var entry = registry.Registry[input.Variable];
 
                 PrintCommand(ctx, entry);
-
-                ctx.OutStream.WriteLine();
-                foreach (var option in entry.Options)
-                {
-                    ctx.OutStream.WriteLine($"[{option.Argument} / {option.LongArgument}]");
-
-                    ctx.OutStream.Intent().Format(FormatType.ForegroundYellow);
-                    option.HelpCallback(ctx.OutStream);
-                    ctx.OutStream.ClearFormat().WriteLine();
-                }
+                PrintCommandOptions(ctx, entry, true);
             }
             else
             {
@@ -88,6 +89,36 @@ namespace Gint
             }
 
             return CommandOutput.SuccessfulTask;
+        }
+
+        private static void PrintCommandOptions(CommandExecutionContext ctx, CommandEntry entry, bool detailed)
+        {
+            foreach (var option in entry.Options)
+            {
+                string needsArgument = null;
+                if (option is VariableOption vop)
+                    needsArgument = " <var>";
+
+                ctx.OutStream.Write($"[{option.Argument} / {option.LongArgument}");
+
+                if (needsArgument != null)
+                    ctx.OutStream.WriteFormatted(needsArgument, FormatType.ForegroundDarkGray);
+
+                ctx.OutStream.Write("]");
+
+                if (detailed)
+                    ctx.OutStream.WriteLine();
+                else
+                    ctx.OutStream.WriteWhitespace();
+
+
+                if (detailed)
+                {
+                    ctx.OutStream.Intent().Format(FormatType.ForegroundYellow);
+                    option.HelpCallback(ctx.OutStream);
+                    ctx.OutStream.ClearFormat().WriteLine();
+                }
+            }
         }
 
         private void CommandHelp(Out @out)
