@@ -13,6 +13,7 @@ namespace Gint
         public override CommandTokenKind Kind => CommandTokenKind.VariableOptionExpression;
         public CommandSyntaxToken OptionToken { get; }
         public CommandSyntaxToken VariableToken { get; }
+
         public override IEnumerable<SyntaxNode> GetChildren()
         {
             yield return OptionToken;

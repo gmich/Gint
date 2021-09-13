@@ -7,7 +7,7 @@ namespace Gint
 {
     internal class Evaluator
     {
-        private readonly CommandExecutionContext commandExecutionContext;
+        private CommandExecutionContext commandExecutionContext;
         private readonly ExecutionBuffer buffer;
         private readonly EvaluationChain evaluationChain = new EvaluationChain();
 
@@ -72,6 +72,9 @@ namespace Gint
                 case BoundNodeKind.Command:
                     EvaluateCommand((BoundCommand)node);
                     break;
+                case BoundNodeKind.CommandWithVariable:
+                    EvaluateCommand((BoundCommandWithVariable)node);
+                    break;
                 case BoundNodeKind.Option:
                     EvaluateOption((BoundOption)node);
                     break;
@@ -102,6 +105,7 @@ namespace Gint
         private void EvaluateVariableOption(BoundVariableOption boundVariableOption)
         {
             var capturedBoundOptions = BoundOptionsCopy;
+            //var ctx = commandExecutionContext.Clone();
             evaluationChain.Add(async () =>
             {
                 var output = await boundVariableOption.VariableOption.Callback.Invoke(new CommandInput(GetExecutionId, boundVariableOption.Variable, GetStream(), capturedBoundOptions), commandExecutionContext, Next);
@@ -112,6 +116,8 @@ namespace Gint
         private void EvaluateOption(BoundOption boundOption)
         {
             var capturedBoundOptions = BoundOptionsCopy;
+            //var ctx = commandExecutionContext.Clone();
+
             evaluationChain.Add(async () =>
             {
                 var output = await boundOption.Option.Callback.Invoke(new CommandInput(GetExecutionId, string.Empty, GetStream(), capturedBoundOptions), commandExecutionContext, Next);
@@ -121,19 +127,34 @@ namespace Gint
 
         private void EvaluateCommand(BoundCommand boundCommand)
         {
+            EvaluateCommand(boundCommand, string.Empty, boundCommand.TextSpan);
+        }
+
+        private void EvaluateCommandWithVariable(BoundCommandWithVariable boundCommand)
+        {
+            EvaluateCommand(boundCommand, boundCommand.Variable, boundCommand.TextSpanWithVariable);
+        }
+
+        private void EvaluateCommand(BoundCommand boundCommand, string variable, TextSpan span)
+        {
             boundOptionsCache = boundCommand.BoundOptions.Select(c => c.Argument).ToArray();
             var capturedBoundOptions = BoundOptionsCopy;
-            evaluationChain.Add(async () =>
-            {
-                var output = await boundCommand.Command.Callback.Invoke(new CommandInput(GetExecutionId, string.Empty, GetStream(), capturedBoundOptions), commandExecutionContext, Next);
-                OnExecutionEnd(output);
-            }, boundCommand.TextSpan);
+            //commandExecutionContext = commandExecutionContext.Clone();
+            //commandExecutionContext.ScopeMetadata.Clear();
+            //var ctx = commandExecutionContext.Clone();
 
             foreach (var opt in boundCommand.BoundOptions)
             {
                 EvaluateNode(opt);
             }
+
+            evaluationChain.Add(async () =>
+            {
+                var output = await boundCommand.Command.Callback.Invoke(new CommandInput(GetExecutionId, variable, GetStream(), capturedBoundOptions), commandExecutionContext, Next);
+                OnExecutionEnd(output);
+            }, span);
         }
+
 
         private string[] BoundOptionsCopy => boundOptionsCache.ToArray();
 

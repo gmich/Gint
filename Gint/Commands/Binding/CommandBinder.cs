@@ -30,10 +30,12 @@ namespace Gint
             {
                 case CommandTokenKind.CommandExpression:
                     return BindCommandExpression((CommandExpressionSyntax)node);
+                case CommandTokenKind.CommandWithVariableExpression:
+                    return BindCommandWithVariableExpression((CommandWithVariableExpressionSyntax)node);
                 case CommandTokenKind.PipedCommandExpression:
                     return BindPipedCommandExpression((PipedCommandExpressionSyntax)node);
                 default:
-                    throw new Exception("");
+                    throw new BindingException($"Unsupported command token kind <{node.Kind.ToString()}> for binding.");
             }
         }
 
@@ -64,16 +66,41 @@ namespace Gint
                 return commandRegistry.Registry[cmd];
             }
         }
+
         private BoundCommand BindCommandExpression(CommandExpressionSyntax n)
         {
             var cmd = GetCommand(n);
 
+            var boundOptions = GetBoundOptions(n, cmd);
+
+            if (cmd.Command is CommandWithVariable bcwv && bcwv.Required)
+            {
+                diagnostics.ReportCommandHasRequiredVariable(n.Span);
+            }
+
+            return new BoundCommand(cmd.Command, n.CommandToken, boundOptions);
+        }
+
+        private BoundCommandWithVariable BindCommandWithVariableExpression(CommandWithVariableExpressionSyntax n)
+        {
+            var cmd = GetCommand(n);
+            if (cmd.Command is not CommandWithVariable)
+            {
+                diagnostics.ReportCommandIsNotACommandWithVariable(n.Span);
+            }
+            var boundOptions = GetBoundOptions(n, cmd);
+
+            return new BoundCommandWithVariable(cmd.Command, n.CommandToken, n.VariableToken.Value, TextSpan.FromBounds(n.CommandToken.Span.Start, n.VariableToken.Span.End), boundOptions);
+        }
+
+        private BoundOptionExpression[] GetBoundOptions(CommandExpressionSyntax n, CommandEntry cmd)
+        {
             var boundOptions = n.Options
-                .Select(c =>
-                    BindOption(c, cmd)
-                )
-                .OrderBy(c => c.Priority)
-                .ToArray();
+            .Select(c =>
+                BindOption(c, cmd)
+            )
+            .OrderBy(c => c.Priority)
+            .ToArray();
 
             //Check for multiples
             var groups = boundOptions.GroupBy(c => c.Argument);
@@ -85,7 +112,8 @@ namespace Gint
                         diagnostics.ReportMultipleOptionsNotAllowed(item.TextSpan);
                 }
             }
-            return new BoundCommand(cmd.Command, n.CommandToken, boundOptions);
+
+            return boundOptions;
         }
 
         private BoundOptionExpression BindOption(ExpressionSyntax node, CommandEntry command)

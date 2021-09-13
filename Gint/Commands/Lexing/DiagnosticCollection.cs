@@ -74,5 +74,17 @@ namespace Gint
             var message = $"Multiple calls to this option are not allowed.";
             ReportError(span, message);
         }
+
+        internal void ReportCommandHasRequiredVariable(TextSpan span)
+        {
+            var message = $"Command requires a variable.";
+            ReportError(span, message);
+        }
+
+        internal void ReportCommandIsNotACommandWithVariable(TextSpan span)
+        {
+            var message = $"Command does not accept variables.";
+            ReportError(span, message);
+        }
     }
 }

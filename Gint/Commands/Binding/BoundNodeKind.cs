@@ -3,6 +3,7 @@
     internal enum BoundNodeKind
     {
         Command,
+        CommandWithVariable,
         Option,
         VariableOption,
         Pipe,

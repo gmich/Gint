@@ -2,21 +2,31 @@
 
 namespace Gint
 {
-    internal sealed class CommandExpressionSyntax : ExpressionSyntax
+    internal sealed class CommandWithVariableExpressionSyntax : CommandExpressionSyntax
     {
-        public CommandExpressionSyntax(CommandSyntaxToken commandToken, ExpressionSyntax[] options)
+        public CommandWithVariableExpressionSyntax(CommandSyntaxToken commandToken,CommandSyntaxToken variableToken, ExpressionSyntax[] options) : base(commandToken,options)
         {
-            CommandToken = commandToken;
-            Options = options;
+            VariableToken = variableToken;
         }
 
-        public override CommandTokenKind Kind => CommandTokenKind.CommandExpression;
-        public CommandSyntaxToken CommandToken { get; }
-        public ExpressionSyntax[] Options { get; }
+        public override CommandTokenKind Kind => CommandTokenKind.CommandWithVariableExpression;
+        public CommandSyntaxToken VariableToken { get; }
+
+        public override TextSpan Span
+        {
+            get
+            {
+                var first = CommandToken.Span;
+                var last = VariableToken.Span;
+                return TextSpan.FromBounds(first.Start, last.End);
+            }
+        }
 
         public override IEnumerable<SyntaxNode> GetChildren()
         {
             yield return CommandToken;
+            yield return VariableToken;
+
             foreach (var option in Options)
             {
                 yield return option;

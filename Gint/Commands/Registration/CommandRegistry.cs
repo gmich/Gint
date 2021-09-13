@@ -33,14 +33,18 @@ namespace Gint
             {
                 var option = new Option(priority, argument, longArgument, allowMultiple, callback, helpCallback);
                 options.Add(option);
-                registry.Registry[commandName].Options = options.ToArray();
+                var optionsArray = options.ToArray();
+                registry.ThrowIfDuplicate(commandName, optionsArray);
+                registry.Registry[commandName].Options = optionsArray;
                 return this;
             }
             public AddOptionsBuilder AddVariableOption(int priority, string argument, string longArgument, bool allowMultiple, HelpCallback helpCallback, ExecutionBlock callback)
             {
                 var option = new VariableOption(priority, argument, longArgument, allowMultiple, callback, helpCallback);
                 options.Add(option);
-                registry.Registry[commandName].Options = options.ToArray();
+                var optionsArray = options.ToArray();
+                registry.ThrowIfDuplicate(commandName, optionsArray);
+                registry.Registry[commandName].Options = optionsArray;
                 return this;
             }
 
@@ -51,6 +55,11 @@ namespace Gint
             return new AddOptionsBuilder(commandName, this);
         }
 
+        public AddOptionsBuilder AddVariableCommand(string commandName, bool required, HelpCallback helpCallback, ExecutionBlock callback)
+        {
+            Add(new CommandWithVariable(commandName, required, helpCallback, callback));
+            return new AddOptionsBuilder(commandName, this);
+        }
 
         public void Add(Command command, params Option[] options)
         {
@@ -58,8 +67,20 @@ namespace Gint
             {
                 throw new CommandRegistrationException($"Command {command.CommandName} has already been registered.");
             }
+            ThrowIfDuplicate(command.CommandName, options);
 
             registry.Add(command.CommandName, new CommandEntry(command, options?.ToArray() ?? new Option[0]));
+        }
+
+        internal void ThrowIfDuplicate(string commandName, Option[] options)
+        {
+            var argumentDuplicates = options.GroupBy(c => c.Argument).FirstOrDefault(g => g.Count() > 1);
+            if(argumentDuplicates!=null)
+                throw new CommandRegistrationException($"Duplicate option <{argumentDuplicates.Key}> in command <{commandName}>");
+
+            var longArgumentDuplicates = options.GroupBy(c => c.LongArgument).FirstOrDefault(g => g.Count() > 1);
+            if (longArgumentDuplicates != null)
+                throw new CommandRegistrationException($"Duplicate option <{longArgumentDuplicates.Key}> in command <{commandName}>");
         }
 
         public void AddDefinition(ICommandDefinition definition)

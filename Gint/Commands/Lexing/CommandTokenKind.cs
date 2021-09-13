@@ -9,6 +9,7 @@
         End,
 
         CommandExpression,
+        CommandWithVariableExpression,
         OptionExpression,
         VariableOptionExpression,
         PipeExpression,

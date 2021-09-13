@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace Gint
 {
@@ -21,30 +22,60 @@ namespace Gint
 
         private Task<ICommandOutput> Help(ICommandInput input, CommandExecutionContext ctx, Func<Task> next)
         {
-            if (!input.Options.Any())
+            var printDetailed = input.Options.Contains("-d");
+
+            if (input.Options.Contains("-c"))
+            {
+                var cmds = (List<string>)ctx.ScopeMetadata["-c"];
+                var count = 0;
+                foreach (var cmd in cmds)
+                {
+                    var entry = registry.Registry[cmd];
+
+                    PrintCommand(ctx, entry);
+                    if (printDetailed)
+                        PrintCommandOptions(ctx, entry, printDetailed);
+
+                    count++;
+                    if (count < cmds.Count)
+                        ctx.OutStream.WriteLine();
+                }
+            }
+            else
             {
                 var count = 0;
                 foreach (var cmd in registry.Registry)
                 {
                     PrintCommand(ctx, cmd.Value);
+                    if (printDetailed)
+                        PrintCommandOptions(ctx, cmd.Value, printDetailed);
+
                     count++;
                     if (count < registry.Registry.Count)
                         ctx.OutStream.WriteLine();
                 }
             }
-
             return CommandOutput.SuccessfulTask;
         }
 
         private static void PrintCommand(CommandExecutionContext ctx, CommandEntry cmd)
         {
-            var entry = cmd;
-            ctx.OutStream.Write(entry.Command.CommandName).WriteWhitespace();
+            var entry = cmd.Command;
+            ctx.OutStream.Write(entry.CommandName).WriteWhitespace();
+            if (entry is CommandWithVariable cwv)
+            {
+                ctx.OutStream.Format(FormatType.DarkGrayForeground)
+                    .Write("<var")
+                    .Write(cwv.Required ? string.Empty : "?")
+                    .Write(">")
+                    .ClearFormat()
+                    .WriteWhitespace();
+            }
             PrintCommandOptions(ctx, cmd, false);
             ctx.OutStream.WriteLine()
                 .Intent()
                 .Format(FormatType.YellowForeground);
-            entry.Command.HelpCallback(ctx.OutStream);
+            entry.HelpCallback(ctx.OutStream);
             ctx.OutStream.WriteLine().ClearFormat();
         }
 
@@ -55,16 +86,6 @@ namespace Gint
 
         private Task<ICommandOutput> Detail(ICommandInput input, CommandExecutionContext ctx, Func<Task> next)
         {
-            var count = 0;
-            foreach (var cmd in registry.Registry)
-            {
-                PrintCommand(ctx, cmd.Value);
-                PrintCommandOptions(ctx, cmd.Value, true);
-                count++;
-                if (count < registry.Registry.Count)
-                    ctx.OutStream.WriteLine();
-            }
-
             return CommandOutput.SuccessfulTask;
         }
 
@@ -77,10 +98,11 @@ namespace Gint
         {
             if (registry.Registry.ContainsKey(input.Variable))
             {
-                var entry = registry.Registry[input.Variable];
+                if (ctx.ScopeMetadata.ContainsKey("-c"))
+                    ((List<string>)ctx.ScopeMetadata["-c"]).Add(input.Variable);
+                else
+                    ctx.ScopeMetadata.Add("-c", new List<string>() { input.Variable });
 
-                PrintCommand(ctx, entry);
-                PrintCommandOptions(ctx, entry, true);
             }
             else
             {

@@ -16,8 +16,8 @@ namespace Gint
 
     public static class ExecutionBlockUtilities
     {
-        public static Task<ICommandOutput> NoopExecutionBlock(ICommandInput input, CommandExecutionContext executionContext, Func<Task> next) => throw new NotImplementedException();
+        public static Task<ICommandOutput> NoopExecutionBlock(ICommandInput input, CommandExecutionContext executionContext, Func<Task> next) => CommandOutput.SuccessfulTask;
 
-        public static void NoopHelp(Out @out) => throw new NotImplementedException();
+        public static void NoopHelp(Out @out) {}
     }
 }

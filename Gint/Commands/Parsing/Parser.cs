@@ -86,7 +86,7 @@ namespace Gint
                 var second = ParseExecutionPipeline();
                 return new PipedCommandExpressionSyntax(commandExpressionSyntax, pipe, second);
             }
-            if(commandExpressionSyntax==null)
+            if (commandExpressionSyntax == null)
             {
                 diagnostics.ReportUnterminatedPipeline(Current.Span);
             }
@@ -99,13 +99,20 @@ namespace Gint
             List<ExpressionSyntax> options = new List<ExpressionSyntax>();
             var commandToken = MatchToken(CommandTokenKind.Keyword);
 
+            CommandSyntaxToken commandVariableToken = null;
+            if (Peek(0).Kind == CommandTokenKind.Keyword)
+                commandVariableToken = MatchToken(CommandTokenKind.Keyword);
+
             while (Current.Kind != CommandTokenKind.End &&
                   Current.Kind != CommandTokenKind.Pipe)
             {
                 var option = ParseOption();
                 options.Add(option);
             }
-
+            if (commandVariableToken != null)
+            {
+                return new CommandWithVariableExpressionSyntax(commandToken, commandVariableToken, options.ToArray());
+            }
             return new CommandExpressionSyntax(commandToken, options.ToArray());
         }
 

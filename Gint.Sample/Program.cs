@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Gint.Sample
@@ -13,25 +14,29 @@ namespace Gint.Sample
                 commandRegistry: CommandRegistry.Empty,
                 commandExecutionContextFactory: () =>
                 {
-                    var ctx = CommandExecutionContext.Default;
+                    var ctx = CommandExecutionContext.New;
                     ctx.Info.AddWriter(consoleOutputWriter);
                     ctx.Error.AddWriter(consoleOutputWriter);
-                    ctx.Metadata.Add("di_container", "you can add a di container for example, or resolve a dependency");
+                    ctx.GlobalMetadata.Add("di_container", "you can add a di container for example, or resolve a dependency");
                     return ctx;
                 });
 
             runtime.CommandRegistry
-                .AddCommand("cpu", o => o.Write("Cpu utilities"),
+                .AddVariableCommand("cpu", false, o => o.Write("CPU utilities"),
                     (input, ctx, next) =>
                     {
-                        ctx.OutStream.Write("CPU utilities");
+                        if(input.Options.Contains("-c"))
+                        {
+                            ctx.OutStream.Write("CPU count: ")
+                            .WriteFormatted($"{Environment.ProcessorCount}", FormatType.DarkGrayForeground);
+                        }
+                        else
+                            ctx.OutStream.Write("CPU utilities");
                         return CommandOutput.SuccessfulTask;
                     })
                 .AddOption(1, "-c", "--count", false, o => o.Write("Machine cpu count"),
                     (input, ctx, next) =>
                     {
-                        ctx.OutStream.Write("CPU count: ")
-                        .WriteFormatted($"{Environment.ProcessorCount}", FormatType.DarkGrayForeground);
                         return CommandOutput.SuccessfulTask;
                     });
 
@@ -45,8 +50,8 @@ namespace Gint.Sample
             };
 
             //log interpretater results details
-            //runtime.Options.LogBindTree = true;
-            //runtime.Options.LogParseTree = true;
+            runtime.Options.LogBindTree = true;
+            runtime.Options.LogParseTree = true;
             runtime.Options.Out.AddWriter(consoleOutputWriter);
 
             while (true)

@@ -25,6 +25,7 @@ namespace Gint
             if (Chain.Count == 0 || position >= Chain.Count) return Task.FromResult(0);
 
             LastInvokedPosition = position;
+
             return Chain[position].Invoke();
         }
 

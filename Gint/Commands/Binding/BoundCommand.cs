@@ -1,6 +1,6 @@
 ﻿namespace Gint
 {
-    internal sealed class BoundCommand : BoundNode
+    internal class BoundCommand : BoundNode
     {
         public BoundCommand(Command cmd, CommandSyntaxToken token, BoundOptionExpression[] boundOptions)
         {
@@ -13,6 +13,7 @@
         public TextSpan TextSpan { get; }
         public BoundOptionExpression[] BoundOptions { get; }
         public override BoundNodeKind Kind { get; } = BoundNodeKind.Command;
+
     }
 
 }
