@@ -17,7 +17,7 @@ namespace Gint.Sample
                     var ctx = CommandExecutionContext.New;
                     ctx.Info.AddWriter(consoleOutputWriter);
                     ctx.Error.AddWriter(consoleOutputWriter);
-                    ctx.GlobalMetadata.Add("di_container", "you can add a di container for example, or resolve a dependency");
+                    ctx.GlobalScope.Add("di_container", "you can add a di container for example, or resolve a dependency");
                     return ctx;
                 });
 
@@ -25,7 +25,7 @@ namespace Gint.Sample
                 .AddVariableCommand("cpu", false, o => o.Write("CPU utilities"),
                     (input, ctx, next) =>
                     {
-                        if(input.Options.Contains("-c"))
+                        if (input.Options.Contains("-c"))
                         {
                             ctx.OutStream.Write("CPU count: ")
                             .WriteFormatted($"{Environment.ProcessorCount}", FormatType.DarkGrayForeground);
@@ -38,6 +38,39 @@ namespace Gint.Sample
                     (input, ctx, next) =>
                     {
                         return CommandOutput.SuccessfulTask;
+                    });
+
+            runtime.CommandRegistry
+                .AddVariableCommand("setvar", true, o => o.Write("Sets variable"),
+                    (input, ctx, next) =>
+                    {
+                        if (!ctx.GlobalScope.ContainsKey(input.Variable))
+                        {
+                            ctx.GlobalScope.Add(input.Variable, input.Stream.Raw);
+                            return CommandOutput.SuccessfulTask;
+
+                        }
+                        else
+                        {
+                            ctx.Error.Write($"Variable {input.Variable} is already set.");
+                            return CommandOutput.ErrorTask;
+                        }
+                    });
+
+            runtime.CommandRegistry
+                .AddVariableCommand("readvar", true, o => o.Write("Reads variable"),
+                    (input, ctx, next) =>
+                    {
+                        if (ctx.GlobalScope.ContainsKey(input.Variable))
+                        {
+                            ctx.OutStream.Write((string)ctx.GlobalScope[input.Variable]);
+                            return CommandOutput.SuccessfulTask;
+                        }
+                        else
+                        {
+                            ctx.Error.Write($"Variable {input.Variable} is not set.");
+                            return CommandOutput.ErrorTask;
+                        }
                     });
 
             //cancel command on control + c

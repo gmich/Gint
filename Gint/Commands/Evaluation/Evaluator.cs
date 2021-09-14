@@ -73,7 +73,7 @@ namespace Gint
                     EvaluateCommand((BoundCommand)node, scope);
                     break;
                 case BoundNodeKind.CommandWithVariable:
-                    EvaluateCommand((BoundCommandWithVariable)node, scope);
+                    EvaluateCommandWithVariable((BoundCommandWithVariable)node, scope);
                     break;
                 case BoundNodeKind.Option:
                     EvaluateOption((BoundOption)node, scope);

@@ -15,13 +15,13 @@ namespace Gint
             Info = info;
             Error = error;
             CancellationToken = cancellationToken;
-            GlobalMetadata = globalMetadata;
+            GlobalScope = globalMetadata;
         }
 
         public Out OutStream { get; }
         public Out Info { get; }
         public Out Error { get; }
-        public Dictionary<string, object> GlobalMetadata { get; }
+        public Dictionary<string, object> GlobalScope { get; }
 
         public CancellationTokenSource CancellationToken { get; }
 
