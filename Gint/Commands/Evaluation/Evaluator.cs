@@ -36,6 +36,8 @@ namespace Gint
                 evaluator.commandExecutionContext.Info.Flush();
                 evaluator.commandExecutionContext.Error.Flush();
                 evaluator.commandExecutionContext.Error.WriteLine(ex.ToString());
+                evaluator.commandExecutionContext.Error.Flush();
+                evaluator.evaluationChain.Error = true;
             }
             finally
             {
@@ -105,10 +107,10 @@ namespace Gint
         private void EvaluateVariableOption(BoundVariableOption boundVariableOption, CommandScope scope)
         {
             var capturedBoundOptions = BoundOptionsCopy;
-            evaluationChain.Add(async () =>
+            evaluationChain.Add(() =>
             {
-                var output = await boundVariableOption.VariableOption.Callback.Invoke(new CommandInput(GetExecutionId, boundVariableOption.Variable, GetStream(), capturedBoundOptions, scope), commandExecutionContext, Next);
-                OnExecutionEnd(output);
+                return boundVariableOption.VariableOption.Callback.Invoke(new CommandInput(GetExecutionId, boundVariableOption.Variable, GetStream(), capturedBoundOptions, scope), commandExecutionContext, Next)
+                .ContinueWith(c => OnExecutionEnd(c.Result));
             }, boundVariableOption.TextSpanWithVariable);
         }
 
@@ -116,10 +118,10 @@ namespace Gint
         {
             var capturedBoundOptions = BoundOptionsCopy;
 
-            evaluationChain.Add(async () =>
+            evaluationChain.Add(() =>
             {
-                var output = await boundOption.Option.Callback.Invoke(new CommandInput(GetExecutionId, string.Empty, GetStream(), capturedBoundOptions, scope), commandExecutionContext, Next);
-                OnExecutionEnd(output);
+                return boundOption.Option.Callback.Invoke(new CommandInput(GetExecutionId, string.Empty, GetStream(), capturedBoundOptions, scope), commandExecutionContext, Next)
+                .ContinueWith(c => OnExecutionEnd(c.Result));
             }, boundOption.TextSpan);
         }
 
@@ -144,10 +146,10 @@ namespace Gint
                 EvaluateNode(opt, newScope);
             }
 
-            evaluationChain.Add(async () =>
+            evaluationChain.Add(() =>
             {
-                var output = await boundCommand.Command.Callback.Invoke(new CommandInput(GetExecutionId, variable, GetStream(), capturedBoundOptions, newScope), commandExecutionContext, Next);
-                OnExecutionEnd(output);
+                return boundCommand.Command.Callback.Invoke(new CommandInput(GetExecutionId, variable, GetStream(), capturedBoundOptions, newScope), commandExecutionContext, Next)
+                .ContinueWith(c => OnExecutionEnd(c.Result));
             }, span);
         }
 
