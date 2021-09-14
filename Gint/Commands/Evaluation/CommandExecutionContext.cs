@@ -9,27 +9,23 @@ namespace Gint
 
     public class CommandExecutionContext
     {
-        public CommandExecutionContext(Out @out, Out info, Out error, CancellationTokenSource cancellationToken, Dictionary<string, object> globalMetadata, Dictionary<string, object> scopeMetadata)
+        public CommandExecutionContext(Out @out, Out info, Out error, CancellationTokenSource cancellationToken, Dictionary<string, object> globalMetadata)
         {
             OutStream = @out;
             Info = info;
             Error = error;
             CancellationToken = cancellationToken;
             GlobalMetadata = globalMetadata;
-            ScopeMetadata = scopeMetadata;
         }
 
         public Out OutStream { get; }
         public Out Info { get; }
         public Out Error { get; }
-        public Dictionary<string, object> ScopeMetadata { get; }
         public Dictionary<string, object> GlobalMetadata { get; }
 
         public CancellationTokenSource CancellationToken { get; }
 
-        internal CommandExecutionContext Clone() => this;
-
-        public static CommandExecutionContext New => new(new Out(), new Out(), new Out(), new CancellationTokenSource(), new Dictionary<string, object>(), new Dictionary<string, object>());
+        public static CommandExecutionContext New => new(new Out(), new Out(), new Out(), new CancellationTokenSource(), new Dictionary<string, object>());
     
     }
 

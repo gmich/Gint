@@ -26,7 +26,7 @@ namespace Gint
 
             if (input.Options.Contains("-c"))
             {
-                var cmds = (List<string>)ctx.ScopeMetadata["-c"];
+                var cmds = (List<string>)input.Scope.Metadata["-c"];
                 var count = 0;
                 foreach (var cmd in cmds)
                 {
@@ -98,10 +98,10 @@ namespace Gint
         {
             if (registry.Registry.ContainsKey(input.Variable))
             {
-                if (ctx.ScopeMetadata.ContainsKey("-c"))
-                    ((List<string>)ctx.ScopeMetadata["-c"]).Add(input.Variable);
+                if (input.Scope.Metadata.ContainsKey("-c"))
+                    ((List<string>)input.Scope.Metadata["-c"]).Add(input.Variable);
                 else
-                    ctx.ScopeMetadata.Add("-c", new List<string>() { input.Variable });
+                    input.Scope.Metadata.Add("-c", new List<string>() { input.Variable });
 
             }
             else

@@ -25,7 +25,7 @@ namespace Gint
         public static async Task Evaluate(BoundNode root, string command, CommandExecutionContext commandExecutionContext)
         {
             var evaluator = new Evaluator(commandExecutionContext);
-            evaluator.EvaluateNode(root);
+            evaluator.EvaluateNode(root, new CommandScope());
 
             try
             {
@@ -65,92 +65,88 @@ namespace Gint
                 .Flush();
         }
 
-        private void EvaluateNode(BoundNode node)
+        private void EvaluateNode(BoundNode node, CommandScope scope)
         {
             switch (node.Kind)
             {
                 case BoundNodeKind.Command:
-                    EvaluateCommand((BoundCommand)node);
+                    EvaluateCommand((BoundCommand)node, scope);
                     break;
                 case BoundNodeKind.CommandWithVariable:
-                    EvaluateCommand((BoundCommandWithVariable)node);
+                    EvaluateCommand((BoundCommandWithVariable)node, scope);
                     break;
                 case BoundNodeKind.Option:
-                    EvaluateOption((BoundOption)node);
+                    EvaluateOption((BoundOption)node, scope);
                     break;
                 case BoundNodeKind.VariableOption:
-                    EvaluateVariableOption((BoundVariableOption)node);
+                    EvaluateVariableOption((BoundVariableOption)node, scope);
                     break;
                 case BoundNodeKind.Pipe:
-                    EvaluatePipe((BoundPipe)node);
+                    EvaluatePipe((BoundPipe)node, scope);
                     break;
                 case BoundNodeKind.Pipeline:
-                    EvaluatePipeline((BoundPipeline)node);
+                    EvaluatePipeline((BoundPipeline)node, scope);
                     break;
             }
         }
 
-        private void EvaluatePipeline(BoundPipeline boundPipeline)
+        private void EvaluatePipeline(BoundPipeline boundPipeline, CommandScope scope)
         {
-            EvaluateNode(boundPipeline.FirstNode);
-            EvaluatePipe(boundPipeline.Pipe);
-            EvaluateNode(boundPipeline.SecondNode);
+            EvaluateNode(boundPipeline.FirstNode, scope);
+            EvaluatePipe(boundPipeline.Pipe, scope);
+            EvaluateNode(boundPipeline.SecondNode, scope);
         }
 
-        private void EvaluatePipe(BoundPipe boundPipe)
+        private void EvaluatePipe(BoundPipe boundPipe, CommandScope scope)
         {
 
         }
 
-        private void EvaluateVariableOption(BoundVariableOption boundVariableOption)
+        private void EvaluateVariableOption(BoundVariableOption boundVariableOption, CommandScope scope)
         {
             var capturedBoundOptions = BoundOptionsCopy;
-            //var ctx = commandExecutionContext.Clone();
             evaluationChain.Add(async () =>
             {
-                var output = await boundVariableOption.VariableOption.Callback.Invoke(new CommandInput(GetExecutionId, boundVariableOption.Variable, GetStream(), capturedBoundOptions), commandExecutionContext, Next);
+                var output = await boundVariableOption.VariableOption.Callback.Invoke(new CommandInput(GetExecutionId, boundVariableOption.Variable, GetStream(), capturedBoundOptions, scope), commandExecutionContext, Next);
                 OnExecutionEnd(output);
             }, boundVariableOption.TextSpanWithVariable);
         }
 
-        private void EvaluateOption(BoundOption boundOption)
+        private void EvaluateOption(BoundOption boundOption, CommandScope scope)
         {
             var capturedBoundOptions = BoundOptionsCopy;
-            //var ctx = commandExecutionContext.Clone();
 
             evaluationChain.Add(async () =>
             {
-                var output = await boundOption.Option.Callback.Invoke(new CommandInput(GetExecutionId, string.Empty, GetStream(), capturedBoundOptions), commandExecutionContext, Next);
+                var output = await boundOption.Option.Callback.Invoke(new CommandInput(GetExecutionId, string.Empty, GetStream(), capturedBoundOptions, scope), commandExecutionContext, Next);
                 OnExecutionEnd(output);
             }, boundOption.TextSpan);
         }
 
-        private void EvaluateCommand(BoundCommand boundCommand)
+        private void EvaluateCommand(BoundCommand boundCommand, CommandScope scope)
         {
-            EvaluateCommand(boundCommand, string.Empty, boundCommand.TextSpan);
+            EvaluateCommand(boundCommand, string.Empty, boundCommand.TextSpan, scope);
         }
 
-        private void EvaluateCommandWithVariable(BoundCommandWithVariable boundCommand)
+        private void EvaluateCommandWithVariable(BoundCommandWithVariable boundCommand, CommandScope scope)
         {
-            EvaluateCommand(boundCommand, boundCommand.Variable, boundCommand.TextSpanWithVariable);
+            EvaluateCommand(boundCommand, boundCommand.Variable, boundCommand.TextSpanWithVariable, scope);
         }
 
-        private void EvaluateCommand(BoundCommand boundCommand, string variable, TextSpan span)
+        private void EvaluateCommand(BoundCommand boundCommand, string variable, TextSpan span, CommandScope scope)
         {
+            var newScope = new CommandScope();
             boundOptionsCache = boundCommand.BoundOptions.Select(c => c.Argument).ToArray();
             var capturedBoundOptions = BoundOptionsCopy;
-            //commandExecutionContext = commandExecutionContext.Clone();
-            //commandExecutionContext.ScopeMetadata.Clear();
-            //var ctx = commandExecutionContext.Clone();
 
             foreach (var opt in boundCommand.BoundOptions)
             {
-                EvaluateNode(opt);
+                EvaluateNode(opt, newScope);
             }
 
             evaluationChain.Add(async () =>
             {
-                var output = await boundCommand.Command.Callback.Invoke(new CommandInput(GetExecutionId, variable, GetStream(), capturedBoundOptions), commandExecutionContext, Next);
+                var output = await boundCommand.Command.Callback.Invoke(new CommandInput(GetExecutionId, variable, GetStream(), capturedBoundOptions, newScope), commandExecutionContext, Next);
                 OnExecutionEnd(output);
             }, span);
         }

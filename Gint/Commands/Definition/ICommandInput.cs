@@ -6,5 +6,6 @@
         InputStream Stream { get; }
         int ExecutionId { get; }
         string[] Options { get; }
+        CommandScope Scope { get; }
     }
 }
