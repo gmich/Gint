@@ -14,9 +14,8 @@ namespace Gint
             this.registry = registry;
 
             registry.Add(
-                  new Command("help", HelpHelp, Help),
-                  new Option(1, "-d", "--detailed", false, Detail, DetailHelp),
-                  new VariableOption(2, "-c", "--command", true, Command, CommandHelp)
+                  new CommandWithVariable("help", required: false, HelpHelp, Help),
+                  new Option(1, "-d", "--detail", false, Detail, DetailHelp)
               );
         }
 
@@ -24,21 +23,20 @@ namespace Gint
         {
             var printDetailed = input.Options.Contains("-d");
 
-            if (input.Options.Contains("-c"))
+            // if there's a variable, show help for that command only
+            if (!string.IsNullOrEmpty(input.Variable))
             {
-                var cmds = (List<string>)input.Scope.Metadata["-c"];
-                var count = 0;
-                foreach (var cmd in cmds)
+                if (registry.Registry.ContainsKey(input.Variable))
                 {
-                    var entry = registry.Registry[cmd];
-
+                    var entry = registry.Registry[input.Variable];
                     PrintCommand(ctx, entry);
                     if (printDetailed)
                         PrintCommandOptions(ctx, entry, printDetailed);
-
-                    count++;
-                    if (count < cmds.Count)
-                        ctx.OutStream.WriteLine();
+                }
+                else
+                {
+                    ctx.Error.WriteLine($"Command <{input.Variable}> does not exist in the registry.");
+                    return CommandOutput.ErrorTask;
                 }
             }
             else
@@ -94,24 +92,6 @@ namespace Gint
             @out.Write("Includes options details.");
         }
 
-        private Task<ICommandOutput> Command(ICommandInput input, CommandExecutionContext ctx, Func<Task> next)
-        {
-            if (registry.Registry.ContainsKey(input.Variable))
-            {
-                if (input.Scope.Metadata.ContainsKey("-c"))
-                    ((List<string>)input.Scope.Metadata["-c"]).Add(input.Variable);
-                else
-                    input.Scope.Metadata.Add("-c", new List<string>() { input.Variable });
-
-            }
-            else
-            {
-                ctx.Error.WriteLine($"Command <{input.Variable}> does not exist in the registry.");
-                return CommandOutput.ErrorTask;
-            }
-
-            return CommandOutput.SuccessfulTask;
-        }
 
         private static void PrintCommandOptions(CommandExecutionContext ctx, CommandEntry entry, bool detailed)
         {
@@ -143,10 +123,6 @@ namespace Gint
             }
         }
 
-        private void CommandHelp(Out @out)
-        {
-            @out.Write("Provides details for the specified command.");
-        }
 
 
     }
