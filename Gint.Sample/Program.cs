@@ -41,7 +41,15 @@ namespace Gint.Sample
                     });
 
             runtime.CommandRegistry
-                .AddVariableCommand("setvar", true, o => o.Write("Sets variable"),
+            .AddVariableCommand("out", required: true, helpCallback: o => o.Write("Prints to stream out"),
+                (input, ctx, next) =>
+                {
+                    ctx.OutStream.Write(input.Variable);
+                    return CommandOutput.SuccessfulTask;
+                });
+
+            runtime.CommandRegistry
+                .AddVariableCommand("setvar", required: true, helpCallback: o => o.Write("Sets variable"),
                     (input, ctx, next) =>
                     {
                         if (!ctx.GlobalScope.ContainsKey(input.Variable))
@@ -58,7 +66,7 @@ namespace Gint.Sample
                     });
 
             runtime.CommandRegistry
-                .AddVariableCommand("readvar", true, o => o.Write("Reads variable"),
+                .AddVariableCommand("getvar", true, o => o.Write("Reads variable"),
                     (input, ctx, next) =>
                     {
                         if (ctx.GlobalScope.ContainsKey(input.Variable))
