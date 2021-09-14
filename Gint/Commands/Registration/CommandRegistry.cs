@@ -96,7 +96,7 @@ namespace Gint
             }
         }
 
-        public void ScanAttributes(object obj)
+        public void AddFromAttributes(object obj)
         {
             ScanForAttributes(this, obj);
         }
@@ -126,7 +126,7 @@ namespace Gint
 
         private static void ScanForAttributes(CommandRegistry registry, object definition)
         {
-            var methods = definition.GetType().GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            var methods = definition.GetType().GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
             Command command = null;
             List<Option> options = new List<Option>();
 
@@ -162,7 +162,7 @@ namespace Gint
                     if (callback.ReturnType != typeof(void))
                         throw new CommandDiscoveryException($"ICommandDefinition {definition.GetType().FullName} method {callback.Name} return type should be of type void. See HelpCallback delegate.");
 
-                    return new HelpCallback((i) => m.Invoke(definition, new object[] { i }));
+                    return new HelpCallback((i) => callback.Invoke(definition, new object[] { i }));
                 }
 
                 var cmdAttr = m.GetCustomAttribute(typeof(CommandAttribute));
@@ -172,7 +172,7 @@ namespace Gint
                     continue;
                 }
                 var cmdwvAttr = m.GetCustomAttribute(typeof(CommandWithVariableAttribute));
-                if (cmdAttr is CommandWithVariableAttribute cattr)
+                if (cmdwvAttr is CommandWithVariableAttribute cattr)
                 {
                     command = new CommandWithVariable(cattr.CommandName, cattr.Required, GetHelpCallback(cattr.HelpCallbackMethodName), GetExecutionBlock());
                     continue;

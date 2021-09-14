@@ -4,8 +4,9 @@ using System.Threading.Tasks;
 
 namespace Gint.Sample
 {
-    class Program
+    internal class Program
     {
+
         static async Task Main()
         {
             var consoleOutputWriter = new ConsoleOutputWriter();
@@ -21,65 +22,7 @@ namespace Gint.Sample
                     return ctx;
                 });
 
-            runtime.CommandRegistry
-                .AddVariableCommand("cpu", false, o => o.Write("CPU utilities"),
-                    (input, ctx, next) =>
-                    {
-                        if (input.Options.Contains("-c"))
-                        {
-                            ctx.OutStream.Write("CPU count: ")
-                            .WriteFormatted($"{Environment.ProcessorCount}", FormatType.DarkGrayForeground);
-                        }
-                        else
-                            ctx.OutStream.Write("CPU utilities");
-                        return CommandOutput.SuccessfulTask;
-                    })
-                .AddOption(1, "-c", "--count", false, o => o.Write("Machine cpu count"),
-                    (input, ctx, next) =>
-                    {
-                        return CommandOutput.SuccessfulTask;
-                    });
-
-            runtime.CommandRegistry
-            .AddVariableCommand("out", required: true, helpCallback: o => o.Write("Prints to stream out"),
-                (input, ctx, next) =>
-                {
-                    ctx.OutStream.Write(input.Variable);
-                    return CommandOutput.SuccessfulTask;
-                });
-
-            runtime.CommandRegistry
-                .AddVariableCommand("setvar", required: true, helpCallback: o => o.Write("Sets variable"),
-                    (input, ctx, next) =>
-                    {
-                        if (!ctx.GlobalScope.ContainsKey(input.Variable))
-                        {
-                            ctx.GlobalScope.Add(input.Variable, input.Stream.Raw);
-                            return CommandOutput.SuccessfulTask;
-
-                        }
-                        else
-                        {
-                            ctx.Error.Write($"Variable {input.Variable} is already set.");
-                            return CommandOutput.ErrorTask;
-                        }
-                    });
-
-            runtime.CommandRegistry
-                .AddVariableCommand("getvar", true, o => o.Write("Reads variable"),
-                    (input, ctx, next) =>
-                    {
-                        if (ctx.GlobalScope.ContainsKey(input.Variable))
-                        {
-                            ctx.OutStream.Write((string)ctx.GlobalScope[input.Variable]);
-                            return CommandOutput.SuccessfulTask;
-                        }
-                        else
-                        {
-                            ctx.Error.Write($"Variable {input.Variable} is not set.");
-                            return CommandOutput.ErrorTask;
-                        }
-                    });
+            Bootstrapper.RegisterCommands(runtime);
 
             //cancel command on control + c
             runtime.OnCommandExecuting += (sender, args) =>
@@ -91,8 +34,8 @@ namespace Gint.Sample
             };
 
             //log interpretater results details
-            runtime.Options.LogBindTree = true;
-            runtime.Options.LogParseTree = true;
+            //runtime.Options.LogBindTree = true;
+            //runtime.Options.LogParseTree = true;
             runtime.Options.Out.AddWriter(consoleOutputWriter);
 
             while (true)
@@ -100,8 +43,7 @@ namespace Gint.Sample
                 //print prompt
                 runtime.Options.Out
                     .Format(FormatType.GreenForeground)
-                    .WriteLine($"{Environment.MachineName} cli »")
-                    .WriteLine()
+                    .Write($"{Environment.MachineName} » ")
                     .Flush();
 
                 await runtime.Run(Console.ReadLine());
