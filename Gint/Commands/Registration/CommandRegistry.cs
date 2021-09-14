@@ -171,6 +171,12 @@ namespace Gint
                     command = new Command(attr.CommandName, GetHelpCallback(attr.HelpCallbackMethodName), GetExecutionBlock());
                     continue;
                 }
+                var cmdwvAttr = m.GetCustomAttribute(typeof(CommandWithVariableAttribute));
+                if (cmdAttr is CommandWithVariableAttribute cattr)
+                {
+                    command = new CommandWithVariable(cattr.CommandName, cattr.Required, GetHelpCallback(cattr.HelpCallbackMethodName), GetExecutionBlock());
+                    continue;
+                }
                 var optAttr = m.GetCustomAttribute(typeof(OptionAttribute));
                 if (optAttr is OptionAttribute oatrr)
                 {
