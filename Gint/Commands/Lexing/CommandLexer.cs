@@ -32,7 +32,7 @@ namespace Gint
 
         private bool ReachedEnd => (position >= text.Length);
 
-        private void ReadArgumentWithinQuotes()
+        private void ReadArgumentWithinCharacter(char ch)
         {
             // Skip the first quote
             position++;
@@ -42,6 +42,21 @@ namespace Gint
 
             while (!done)
             {
+                if (Current == ch)
+                {
+                    if (Lookahead == ch)
+                    {
+                        sb.Append(Current);
+                        position += 2;
+                    }
+                    else
+                    {
+                        position++;
+                        done = true;
+                    }
+                    continue;
+                }
+
                 switch (Current)
                 {
                     case '\0':
@@ -51,24 +66,14 @@ namespace Gint
                         Diagnostics.ReportUnterminatedString(span);
                         done = true;
                         break;
-                    case '"':
-                        if (Lookahead == '"')
-                        {
-                            sb.Append(Current);
-                            position += 2;
-                        }
-                        else
-                        {
-                            position++;
-                            done = true;
-                        }
+                    case null:
                         break;
                     default:
                         sb.Append(Current);
                         position++;
                         break;
                 }
-                if(ReachedEnd && !done)
+                if (ReachedEnd && !done)
                 {
                     done = true;
                     var length = position - start;
@@ -81,6 +86,15 @@ namespace Gint
             value = sb.ToString();
         }
 
+        private void ReadArgumentWithinApostrophe()
+        {
+            ReadArgumentWithinCharacter('\'');
+        }
+
+        private void ReadArgumentWithinQuotes()
+        {
+            ReadArgumentWithinCharacter('"');
+        }
 
         public CommandSyntaxToken Lex()
         {
@@ -96,8 +110,11 @@ namespace Gint
                 case '"':
                     ReadArgumentWithinQuotes();
                     break;
+                case '\'':
+                    ReadArgumentWithinApostrophe();
+                    break;
                 case '>':
-                    position ++;
+                    position++;
                     value = ">";
                     kind = CommandTokenKind.Pipe;
                     break;
