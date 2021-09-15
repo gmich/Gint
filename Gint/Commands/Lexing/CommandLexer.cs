@@ -114,7 +114,7 @@ namespace Gint
                     ReadArgumentWithinApostrophe();
                     break;
                 case '>':
-                    if (Lookahead == ' ')
+                    if (Lookahead == ' ' || Lookahead == null)
                     {
                         position++;
                         kind = CommandTokenKind.Pipe;
