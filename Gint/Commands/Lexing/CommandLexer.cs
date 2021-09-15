@@ -114,10 +114,18 @@ namespace Gint
                     ReadArgumentWithinApostrophe();
                     break;
                 case '>':
-                    position++;
-                    value = ">";
-                    kind = CommandTokenKind.Pipe;
-                    break;
+                    if (Lookahead == ' ')
+                    {
+                        position++;
+                        kind = CommandTokenKind.Pipe;
+                        value = ">";
+                        break;
+                    }
+                    else
+                    {
+                        ReadKeyword();
+                        break;
+                    }
                 case '-':
                     if (Lookahead == '-')
                     {
@@ -180,7 +188,7 @@ namespace Gint
 
         private void ReadKeyword()
         {
-            while (Current.HasValue && (char.IsLetterOrDigit(Current.Value) || Current == '-' || Current == '>'))
+            while (Current.HasValue && (!char.IsWhiteSpace(Current.Value)))
                 position++;
 
             var length = position - start;
