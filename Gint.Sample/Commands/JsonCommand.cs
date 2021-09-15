@@ -7,7 +7,7 @@ namespace Gint.Sample
 {
     internal sealed class JsonCommand : IScanForAttributes
     {
-        [Command("json",helpCallback: nameof(JsonHelp))]
+        [Command("json", helpCallback: nameof(JsonHelp))]
         public Task<ICommandOutput> Json(ICommandInput input, CommandExecutionContext ctx, Func<Task> next)
         {
             if (!input.Stream.IsEmpty)
@@ -57,7 +57,7 @@ namespace Gint.Sample
             return CommandOutput.SuccessfulTask;
         }
 
-        private void PrettyHelp(Out @out)
+        private static void PrettyHelp(Out @out)
         {
             @out.Write("Includes options details.");
         }

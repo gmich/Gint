@@ -86,5 +86,11 @@ namespace Gint
             var message = $"Command does not accept variables.";
             ReportError(span, message);
         }
+
+        internal void ReportMissingCommandToPipe(TextSpan span)
+        {
+            var message = $"Missing command before pipe.";
+            ReportError(span, message);
+        }
     }
 }

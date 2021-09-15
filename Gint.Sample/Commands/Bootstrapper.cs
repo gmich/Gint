@@ -30,23 +30,6 @@ namespace Gint.Sample
                     });
 
 
-            runtime.CommandRegistry
-                .AddCommand("showlog", o => o.Write("Toggles showing of bind and parse trees."),
-                    (input, ctx, next) =>
-                    {
-                        runtime.Options.LogBindTree = !runtime.Options.LogBindTree;
-                        runtime.Options.LogParseTree = !runtime.Options.LogParseTree;
-
-                        ctx.Info.Write("Showing bind / parse trees: ");
-                        if (runtime.Options.LogBindTree)
-                            ctx.Info.WriteFormatted("✓", FormatType.GreenForeground);
-                        else
-                            ctx.Info.WriteFormatted("x", FormatType.RedForeground);
-
-                        return CommandOutput.SuccessfulTask;
-                    });
-
-
             runtime.CommandRegistry.DiscoverAttributeDefinitions(System.Reflection.Assembly.GetExecutingAssembly());
         }
     }

@@ -19,6 +19,27 @@ namespace Gint
         {
             CommandRegistry = commandRegistry;
             CommandExecutionContextFactory = commandExecutionContextFactory;
+
+            AddShowTreesCommand();
+        }
+
+        private void AddShowTreesCommand()
+        {
+            CommandRegistry
+            .AddCommand("showtrees", o => o.Write("Toggles showing of bind and parse trees."),
+                (input, ctx, next) =>
+                {
+                    Options.LogBindTree = !Options.LogBindTree;
+                    Options.LogParseTree = !Options.LogParseTree;
+
+                    ctx.Info.Write("Showing bind / parse trees: ");
+                    if (Options.LogBindTree)
+                        ctx.Info.WriteFormatted("✓", FormatType.GreenForeground);
+                    else
+                        ctx.Info.WriteFormatted("x", FormatType.RedForeground);
+
+                    return CommandOutput.SuccessfulTask;
+                });
         }
 
         public async Task Run(string command)

@@ -84,6 +84,10 @@ namespace Gint
             {
                 var pipe = ParsePipe();
                 var second = ParseExecutionPipeline();
+                if(commandExpressionSyntax==null)
+                {
+                    diagnostics.ReportMissingCommandToPipe(pipe.Span);
+                }
                 return new PipedCommandExpressionSyntax(commandExpressionSyntax, pipe, second);
             }
             if (commandExpressionSyntax == null)
