@@ -3,9 +3,9 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Generic;
 
-namespace Gint
+namespace Gint.Builtin
 {
-    internal class HelpCommandDefinition : ICommandDefinition
+    internal class HelpDefinition : ICommandDefinition
     {
         private CommandRegistry registry;
 

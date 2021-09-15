@@ -13,8 +13,14 @@ namespace Gint
 
         internal CommandRegistry()
         {
-            var help = new HelpCommandDefinition();
-            help.Register(this);
+            var commandDefinitionType = typeof(ICommandDefinition);
+            var builtinCommandDefinitions = Assembly.Load("Gint")
+                .GetTypes()
+                .Where(type => type.Namespace == "Gint.Builtin" && commandDefinitionType.IsAssignableFrom(type))
+                .Select(t => Activator.CreateInstance(t))
+                .Cast<ICommandDefinition>();
+
+            AddDefinitions(builtinCommandDefinitions);
         }
 
         public class AddOptionsBuilder
@@ -101,29 +107,6 @@ namespace Gint
             ScanForAttributes(this, obj);
         }
 
-        public static CommandRegistry Empty => new CommandRegistry();
-
-        public static CommandRegistry FromDefinitions(IEnumerable<ICommandDefinition> definitions)
-        {
-            var registry = new CommandRegistry();
-            foreach (var d in definitions)
-            {
-                d.Register(registry);
-            }
-            return registry;
-        }
-
-        public static CommandRegistry FromAttributes(IEnumerable<object> types)
-        {
-            var registry = new CommandRegistry();
-
-            foreach (var definition in types)
-            {
-                ScanForAttributes(registry, definition);
-            }
-            return registry;
-        }
-
         private static void ScanForAttributes(CommandRegistry registry, object definition)
         {
             var methods = definition.GetType().GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
@@ -200,7 +183,7 @@ namespace Gint
             }
         }
 
-        public static CommandRegistry DiscoverDefinitions(Assembly assembly)
+        public void DiscoverDefinitions(Assembly assembly)
         {
             var type = typeof(ICommandDefinition);
             var definitions = assembly.GetTypes()
@@ -208,32 +191,68 @@ namespace Gint
              .Select(t => Activator.CreateInstance(t))
              .Cast<ICommandDefinition>();
 
-            var registry = new CommandRegistry();
-
             foreach (var d in definitions)
             {
-                d.Register(registry);
+                d.Register(this);
             }
-
-            return registry;
         }
 
-        public static CommandRegistry DiscoverAttributeDefinitions(Assembly assembly)
+        public void DiscoverAttributeDefinitions(Assembly assembly)
         {
             var type = typeof(IScanForAttributes);
             var definitions = assembly.GetTypes()
              .Where(p => type.IsAssignableFrom(p) && !p.IsAbstract)
              .Select(t => Activator.CreateInstance(t));
 
-            var registry = new CommandRegistry();
-
             foreach (var d in definitions)
             {
-                ScanForAttributes(registry, d);
+                ScanForAttributes(this, d);
             }
+        }
+
+        #region Factories
+
+        public static CommandRegistry Empty => new CommandRegistry();
+
+        public static CommandRegistry FromDefinitions(IEnumerable<ICommandDefinition> definitions)
+        {
+            var registry = new CommandRegistry();
+            foreach (var d in definitions)
+            {
+                d.Register(registry);
+            }
+            return registry;
+        }
+
+        public static CommandRegistry FromAttributes(IEnumerable<object> types)
+        {
+            var registry = new CommandRegistry();
+
+            foreach (var definition in types)
+            {
+                ScanForAttributes(registry, definition);
+            }
+            return registry;
+        }
+
+        public static CommandRegistry FromDefinitionsAssembly(Assembly assembly)
+        {
+            var registry = new CommandRegistry();
+
+            registry.DiscoverDefinitions(assembly);
 
             return registry;
         }
+
+        public static CommandRegistry FromAttributesAssembly(Assembly assembly)
+        {
+            var registry = new CommandRegistry();
+
+            registry.DiscoverAttributeDefinitions(assembly);
+
+            return registry;
+        }
+        #endregion
     }
 
 }

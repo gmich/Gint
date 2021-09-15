@@ -29,14 +29,6 @@ namespace Gint.Sample
                         return CommandOutput.SuccessfulTask;
                     });
 
-            runtime.CommandRegistry
-                .AddVariableCommand("out", required: true, helpCallback: o => o.Write("Prints to stream out"),
-                    (input, ctx, next) =>
-                    {
-                        ctx.OutStream.Write(input.Variable);
-                        return CommandOutput.SuccessfulTask;
-                    });
-
 
             runtime.CommandRegistry
                 .AddCommand("showlog", o => o.Write("Toggles showing of bind and parse trees."),
@@ -55,9 +47,7 @@ namespace Gint.Sample
                     });
 
 
-            runtime.CommandRegistry.AddDefinition(new GetVarCommand());
-
-            runtime.CommandRegistry.AddFromAttributes(new SetVarCommand());
+            runtime.CommandRegistry.DiscoverAttributeDefinitions(System.Reflection.Assembly.GetExecutingAssembly());
         }
     }
 }

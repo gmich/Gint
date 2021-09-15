@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace Gint.Sample
+namespace Gint.Builtin
 {
-    internal sealed class SetVarCommand
+    internal sealed class SetVarDefinition : ICommandDefinition
     {
-        [CommandWithVariable("setvar", required: true, helpCallback: nameof(Help))]
+        public void Register(CommandRegistry registry)
+        {
+            registry.AddVariableCommand("setvar", required: true, Help, SetVar);
+        }
+
         public Task<ICommandOutput> SetVar(ICommandInput input, CommandExecutionContext ctx, Func<Task> next)
         {
             if (!ctx.GlobalScope.ContainsKey(input.Variable))
@@ -25,6 +29,8 @@ namespace Gint.Sample
         {
             o.Write("Sets variable.");
         }
+
+
     }
 
 }

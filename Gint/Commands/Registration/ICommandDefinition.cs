@@ -1,6 +1,7 @@
 ﻿namespace Gint
 {
-    public interface IScanForAttributes
+    public interface ICommandDefinition
     {
+        void Register(CommandRegistry registry);
     }
 }

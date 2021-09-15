@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace Gint.Sample
+namespace Gint.Builtin
 {
-    internal sealed class GetVarCommand : ICommandDefinition
+    internal sealed class GetVarDefinition : ICommandDefinition
     {
         public void Register(CommandRegistry registry)
         {

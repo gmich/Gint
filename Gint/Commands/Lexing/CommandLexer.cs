@@ -30,6 +30,8 @@ namespace Gint
             return text[index];
         }
 
+        private bool ReachedEnd => (position >= text.Length);
+
         private void ReadArgumentWithinQuotes()
         {
             // Skip the first quote
@@ -65,6 +67,13 @@ namespace Gint
                         sb.Append(Current);
                         position++;
                         break;
+                }
+                if(ReachedEnd && !done)
+                {
+                    done = true;
+                    var length = position - start;
+                    var span = new TextSpan(start, length);
+                    Diagnostics.ReportUnterminatedString(span);
                 }
             }
 

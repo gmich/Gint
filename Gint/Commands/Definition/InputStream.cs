@@ -10,5 +10,7 @@
 
         public string Raw { get; }
         public string Unformatted { get; }
+
+        public bool IsEmpty => string.IsNullOrEmpty(Raw);
     }
 }
