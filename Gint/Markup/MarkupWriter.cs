@@ -14,7 +14,7 @@ namespace Gint.Markup
             var tokens = MarkupLinter.Lint(text, out var diagnostics);
             if(diagnostics.Any())
             {
-                var shouldContinue = OnLintingError(diagnostics);
+                var shouldContinue = OnLintingError(diagnostics, text);
                 if (!shouldContinue)
                     return;
             }
@@ -42,7 +42,7 @@ namespace Gint.Markup
             EndOfStream();
         }
 
-        public abstract bool OnLintingError(DiagnosticCollection diagnostics);
+        public abstract bool OnLintingError(DiagnosticCollection diagnostics, string text);
         public abstract void Flush();
         protected abstract void StartOfStream();
         protected abstract void EndOfStream();
