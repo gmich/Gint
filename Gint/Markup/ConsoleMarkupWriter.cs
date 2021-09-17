@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Gint.Markup
 {
+
     public class ConsoleMarkupWriter : MarkupWriter
     {
-        public override void Flush()
-        {
-            throw new NotImplementedException();
-        }
+
+        private readonly static Format.ConsoleMarkupWriterFormatFactory formatFactory = new();
+        private readonly List<Format.IMarkupFormat> appliedFormats = new();
 
         public override bool OnLintingError(DiagnosticCollection diagnostics, string text)
         {
@@ -31,28 +30,43 @@ namespace Gint.Markup
 
         protected override void EndOfStream()
         {
+            appliedFormats.Clear();
         }
 
-        protected override void FormatEnd(MarkupSyntaxToken token)
+        protected override void FormatEnd(string tag)
         {
+            formatFactory.GetFormat(tag).Remove();
+            for (int i = appliedFormats.Count - 1; 0 <= i; i--)
+            {
+                var format = appliedFormats[i];
+                if(format.Tag == tag)
+                {
+                    format.Remove();
+                    appliedFormats.Remove(format);
+                }
+            }
         }
 
-        protected override void FormatStart(MarkupSyntaxToken token)
+        protected override void FormatStart(string tag)
         {
+            var format = formatFactory.GetFormat(tag);
+            format.Apply();
+            appliedFormats.Add(format);
         }
 
-        protected override void NewLine(MarkupSyntaxToken token)
+        protected override void NewLine()
         {
-            Console.WriteLine();
+            //Console.WriteLine();
         }
 
-        protected override void PrintText(MarkupSyntaxToken token)
+        protected override void PrintText(string text)
         {
-            Console.Write(token.Value);
+            Console.Write(text);
         }
 
         protected override void StartOfStream()
         {
+            appliedFormats.Clear();
         }
     }
 

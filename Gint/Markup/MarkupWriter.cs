@@ -25,16 +25,16 @@ namespace Gint.Markup
                 switch (token.Kind)
                 {
                     case MarkupTokenKind.Text:
-                        PrintText(token);
+                        PrintText(token.Value);
                         break;
                     case MarkupTokenKind.FormatStart:
-                        FormatStart(token);
+                        FormatStart(token.Value);
                         break;
                     case MarkupTokenKind.FormatEnd:
-                        FormatEnd(token);
+                        FormatEnd(token.Value);
                         break;
                     case MarkupTokenKind.NewLine:
-                        NewLine(token);
+                        NewLine();
                         break;
 
                 }
@@ -43,13 +43,12 @@ namespace Gint.Markup
         }
 
         public abstract bool OnLintingError(DiagnosticCollection diagnostics, string text);
-        public abstract void Flush();
         protected abstract void StartOfStream();
         protected abstract void EndOfStream();
-        protected abstract void NewLine(MarkupSyntaxToken token);
-        protected abstract void FormatStart(MarkupSyntaxToken token);
-        protected abstract void FormatEnd(MarkupSyntaxToken token);
-        protected abstract void PrintText(MarkupSyntaxToken token);
+        protected abstract void NewLine();
+        protected abstract void FormatStart(string tag);
+        protected abstract void FormatEnd(string tag);
+        protected abstract void PrintText(string text);
     }
 
 }

@@ -63,6 +63,8 @@ namespace Gint.Tests
         {
             new ConsoleMarkupWriter().Print("hello [bold,fg:red] world [-bold,fg:red,-bold]");
             new ConsoleMarkupWriter().Print("hello [bold,fg:red] world [-bold,-fg:red]");
+
+            new Markup.ConsoleMarkupWriter().Print("[fg:green,fg:red]hello [-fg:red]world[-fg:green]!!!\r\n");
         }
 
         private void PrintDiagnostics(Markup.DiagnosticCollection diagnostics, string text)
