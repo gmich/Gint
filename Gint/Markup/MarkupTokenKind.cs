@@ -7,8 +7,9 @@
         FormatEnd,
         FormatToken,
         NewLine,
-        EndOfStream,
         WhiteSpace,
+
+        EndOfStream,
     }
 
 }

@@ -51,10 +51,12 @@ namespace Gint.Markup
         public abstract bool OnLintingError(DiagnosticCollection diagnostics, string text);
         protected abstract void StartOfStream();
         protected abstract void EndOfStream();
-        protected abstract void NewLine();
+
         protected abstract void FormatStart(string tag);
-        protected abstract void FormatToken(string tag);
         protected abstract void FormatEnd(string tag);
+        protected abstract void FormatToken(string tag);
+
+        protected abstract void NewLine();
         protected abstract void PrintWhitespace(string whitespace);
         protected abstract void PrintText(string text);
     }

@@ -22,7 +22,7 @@ namespace Gint.Markup
                 Console.Write(error);
                 Console.ResetColor();
                 Console.WriteLine(suffix);
-                Console.WriteLine(diagnostic.Message);
+                Console.WriteLine(diagnostic.ToString());
                 Console.WriteLine();
             }
             return false;

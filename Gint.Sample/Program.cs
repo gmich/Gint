@@ -6,17 +6,24 @@ namespace Gint.Sample
 {
     internal class Program
     {
-
-        static async Task Main()
+        static void Markup()
         {
-            new Markup.ConsoleMarkupWriter().Print(@"
-[fg:red,bg:white]hello    world[-bg:white]!!!!!![-fg:red]
+            var text = @"
+[fg:red,bg:white]hello world[-bg:white]!!!!!![-fg:red]
 
 [~br,~br]
 
 [fg:green]hello world[-fg:green]!!!!!!
 
-");
+";
+            Console.WriteLine(text);
+
+            new Markup.ConsoleMarkupWriter().Print(text);
+        }
+
+        static async Task Main()
+        {
+            Markup();
 
             var consoleOutputWriter = new ConsoleOutputWriter();
 

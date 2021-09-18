@@ -34,7 +34,7 @@ namespace Gint.Markup
                     case MarkupTokenKind.FormatEnd:
                         var tokenToRemove = formatTokens.Where(c => c.Value == token.Value).FirstOrDefault();
                         if (tokenToRemove == null)
-                            linter.diagnostics.ReportMissingStartTag(token.Span);
+                            linter.diagnostics.ReportMissingStartTag(token.Span,token.Value);
                         else
                             formatTokens.Remove(tokenToRemove);
                         break;
@@ -47,7 +47,7 @@ namespace Gint.Markup
 
             foreach (var token in formatTokens)
             {
-                linter.diagnostics.ReportMissingEndTag(token.Span);
+                linter.diagnostics.ReportMissingEndTag(token.Span, token.Value);
             }
 
             diagnostics = linter.diagnostics;

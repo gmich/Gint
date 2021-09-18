@@ -103,10 +103,16 @@ namespace Gint.Markup
                 }
             }
 
-            var length = position - start;
-            var text = this.text.Substring(start, length);
+            var text = GetText();
 
             return new MarkupSyntaxToken(kind, start, text, value);
+        }
+
+        private string GetText()
+        {
+            var length = position - start;
+            var text = this.text.Substring(start, length);
+            return text;
         }
 
         private void ReadFormat()
@@ -157,7 +163,7 @@ namespace Gint.Markup
                 }
             }
             readingFormat = false;
-            Diagnostics.ReportUnterminatedFormat(GetSpan());
+            Diagnostics.ReportUnterminatedFormat(GetSpan(), GetText());
         }
 
         private void ReadText()
