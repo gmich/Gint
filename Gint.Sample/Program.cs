@@ -12,7 +12,7 @@ namespace Gint.Sample
             new Markup.ConsoleMarkupWriter().Print(@"
 [fg:red,bg:white]hello world[-bg:white]!!!!!![-fg:red]
 
-[br,br,-br,-br]
+[~br,~br]
 
 [fg:green]hello world[-fg:green]!!!!!!
 

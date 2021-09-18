@@ -5,6 +5,7 @@
         Text,
         FormatStart,
         FormatEnd,
+        FormatToken,
         NewLine,
         EndOfStream,
     }

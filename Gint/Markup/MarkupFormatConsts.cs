@@ -7,6 +7,7 @@
 
         public const char FormatEnd = '-';
         public const char FormatSeparator = ',';
+        public const char FormatToken = '~';
 
     }
 

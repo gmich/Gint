@@ -39,7 +39,7 @@ namespace Gint.Markup
             for (int i = appliedFormats.Count - 1; 0 <= i; i--)
             {
                 var format = appliedFormats[i];
-                if(format.Tag == tag)
+                if (format.Tag == tag)
                 {
                     format.Remove();
                     appliedFormats.Remove(format);
@@ -52,6 +52,12 @@ namespace Gint.Markup
             var format = formatFactory.GetFormat(tag);
             format.Apply();
             appliedFormats.Add(format);
+        }
+
+        protected override void FormatToken(string tag)
+        {
+            var format = formatFactory.GetFormat(tag);
+            format.Apply();
         }
 
         protected override void NewLine()

@@ -125,6 +125,11 @@ namespace Gint.Markup
                 position++;
                 kind = MarkupTokenKind.FormatEnd;
             }
+            else if (Current.Value == MarkupFormatConsts.FormatToken)
+            {
+                position++;
+                kind = MarkupTokenKind.FormatToken;
+            }
             else
                 kind = MarkupTokenKind.FormatStart;
 
