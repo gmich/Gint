@@ -36,6 +36,9 @@ namespace Gint.Markup
                     case MarkupTokenKind.FormatToken:
                         FormatToken(token.Value);
                         break;
+                    case MarkupTokenKind.WhiteSpace:
+                        PrintWhitespace(token.Value);
+                        break;
                     case MarkupTokenKind.NewLine:
                         NewLine();
                         break;
@@ -52,6 +55,7 @@ namespace Gint.Markup
         protected abstract void FormatStart(string tag);
         protected abstract void FormatToken(string tag);
         protected abstract void FormatEnd(string tag);
+        protected abstract void PrintWhitespace(string whitespace);
         protected abstract void PrintText(string text);
     }
 

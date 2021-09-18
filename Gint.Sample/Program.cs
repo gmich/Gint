@@ -10,7 +10,7 @@ namespace Gint.Sample
         static async Task Main()
         {
             new Markup.ConsoleMarkupWriter().Print(@"
-[fg:red,bg:white]hello world[-bg:white]!!!!!![-fg:red]
+[fg:red,bg:white]hello    world[-bg:white]!!!!!![-fg:red]
 
 [~br,~br]
 

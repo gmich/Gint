@@ -40,7 +40,7 @@ namespace Gint.Markup
             {
                 var token = lexer.Lex();
                 tokens.Add(token);
-                
+
                 if (token.Kind == MarkupTokenKind.EndOfStream)
                     break;
             }
@@ -95,7 +95,10 @@ namespace Gint.Markup
                         position++;
                         break;
                     default:
-                        ReadText();
+                        if (char.IsWhiteSpace(Current.Value))
+                            ReadWhiteSpace();
+                        else
+                            ReadText();
                         break;
                 }
             }
@@ -163,12 +166,40 @@ namespace Gint.Markup
                 Current != MarkupFormatConsts.FormatTagOpen
                 && Current != '\r'
                 && Current != '\n'
-                && Current.HasValue)
+                && Current.HasValue
+                && !char.IsWhiteSpace(Current.Value))
             {
                 value += Current;
                 position++;
             }
             kind = MarkupTokenKind.Text;
+        }
+
+        private void ReadWhiteSpace()
+        {
+            var done = false;
+
+            while (!done)
+            {
+                switch (Current)
+                {
+                    case '\0':
+                    case null:
+                        done = true;
+                        break;
+                    default:
+                        if (!char.IsWhiteSpace(Current.Value))
+                            done = true;
+                        else
+                        {
+                            value += Current;
+                            position++;
+                        }
+                        break;
+                }
+            }
+
+            kind = MarkupTokenKind.WhiteSpace;
         }
 
     }

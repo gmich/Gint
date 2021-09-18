@@ -10,10 +10,10 @@
             IsWarning = !IsError;
         }
 
+        public bool IsWarning { get; }
         public bool IsError { get; }
         public TextSpan Location { get; }
         public string Message { get; }
-        public bool IsWarning { get; }
 
         public override string ToString() => Message;
 

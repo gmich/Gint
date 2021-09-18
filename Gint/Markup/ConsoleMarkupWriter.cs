@@ -70,6 +70,11 @@ namespace Gint.Markup
             Console.Write(text);
         }
 
+        protected override void PrintWhitespace(string whitespace)
+        {
+            Console.Write(whitespace);
+        }
+
         protected override void StartOfStream()
         {
             appliedFormats.Clear();
