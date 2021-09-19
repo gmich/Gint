@@ -9,12 +9,15 @@ namespace Gint.Sample
         static void Markup()
         {
             var text = @"
-[fg:red,bg:white]hello world[-bg:white]!!!!!![-fg:red]
+[fg:red,bg:white]hello world[-]!!!!!![-fg:red]
 
 [~br,~br]
 
 [fg:green]hello world[-fg:green]!!!!!!
 
+[~br,~br]
+
+[fg:green]hello world[-]!!!!!!
 ";
             Console.WriteLine(text);
 

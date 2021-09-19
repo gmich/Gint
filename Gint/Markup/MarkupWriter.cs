@@ -20,6 +20,8 @@ namespace Gint.Markup
             }
 
             StartOfStream();
+            var formatTokens = new Stack<string>();
+
             foreach(var token in tokens)
             {
                 switch (token.Kind)
@@ -28,10 +30,14 @@ namespace Gint.Markup
                         PrintText(token.Value);
                         break;
                     case MarkupTokenKind.FormatStart:
+                        formatTokens.Push(token.Value);
                         FormatStart(token.Value);
                         break;
                     case MarkupTokenKind.FormatEnd:
-                        FormatEnd(token.Value);
+                        if (string.IsNullOrEmpty(token.Value))
+                            FormatEnd(formatTokens.Pop());
+                        else
+                            FormatEnd(token.Value);
                         break;
                     case MarkupTokenKind.FormatToken:
                         FormatToken(token.Value);
