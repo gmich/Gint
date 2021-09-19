@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace Gint.Markup
@@ -12,7 +11,7 @@ namespace Gint.Markup
                 return;
 
             var tokens = MarkupLinter.Lint(text, out var diagnostics);
-            if(diagnostics.Any())
+            if (diagnostics.Any())
             {
                 var shouldContinue = OnLintingError(diagnostics, text);
                 if (!shouldContinue)
@@ -20,27 +19,43 @@ namespace Gint.Markup
             }
 
             StartOfStream();
-            var formatTokens = new Stack<string>();
+            var formatTokens = new Stack<(string Token, string Variable)>();
 
-            foreach(var token in tokens)
+
+            string GetVariableIfExists(int current)
             {
+                var next = current + 1;
+                if (next < tokens.Length
+                    && tokens[next].Kind == MarkupTokenKind.FormatVariable)
+                    return tokens[next].Value;
+                else
+                    return string.Empty;
+            }
+
+            for (int i = 0; i < tokens.Length; i++)
+            {
+                MarkupSyntaxToken token = tokens[i];
                 switch (token.Kind)
                 {
                     case MarkupTokenKind.Text:
                         PrintText(token.Value);
                         break;
                     case MarkupTokenKind.FormatStart:
-                        formatTokens.Push(token.Value);
-                        FormatStart(token.Value);
+                        var var = GetVariableIfExists(i);
+                        formatTokens.Push((token.Value, var));
+                        FormatStart(token.Value, var);
                         break;
                     case MarkupTokenKind.FormatEnd:
                         if (string.IsNullOrEmpty(token.Value))
-                            FormatEnd(formatTokens.Pop());
+                        {
+                            var formatStart = formatTokens.Pop();
+                            FormatEnd(formatStart.Token, string.IsNullOrEmpty(formatStart.Variable) ? GetVariableIfExists(i) : formatStart.Variable);
+                        }
                         else
-                            FormatEnd(token.Value);
+                            FormatEnd(token.Value, GetVariableIfExists(i));
                         break;
                     case MarkupTokenKind.FormatToken:
-                        FormatToken(token.Value);
+                        FormatToken(token.Value, GetVariableIfExists(i));
                         break;
                     case MarkupTokenKind.WhiteSpace:
                         PrintWhitespace(token.Value);
@@ -58,9 +73,9 @@ namespace Gint.Markup
         protected abstract void StartOfStream();
         protected abstract void EndOfStream();
 
-        protected abstract void FormatStart(string tag);
-        protected abstract void FormatEnd(string tag);
-        protected abstract void FormatToken(string tag);
+        protected abstract void FormatStart(string tag, string variable);
+        protected abstract void FormatEnd(string tag, string variable);
+        protected abstract void FormatToken(string tag, string variable);
 
         protected abstract void NewLine();
         protected abstract void PrintWhitespace(string whitespace);

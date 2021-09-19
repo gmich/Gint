@@ -10,6 +10,8 @@ namespace Gint.Markup
         private string value;
         private MarkupTokenKind kind;
         private bool readingFormat;
+        private bool readingVariable;
+
         public DiagnosticCollection Diagnostics { get; } = new DiagnosticCollection();
 
         public MarkupLexer(string text)
@@ -57,6 +59,10 @@ namespace Gint.Markup
             if (readingFormat)
             {
                 ReadFormat();
+            }
+            else if (readingVariable)
+            {
+                ReadFormatVariable();
             }
             else
             {
@@ -108,6 +114,65 @@ namespace Gint.Markup
             return new MarkupSyntaxToken(kind, start, text, value);
         }
 
+        private void ReadFormatVariable()
+        {
+            kind = MarkupTokenKind.FormatVariable;
+
+            if (!Current.HasValue)
+            {
+                Diagnostics.ReportNullAtStartOfFormat(GetSpan());
+                readingVariable = false;
+                return;
+            }
+
+            while (Current.HasValue)
+            {
+                switch (Current.Value)
+                {
+                    case MarkupFormatConsts.FormatSeparator:
+                        if (Lookahead == MarkupFormatConsts.FormatSeparator)
+                        {
+                            value += Current;
+                            position += 2; //eat one
+                            break;
+                        }
+                        else
+                        {
+                            readingFormat = true;
+                            readingVariable = false;
+                            position++;
+                            return;
+                        }
+                    case MarkupFormatConsts.FormatTagClose:
+                        if (Lookahead == MarkupFormatConsts.FormatTagClose)
+                        {
+                            value += Current;
+                            position += 2; //eat one
+                            break;
+                        }
+                        else
+                        {
+                            readingVariable = false;
+                            position++;
+                            return;
+                        }
+                    default:
+                        value += Current;
+                        position++;
+                        break;
+                }
+            }
+
+            readingVariable = false;
+            Diagnostics.ReportUnterminatedFormat(GetSpan(), GetText());
+        }
+
+        private TextSpan GetSpan()
+        {
+            var length = position - start;
+            return new TextSpan(start, length);
+        }
+
         private string GetText()
         {
             var length = position - start;
@@ -117,51 +182,51 @@ namespace Gint.Markup
 
         private void ReadFormat()
         {
-            TextSpan GetSpan()
-            {
-                var length = position - start;
-                return new TextSpan(start, length);
-            }
-
             if (!Current.HasValue)
             {
                 Diagnostics.ReportNullAtStartOfFormat(GetSpan());
                 return;
             }
 
-            if (Current.Value == MarkupFormatConsts.FormatEnd)
+            switch (Current.Value)
             {
-                position++;
-                kind = MarkupTokenKind.FormatEnd;
+                case MarkupFormatConsts.FormatEnd:
+                    position++;
+                    kind = MarkupTokenKind.FormatEnd;
+                    break;
+                case MarkupFormatConsts.FormatToken:
+                    position++;
+                    kind = MarkupTokenKind.FormatToken;
+                    break;
+                default:
+                    kind = MarkupTokenKind.FormatStart;
+                    break;
             }
-            else if (Current.Value == MarkupFormatConsts.FormatToken)
-            {
-                position++;
-                kind = MarkupTokenKind.FormatToken;
-            }
-            else
-                kind = MarkupTokenKind.FormatStart;
 
             while (Current.HasValue)
             {
-                if (Current.Value == MarkupFormatConsts.FormatSeparator)
+                switch (Current.Value)
                 {
-                    readingFormat = true;
-                    position++;
-                    return;
-                }
-                else if (Current.Value == MarkupFormatConsts.FormatTagClose)
-                {
-                    readingFormat = false;
-                    position++;
-                    return;
-                }
-                else
-                {
-                    value += Current;
-                    position++;
+                    case MarkupFormatConsts.FormatSeparator:
+                        readingFormat = true;
+                        position++;
+                        return;
+                    case MarkupFormatConsts.FormatTagClose:
+                        readingFormat = false;
+                        position++;
+                        return;
+                    case MarkupFormatConsts.FormatVariableStart:
+                        readingFormat = false;
+                        readingVariable = true;
+                        position++;
+                        return;
+                    default:
+                        value += Current;
+                        position++;
+                        break;
                 }
             }
+
             readingFormat = false;
             Diagnostics.ReportUnterminatedFormat(GetSpan(), GetText());
         }

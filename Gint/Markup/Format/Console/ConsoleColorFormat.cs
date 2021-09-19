@@ -43,19 +43,19 @@ namespace Gint.Markup.Format
 
     internal class ForegroundRed : ForegroundConsoleColorFormat
     {
-        public override string Tag => "fg:red";
+        public override string Tag => "fg.red";
         protected override ConsoleColor Color => ConsoleColor.Red;
     }
 
     internal class ForegroundGreen : ForegroundConsoleColorFormat
     {
-        public override string Tag => "fg:green";
+        public override string Tag => "fg.green";
         protected override ConsoleColor Color => ConsoleColor.Green;
     }
 
     internal class BackgroundWhite : BackgroundConsoleColorFormat
     {
-        public override string Tag => "bg:white";
+        public override string Tag => "bg.white";
         protected override ConsoleColor Color => ConsoleColor.White;
     }
 

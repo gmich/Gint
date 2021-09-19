@@ -10,6 +10,7 @@
         WhiteSpace,
 
         EndOfStream,
+        FormatVariable,
     }
 
 }

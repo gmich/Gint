@@ -33,7 +33,7 @@ namespace Gint.Markup
             appliedFormats.Clear();
         }
 
-        protected override void FormatEnd(string tag)
+        protected override void FormatEnd(string tag, string variable)
         {
             formatFactory.GetFormat(tag).Remove();
             for (int i = appliedFormats.Count - 1; 0 <= i; i--)
@@ -47,17 +47,24 @@ namespace Gint.Markup
             }
         }
 
-        protected override void FormatStart(string tag)
+        protected override void FormatStart(string tag, string variable)
         {
             var format = formatFactory.GetFormat(tag);
             format.Apply();
             appliedFormats.Add(format);
         }
 
-        protected override void FormatToken(string tag)
+        protected override void FormatToken(string tag, string variable)
         {
-            var format = formatFactory.GetFormat(tag);
-            format.Apply();
+            if (tag == "date")
+            {
+                Console.Write(DateTime.UtcNow.ToString(variable));
+            }
+            else
+            {
+                var format = formatFactory.GetFormat(tag);
+                format.Apply();
+            }
         }
 
         protected override void NewLine()
