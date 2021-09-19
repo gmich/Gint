@@ -28,6 +28,10 @@ namespace Gint.Markup
             return false;
         }
 
+        public override void Validate(MarkupSyntaxToken[] tokens, string text, DiagnosticCollection diagnostic)
+        {
+        }
+
         protected override void EndOfStream()
         {
             appliedFormats.Clear();

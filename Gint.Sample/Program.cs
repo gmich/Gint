@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Gint.Markup;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -31,9 +32,23 @@ namespace Gint.Sample
 
 [~date:HH:mm,fg.red] hello world[-]!!!!!!
 ";
-            Console.WriteLine(text);
+            //Console.WriteLine(text);
+            //new Markup.ConsoleMarkupWriter().Print(text);
 
-            new Markup.ConsoleMarkupWriter().Print(text);
+            var document = new MarkupDocument();
+            document.Write("test");
+            document.NewLine();
+            document.WriteWithinRedFontWithWhiteBackground("Hello world!!!");
+            document.NewLine();
+            document.WriteDate();
+            document.NewLine();
+            var fgred= document.StartFormat("fg.red");
+            document.Write("red font");
+            fgred.Close();
+
+            var txt = document.Document;
+            Console.WriteLine(txt);
+            new Markup.ConsoleMarkupWriter().Print(txt);
         }
 
         static async Task Main()
