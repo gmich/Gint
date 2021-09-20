@@ -10,7 +10,7 @@ namespace Gint.Markup
         private readonly static Format.ConsoleMarkupWriterFormatFactory formatFactory = new();
         private readonly List<Format.IMarkupFormat> appliedFormats = new();
 
-        public override bool OnLintingError(DiagnosticCollection diagnostics, string text)
+        protected override bool OnLintingError(DiagnosticCollection diagnostics, string text)
         {
             foreach (var diagnostic in diagnostics)
             {
@@ -28,7 +28,7 @@ namespace Gint.Markup
             return false;
         }
 
-        public override void Validate(MarkupSyntaxToken[] tokens, string text, DiagnosticCollection diagnostic)
+        protected override void Bind(MarkupSyntaxToken[] tokens, string text, DiagnosticCollection diagnostic)
         {
         }
 
