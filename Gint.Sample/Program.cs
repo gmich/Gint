@@ -18,7 +18,7 @@ namespace Gint.Sample
 
 [~br]
 
-[fg.red,bg:white]hello world[-]!!!!!![-fg.red]
+[fg.red,bg.white]hello world[-]!!!!!![-fg.red]
 
 [~br]
 
