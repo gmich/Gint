@@ -1,8 +1,6 @@
-using System;
-using Xunit;
-using System.Linq;
-using System.Collections.Generic;
 using Gint.Markup;
+using System.Linq;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace Gint.Tests
@@ -16,58 +14,7 @@ namespace Gint.Tests
             this.output = output;
         }
 
-        [Fact]
-        //TODO: add individual tests
-        public void Markup_Lexer()
-        {
-            string Print(IEnumerable<MarkupSyntaxToken> tokens)
-            {
-                var res = tokens.Select(c => c.ToString()).Aggregate((fst, snd) => $"{fst}{Environment.NewLine}{snd}");
-                output.WriteLine(res);
-                return res;
-            }
-
-            var tokens1 = MarkupLexer.Tokenize("hello [bold]world", out var diagnostics1);
-            var res1 = Print(tokens1);
-
-            var tokens2 = MarkupLexer.Tokenize("hello [bold]world[-bold]", out var diagnostics2);
-            var res2 = Print(tokens2);
-
-            var tokens3 = MarkupLexer.Tokenize("hello [bold,fg:red] world [-bold,fg:red]", out var diagnostics3);
-            var res3 = Print(tokens3);
-
-            var tokens4 = MarkupLexer.Tokenize("hello [[bold] world", out var diagnostics4);
-            var res4 = Print(tokens4);
-
-            var tokens5 = MarkupLexer.Tokenize("hello [", out var diagnostics5);
-            var res5 = Print(tokens5);
-
-            var tokens6 = MarkupLexer.Tokenize("hello [bold", out var diagnostics6);
-            var res6 = Print(tokens6);
-
-            MarkupLinter.Lint("hello [bold,fg:red] world [-bold,fg:red]", out var lintdiagnostics1);
-            MarkupLinter.Lint("hello [bold,fg:red] world [-bold,-fg:red]", out var lintdiagnostics2);
-        }
-
-        [Fact]
-        //TODO: add individual tests
-        public void Markup_Linter()
-        {
-            MarkupLinter.Lint("hello [bold,fg:red] world [-bold,fg:red]", out var lintdiagnostics1);
-            MarkupLinter.Lint("hello [bold,fg:red] world [-bold,-fg:red]", out var lintdiagnostics2);
-        }
-
-        [Fact]
-        //TODO: add individual tests
-        public void Markup_Console_Writer()
-        {
-            new ConsoleMarkupWriter().Print("hello [bold,fg:red] world [-bold,fg:red,-bold]");
-            new ConsoleMarkupWriter().Print("hello [bold,fg:red] world [-bold,-fg:red]");
-
-            new Markup.ConsoleMarkupWriter().Print("[fg:green,fg:red]hello [-fg:red]world[-fg:green]!!!\r\n");
-        }
-
-        private void PrintDiagnostics(Markup.DiagnosticCollection diagnostics, string text)
+        private void PrintDiagnostics(DiagnosticCollection diagnostics, string text)
         {
             foreach (var diagnostic in diagnostics)
             {
@@ -79,6 +26,141 @@ namespace Gint.Tests
                 output.WriteLine(string.Empty);
             }
         }
+
+        private static void EqualsKindAndValue(MarkupSyntaxToken token, MarkupTokenKind kind, string value = null)
+        {
+            Assert.Equal(kind, token.Kind);
+            Assert.Equal(value, token.Value);
+        }
+
+        [Fact]
+        [Trait("Markup", "Lexer")]
+        public void FormatStart_Text_FormatEnd()
+        {
+            var tokens = MarkupLinter.Lint("[bold]hello[-bold]", out var diagnostics);
+
+            Assert.Empty(diagnostics);
+            Assert.Equal(3, tokens.Length);
+
+            EqualsKindAndValue(tokens[0], MarkupTokenKind.FormatStart, "bold");
+            EqualsKindAndValue(tokens[1], MarkupTokenKind.Text, "hello");
+            EqualsKindAndValue(tokens[2], MarkupTokenKind.FormatEnd, "bold");
+        }
+
+        [Fact]
+        [Trait("Markup", "Lexer")]
+        public void FormatStart_Text_QuickEnd()
+        {
+            var tokens = MarkupLinter.Lint("[bold]hello[-]", out var diagnostics);
+
+            Assert.Empty(diagnostics);
+            Assert.Equal(3, tokens.Length);
+
+            EqualsKindAndValue(tokens[0], MarkupTokenKind.FormatStart, "bold");
+            EqualsKindAndValue(tokens[1], MarkupTokenKind.Text, "hello");
+            EqualsKindAndValue(tokens[2], MarkupTokenKind.FormatEnd, null);
+        }
+
+        [Fact]
+        [Trait("Markup", "Lexer")]
+        public void TwoFormatStart_Text_FormatEnd_Text_FormatEnd()
+        {
+            var tokens = MarkupLinter.Lint("[bold,italic]hello[-bold]world[-italic]", out var diagnostics);
+
+            Assert.Empty(diagnostics);
+            Assert.Equal(6, tokens.Length);
+
+            EqualsKindAndValue(tokens[0], MarkupTokenKind.FormatStart, "bold");
+            EqualsKindAndValue(tokens[1], MarkupTokenKind.FormatStart, "italic");
+            EqualsKindAndValue(tokens[2], MarkupTokenKind.Text, "hello");
+            EqualsKindAndValue(tokens[3], MarkupTokenKind.FormatEnd, "bold");
+            EqualsKindAndValue(tokens[4], MarkupTokenKind.Text, "world");
+            EqualsKindAndValue(tokens[5], MarkupTokenKind.FormatEnd, "italic");
+        }
+
+        [Fact]
+        [Trait("Markup", "Lexer")]
+        public void Format_Text_Whitespace_Text_Newline_FormatEnd()
+        {
+            var tokens = MarkupLinter.Lint("[bold]hello world\r\n[-bold]", out var diagnostics);
+
+            Assert.Empty(diagnostics);
+            Assert.Equal(6, tokens.Length);
+
+            EqualsKindAndValue(tokens[0], MarkupTokenKind.FormatStart, "bold");
+            EqualsKindAndValue(tokens[1], MarkupTokenKind.Text, "hello");
+            EqualsKindAndValue(tokens[2], MarkupTokenKind.WhiteSpace, " ");
+            EqualsKindAndValue(tokens[3], MarkupTokenKind.Text, "world");
+            EqualsKindAndValue(tokens[4], MarkupTokenKind.NewLine);
+            EqualsKindAndValue(tokens[5], MarkupTokenKind.FormatEnd, "bold");
+        }
+
+        [Fact]
+        [Trait("Markup", "Lexer")]
+        public void FormatToken_Text()
+        {
+            var tokens = MarkupLinter.Lint("[~br]hello", out var diagnostics);
+
+            Assert.Empty(diagnostics);
+            Assert.Equal(2, tokens.Length);
+
+            EqualsKindAndValue(tokens[0], MarkupTokenKind.FormatToken, "br");
+            EqualsKindAndValue(tokens[1], MarkupTokenKind.Text, "hello");
+        }
+
+        [Fact]
+        [Trait("Markup", "Lexer")]
+        public void FormatToken_WithVariable_Text()
+        {
+            var tokens = MarkupLinter.Lint("[~br:test]hello", out var diagnostics);
+
+            Assert.Empty(diagnostics);
+            Assert.Equal(3, tokens.Length);
+
+            EqualsKindAndValue(tokens[0], MarkupTokenKind.FormatToken, "br");
+            EqualsKindAndValue(tokens[1], MarkupTokenKind.FormatVariable, "test");
+            EqualsKindAndValue(tokens[2], MarkupTokenKind.Text, "hello");
+        }
+
+        [Fact]
+        [Trait("Markup", "Lexer")]
+        public void FormatToken_WithVariable_Format_Text_FormatEnd()
+        {
+            var tokens = MarkupLinter.Lint("[~br:test,bold]hello[-bold]", out var diagnostics);
+
+            Assert.Empty(diagnostics);
+            Assert.Equal(5, tokens.Length);
+
+            EqualsKindAndValue(tokens[0], MarkupTokenKind.FormatToken, "br");
+            EqualsKindAndValue(tokens[1], MarkupTokenKind.FormatVariable, "test");
+            EqualsKindAndValue(tokens[2], MarkupTokenKind.FormatStart, "bold");
+            EqualsKindAndValue(tokens[3], MarkupTokenKind.Text, "hello");
+            EqualsKindAndValue(tokens[4], MarkupTokenKind.FormatEnd, "bold");
+        }
+
+        [Fact]
+        [Trait("Markup", "Diagnostics")]
+        public void Missing_End_Tag()
+        {
+            var tokens = MarkupLinter.Lint("[bold]hello", out var diagnostics);
+
+            Assert.Single(diagnostics);
+            Assert.Equal(2, tokens.Length);
+
+            EqualsKindAndValue(tokens[0], MarkupTokenKind.FormatStart, "bold");
+            EqualsKindAndValue(tokens[1], MarkupTokenKind.Text, "hello");
+
+            switch (diagnostics.First())
+            {
+                case MissingTag a when a.Position == MissingTag.TagPosition.End:
+                    Assert.Equal("bold", a.Tag);
+                    break;
+                default:
+                    Assert.True(false, "Missing tag should be at TagPosition End and with the tag <bold>");
+                    break;
+            }
+        }
+
 
     }
 }

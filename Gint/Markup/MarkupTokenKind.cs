@@ -6,11 +6,11 @@
         FormatStart,
         FormatEnd,
         FormatToken,
+        FormatVariable,
         NewLine,
         WhiteSpace,
 
         EndOfStream,
-        FormatVariable,
     }
 
 }

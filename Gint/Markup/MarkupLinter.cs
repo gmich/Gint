@@ -42,8 +42,6 @@ namespace Gint.Markup
                         break;
                     case MarkupTokenKind.NewLine:
                         break;
-                    case MarkupTokenKind.EndOfStream:
-                        break;
                 }
             }
 

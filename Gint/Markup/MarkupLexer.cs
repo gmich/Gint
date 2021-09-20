@@ -41,10 +41,11 @@ namespace Gint.Markup
             while (true)
             {
                 var token = lexer.Lex();
-                tokens.Add(token);
 
                 if (token.Kind == MarkupTokenKind.EndOfStream)
                     break;
+                
+                tokens.Add(token);
             }
             diagnostics = lexer.Diagnostics;
             return tokens;

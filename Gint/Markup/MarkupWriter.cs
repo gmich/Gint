@@ -20,6 +20,8 @@ namespace Gint.Markup
             }
 
             StartOfStream();
+            var formatTokens = new Stack<(string Token, string Variable)>();
+
 
             string GetVariableIfExists(int current)
             {
@@ -41,10 +43,17 @@ namespace Gint.Markup
                         break;
                     case MarkupTokenKind.FormatStart:
                         var var = GetVariableIfExists(i);
+                        formatTokens.Push((token.Value, var));
                         FormatStart(token.Value, var);
                         break;
                     case MarkupTokenKind.FormatEnd:
-                        FormatEnd(token.Value);
+                        if (string.IsNullOrEmpty(token.Value))
+                        {
+                            var (Token, Variable) = formatTokens.Pop();
+                            FormatEnd(Token);
+                        }
+                        else
+                            FormatEnd(token.Value);
                         break;
                     case MarkupTokenKind.FormatToken:
                         FormatToken(token.Value, GetVariableIfExists(i));
