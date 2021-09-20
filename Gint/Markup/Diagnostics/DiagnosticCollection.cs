@@ -44,5 +44,11 @@ namespace Gint.Markup
             var message = $"Missing end tag.";
             Report(new MissingTag(DiagnosticSeverity.Error, span, message, tag, MissingTag.TagPosition.End));
         }
+
+        internal void ReportEndTagsCannotHaveVariables(TextSpan span)
+        {
+            var message = $"End tags cannot have variables.";
+            Report(new EndTagWithVariable(DiagnosticSeverity.Warning, span, message));
+        }
     }
 }

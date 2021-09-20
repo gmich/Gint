@@ -216,6 +216,10 @@ namespace Gint.Markup
                         position++;
                         return;
                     case MarkupFormatConsts.FormatVariableStart:
+                        if (kind == MarkupTokenKind.FormatEnd)
+                        {
+                            Diagnostics.ReportEndTagsCannotHaveVariables(GetSpan());
+                        }
                         readingFormat = false;
                         readingVariable = true;
                         position++;

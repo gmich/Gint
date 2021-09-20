@@ -37,7 +37,7 @@ namespace Gint.Markup
             appliedFormats.Clear();
         }
 
-        protected override void FormatEnd(string tag, string variable)
+        protected override void FormatEnd(string tag)
         {
             formatFactory.GetFormat(tag).Remove();
             for (int i = appliedFormats.Count - 1; 0 <= i; i--)
@@ -57,7 +57,7 @@ namespace Gint.Markup
             format.Apply();
             appliedFormats.Add(format);
         }
-
+            
         protected override void FormatToken(string tag, string variable)
         {
             if (tag == "date")
