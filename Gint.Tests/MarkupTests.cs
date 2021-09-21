@@ -161,6 +161,111 @@ namespace Gint.Tests
             }
         }
 
+        [Fact]
+        [Trait("Markup", "Diagnostics")]
+        public void Missing_Start_Tag()
+        {
+            var tokens = MarkupLinter.Lint("[-bold]hello", out var diagnostics);
+
+            Assert.Single(diagnostics);
+            Assert.Equal(2, tokens.Length);
+
+            EqualsKindAndValue(tokens[0], MarkupTokenKind.FormatEnd, "bold");
+            EqualsKindAndValue(tokens[1], MarkupTokenKind.Text, "hello");
+
+            switch (diagnostics.First())
+            {
+                case MissingTag a when a.Position == MissingTag.TagPosition.Start:
+                    Assert.Equal("bold", a.Tag);
+                    break;
+                default:
+                    Assert.True(false, "Missing tag should be at TagPosition Start and with the tag <bold>");
+                    break;
+            }
+        }
+
+        [Fact]
+        [Trait("Markup", "Diagnostics")]
+        public void End_Tag_Should_Not_Have_Variable()
+        {
+            var tokens = MarkupLinter.Lint("[bold]hello[-bold:var]", out var diagnostics);
+
+            Assert.Single(diagnostics);
+            Assert.Equal(4, tokens.Length);
+
+            EqualsKindAndValue(tokens[0], MarkupTokenKind.FormatStart, "bold");
+            EqualsKindAndValue(tokens[1], MarkupTokenKind.Text, "hello");
+            EqualsKindAndValue(tokens[2], MarkupTokenKind.FormatEnd, "bold");
+            EqualsKindAndValue(tokens[3], MarkupTokenKind.FormatVariable, "var");
+
+            switch (diagnostics.First())
+            {
+                case EndTagWithVariable:
+                    break;
+                default:
+                    Assert.True(false, "Error should be of type <end tag with variable>.");
+                    break;
+            }
+        }
+
+        [Fact]
+        [Trait("Markup", "Diagnostics")]
+        public void Unterminated_Format()
+        {
+            var tokens = MarkupLinter.Lint("[bold]hello[-bold", out var diagnostics);
+
+            Assert.Single(diagnostics);
+            Assert.Equal(3, tokens.Length);
+
+            EqualsKindAndValue(tokens[0], MarkupTokenKind.FormatStart, "bold");
+            EqualsKindAndValue(tokens[1], MarkupTokenKind.Text, "hello");
+            EqualsKindAndValue(tokens[2], MarkupTokenKind.FormatEnd, "bold");
+
+            switch (diagnostics.First())
+            {
+                case UnterminatedFormat a:
+                    Assert.Equal("[-bold", a.Format);
+                    break;
+                default:
+                    Assert.True(false, "Error should be of type <unterminated format>.");
+                    break;
+            }
+        }
+
+        [Fact]
+        [Trait("Markup", "Diagnostics")]
+        public void Unterminated_Format_Variable()
+        {
+            var tokens = MarkupLinter.Lint("hello[bold:test", out var diagnostics);
+
+            Assert.Equal(2, diagnostics.Count());
+            Assert.Equal(3, tokens.Length);
+
+            EqualsKindAndValue(tokens[0], MarkupTokenKind.Text, "hello");
+            EqualsKindAndValue(tokens[1], MarkupTokenKind.FormatStart, "bold");
+            EqualsKindAndValue(tokens[2], MarkupTokenKind.FormatVariable, "test");
+
+            switch (diagnostics.First())
+            {
+                case UnterminatedFormatVariable a:
+                    Assert.Equal("test", a.Variable);
+                    break;
+                default:
+                    Assert.True(false, "Error should be of type <unterminated format variable>.");
+                    break;
+            }
+
+            switch (diagnostics.Last())
+            {
+                case MissingTag a when a.Position == MissingTag.TagPosition.End:
+                    Assert.Equal("bold", a.Tag);
+                    break;
+                default:
+                    Assert.True(false, "Missing tag should be at TagPosition End and with the tag <bold>");
+                    break;
+            }
+        }
+
 
     }
 }

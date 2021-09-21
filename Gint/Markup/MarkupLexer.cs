@@ -44,7 +44,7 @@ namespace Gint.Markup
 
                 if (token.Kind == MarkupTokenKind.EndOfStream)
                     break;
-                
+
                 tokens.Add(token);
             }
             diagnostics = lexer.Diagnostics;
@@ -121,7 +121,7 @@ namespace Gint.Markup
 
             if (!Current.HasValue)
             {
-                Diagnostics.ReportNullAtStartOfFormat(GetSpan());
+                Diagnostics.ReportUnterminatedFormatVariable(GetSpan(), GetText());
                 readingVariable = false;
                 return;
             }
@@ -165,7 +165,7 @@ namespace Gint.Markup
             }
 
             readingVariable = false;
-            Diagnostics.ReportUnterminatedFormat(GetSpan(), GetText());
+            Diagnostics.ReportUnterminatedFormatVariable(GetSpan(), GetText());
         }
 
         private TextSpan GetSpan()
@@ -185,7 +185,7 @@ namespace Gint.Markup
         {
             if (!Current.HasValue)
             {
-                Diagnostics.ReportNullAtStartOfFormat(GetSpan());
+                Diagnostics.ReportUnterminatedFormat(GetSpan(), GetText());
                 return;
             }
 

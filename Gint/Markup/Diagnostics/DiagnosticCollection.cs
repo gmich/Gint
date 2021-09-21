@@ -20,12 +20,6 @@ namespace Gint.Markup
             diagnostics.Add(diagnostic);
         }
 
-        internal void ReportNullAtStartOfFormat(TextSpan span)
-        {
-            var message = $"Unterminated format. Will be treated as an empty keyword";
-            Report(new NullAtStartOfFormat(DiagnosticSeverity.Warning, span, message));
-        }
-
         internal void ReportUnterminatedFormat(TextSpan span, string format)
         {
             var message = $"Unterminated format. Will be treated as a keyword";
@@ -49,6 +43,12 @@ namespace Gint.Markup
         {
             var message = $"End tags cannot have variables.";
             Report(new EndTagWithVariable(DiagnosticSeverity.Warning, span, message));
+        }
+
+        internal void ReportUnterminatedFormatVariable(TextSpan span, string variable)
+        {
+            var message = $"Unterminated format variable.";
+            Report(new UnterminatedFormatVariable(DiagnosticSeverity.Error, span, message, variable));
         }
     }
 }
