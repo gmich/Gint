@@ -8,17 +8,15 @@
             return document;
         }
 
-        public static MarkupDocument WriteWithinRedFontWithWhiteBackground(this MarkupDocument document, string text)
+        public static MarkupDocument Timestamp(this MarkupDocument document)
         {
-            var format = document.StartFormat(new[] { "fg.red", "bg.white" });
-            document.Write(text);
-            format.Close();
+            document.FormatTokenWithVariable("date", "HH:mm:ss");
             return document;
         }
 
-        public static MarkupDocument WriteDate(this MarkupDocument document)
+        public static MarkupDocument Whitespace(this MarkupDocument document)
         {
-            document.FormatTokenWithVariable("date", "HH:mm tt");
+            document.Write(" ");
             return document;
         }
 

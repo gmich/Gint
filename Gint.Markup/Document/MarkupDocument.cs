@@ -21,7 +21,7 @@ namespace Gint.Markup
     {
         private readonly StringBuilder buffer = new();
 
-        private string EscapeVariable(string variable)
+        private static string EscapeVariable(string variable)
         {
             var tempBuffer = new StringBuilder();
             foreach (var c in variable)
@@ -86,7 +86,6 @@ namespace Gint.Markup
             var closeFormatWithTag = $"{MarkupFormatConsts.FormatTagOpen}{MarkupFormatConsts.FormatEnd}{token}{MarkupFormatConsts.FormatTagClose}";
             buffer.Append(closeFormatWithTag);
         }
-
 
         public void Write(string text)
         {

@@ -9,7 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gint.Sample", "Gint.Sample\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gint.Tests", "Gint.Tests\Gint.Tests.csproj", "{4217EAB8-A54E-4BEC-B464-66D408BAE002}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gint.Benchmarks", "Gint.Benchmarks\Gint.Benchmarks.csproj", "{ABD8C457-7C11-49D0-B8BE-28E7CD0E4CE9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gint.Benchmarks", "Gint.Benchmarks\Gint.Benchmarks.csproj", "{ABD8C457-7C11-49D0-B8BE-28E7CD0E4CE9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gint.Pipes", "Gint.Pipes\Gint.Pipes.csproj", "{3AC19BD0-4931-47F3-8155-0E647A549089}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gint.Markup", "Gint.Markup\Gint.Markup.csproj", "{81EBB19A-7BD5-4CC6-932B-31C644528561}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +37,14 @@ Global
 		{ABD8C457-7C11-49D0-B8BE-28E7CD0E4CE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ABD8C457-7C11-49D0-B8BE-28E7CD0E4CE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ABD8C457-7C11-49D0-B8BE-28E7CD0E4CE9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3AC19BD0-4931-47F3-8155-0E647A549089}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AC19BD0-4931-47F3-8155-0E647A549089}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3AC19BD0-4931-47F3-8155-0E647A549089}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AC19BD0-4931-47F3-8155-0E647A549089}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81EBB19A-7BD5-4CC6-932B-31C644528561}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81EBB19A-7BD5-4CC6-932B-31C644528561}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81EBB19A-7BD5-4CC6-932B-31C644528561}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81EBB19A-7BD5-4CC6-932B-31C644528561}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

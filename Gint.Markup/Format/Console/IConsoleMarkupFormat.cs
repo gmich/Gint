@@ -1,9 +1,9 @@
 ﻿namespace Gint.Markup.Format
 {
-    public interface IMarkupFormat
+    public interface IConsoleMarkupFormat
     {
         string Tag { get; }
-        void Apply();
+        void Apply(string variable);
         void Remove();
     }
 

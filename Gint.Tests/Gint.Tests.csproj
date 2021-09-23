@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Gint.Markup\Gint.Markup.csproj" />
     <ProjectReference Include="..\Gint\Gint.csproj" />
   </ItemGroup>
 

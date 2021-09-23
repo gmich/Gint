@@ -8,7 +8,7 @@ namespace Gint.Markup
     {
 
         private readonly static Format.ConsoleMarkupWriterFormatFactory formatFactory = new();
-        private readonly List<Format.IMarkupFormat> appliedFormats = new();
+        private readonly List<Format.IConsoleMarkupFormat> appliedFormats = new();
 
         protected override bool OnLintingError(DiagnosticCollection diagnostics, string text)
         {
@@ -54,21 +54,16 @@ namespace Gint.Markup
         protected override void FormatStart(string tag, string variable)
         {
             var format = formatFactory.GetFormat(tag);
-            format.Apply();
+            format.Apply(variable);
             appliedFormats.Add(format);
         }
             
         protected override void FormatToken(string tag, string variable)
         {
-            if (tag == "date")
-            {
-                Console.Write(DateTime.UtcNow.ToString(variable));
-            }
-            else
-            {
+   
                 var format = formatFactory.GetFormat(tag);
-                format.Apply();
-            }
+                format.Apply(variable);
+            
         }
 
         protected override void NewLine()

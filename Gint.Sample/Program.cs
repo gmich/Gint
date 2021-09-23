@@ -1,5 +1,4 @@
-﻿using Gint.Markup;
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -7,50 +6,9 @@ namespace Gint.Sample
 {
     internal class Program
     {
-        static void Markup()
-        {
-            var text = @"
-[fg.green]hello world[-fg.green]!!!!!!
-
-[~br]
-
-[fg.green]hello world[-]!!!!!!
-
-[~br]
-
-[fg.red,bg.white]hello world[-]!!!!!![-fg.red]
-
-[~br]
-
-[~date:HH:mm tt] hello world!!!!!!
-
-[~br]
-
-[[[~date:HH:mm]]] hello world!!!!!!
-";
-            Console.WriteLine(text);
-            new Markup.ConsoleMarkupWriter().Print(text);
-
-            var document = new MarkupDocument();
-            document.Write("test");
-            document.NewLine();
-            document.WriteWithinRedFontWithWhiteBackground("Hello world!!!");
-            document.NewLine();
-            document.WriteDate();
-            document.NewLine();
-            var fgred= document.StartFormat("fg.red");
-            document.Write("red font");
-            fgred.Close();
-
-            var txt = document.Document;
-            Console.WriteLine(txt);
-            new Markup.ConsoleMarkupWriter().Print(txt);
-        }
 
         static async Task Main()
-        {
-            Markup();
-
+        { 
             var consoleOutputWriter = new ConsoleOutputWriter();
 
             var runtime = new CommandRuntime(

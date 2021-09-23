@@ -2,11 +2,11 @@
 
 namespace Gint.Markup.Format
 {
-    internal class NewLineFormat : IMarkupFormat
+    internal class NewLineFormat : IConsoleMarkupFormat
     {
         public string Tag { get; } = "br";
 
-        public void Apply()
+        public void Apply(string variable)
         {
             Console.WriteLine();
         }
