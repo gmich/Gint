@@ -3,7 +3,7 @@
     public class PipeOptions
     {
         /// <summary>
-        /// Should be power of 2 since it's for a byte array
+        /// Should be 8^x since it's for a byte array
         /// </summary>
         public int PreferredBufferSegmentSize { get; init; }
 

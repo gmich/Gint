@@ -64,6 +64,7 @@ namespace Gint.Pipes
         /// <param name="sizeHint">minimum size to fit the new bytes</param>
         private void ExtendBuffer(int sizeHint)
         {
+            //no need to be based on 8 because ArrayPool takes care of that
             var newSize = Math.Max(buffer.Length + pipeOptions.PreferredBufferSegmentSize, sizeHint);
 
             var newBuffer = ArrayPool<byte>.Shared.Rent(newSize);
