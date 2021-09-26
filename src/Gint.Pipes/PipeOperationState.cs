@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace Gint.Pipes
 {
-    internal struct PipeOperationState
+    internal class PipeOperationState
     {
         private State state;
 

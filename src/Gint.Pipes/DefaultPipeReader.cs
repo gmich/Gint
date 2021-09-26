@@ -12,15 +12,24 @@ namespace Gint.Pipes
             this.pipe = pipe;
         }
 
-        public PipeReadResult Read()
+        public PipeReadResult Read(bool advanceCursor = true)
         {
             return pipe.Read();
         }
 
-        public Task<PipeReadResult> ReadAsync(CancellationToken cancellationToken)
+        public PipeReadResult Read(int offset, int count)
         {
-            return pipe.ReadAsync(cancellationToken);
+            return pipe.Read(offset, count);
+        }
 
+        public Task<PipeReadResult> ReadAsync(CancellationToken cancellationToken, bool advanceCursor = true)
+        {
+            return pipe.ReadAsync(cancellationToken, advanceCursor);
+        }
+
+        public Task<PipeReadResult> ReadAsync(int offset, int count, CancellationToken cancellationToken)
+        {
+            return pipe.ReadAsync(offset, count, cancellationToken);
         }
     }
 }
