@@ -2,7 +2,7 @@
 
 namespace Gint
 {
-    public class CommandOutput : ICommandOutput
+    public struct CommandOutput : ICommandOutput
     {
         public CommandOutput(CommandState state)
         {
