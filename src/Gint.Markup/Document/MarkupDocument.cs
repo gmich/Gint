@@ -36,14 +36,14 @@ namespace Gint.Markup
             return tempBuffer.ToString();
         }
 
-        public CloseFormat StartFormatWithVariable(string token, string variable)
+        public CloseFormat AddFormatWithVariable(string token, string variable)
         {
             var newtoken = $"{token}{MarkupFormatConsts.FormatVariableStart}{EscapeVariable(variable)}";
-            return StartFormat(newtoken);
+            return AddFormat(newtoken);
         }
 
 
-        public CloseFormat StartFormat(string token)
+        public CloseFormat AddFormat(string token)
         {
             var formatWithTag = $"{MarkupFormatConsts.FormatTagOpen}{token}{MarkupFormatConsts.FormatTagClose}";
             buffer.Append(formatWithTag);
@@ -54,7 +54,7 @@ namespace Gint.Markup
             });
         }
 
-        public CloseFormat StartFormat(string[] tokens)
+        public CloseFormat AddFormat(string[] tokens)
         {
             var formatWithTag = $"{MarkupFormatConsts.FormatTagOpen}{tokens.Aggregate((fst, snd) => $"{fst}{MarkupFormatConsts.FormatSeparator}{snd}")}{MarkupFormatConsts.FormatTagClose}";
             buffer.Append(formatWithTag);
@@ -69,16 +69,16 @@ namespace Gint.Markup
             });
         }
 
-        public void FormatToken(string token)
+        public void AddFormatToken(string token)
         {
             var formatWithTag = $"{MarkupFormatConsts.FormatTagOpen}{MarkupFormatConsts.FormatToken}{token}{MarkupFormatConsts.FormatTagClose}";
             buffer.Append(formatWithTag);
         }
 
-        public void FormatTokenWithVariable(string token, string variable)
+        public void AddFormatTokenWithVariable(string token, string variable)
         {
             var newtoken = $"{token}{MarkupFormatConsts.FormatVariableStart}{EscapeVariable(variable)}";
-            FormatToken(newtoken);
+            AddFormatToken(newtoken);
         }
 
         public void CloseFormat(string token)
@@ -86,6 +86,12 @@ namespace Gint.Markup
             var closeFormatWithTag = $"{MarkupFormatConsts.FormatTagOpen}{MarkupFormatConsts.FormatEnd}{token}{MarkupFormatConsts.FormatTagClose}";
             buffer.Append(closeFormatWithTag);
         }
+
+        public void CloseFormat()
+        {
+            CloseFormat(string.Empty);
+        }
+
 
         public void Write(string text)
         {

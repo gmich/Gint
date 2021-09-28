@@ -8,12 +8,12 @@ namespace Gint.Markup
         {
             Console.WriteLine("Markup Demo");
             var document = new MarkupDocument();
-            var fgred = document.StartFormat("fg.red");
+            var fgred = document.AddFormat("fg.red");
             document.Write("Hello markup");
             fgred.Close();
 
             document.NewLine().Timestamp().Whitespace();
-            var fgred_bgwhite = document.StartFormat(new[] { "fg.red", "bg.white" });
+            var fgred_bgwhite = document.AddFormat(new[] { "fg.red", "bg.white" });
             document.Write("Lorem Ipsum");
             fgred_bgwhite.Close();
             document.NewLine();

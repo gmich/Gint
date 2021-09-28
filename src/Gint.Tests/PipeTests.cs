@@ -18,13 +18,14 @@ namespace Gint.Tests
             this.output = output;
         }
 
+        private IPipe GetPipe(PipeOptions options = null) => new GintPipe();
 
         [Theory]
         [InlineData("hello world!")]
         [InlineData("αβγδέζηθ")]
         public void Pipe_Simple_Write_Read(string text)
         {
-            var pipe = new GintPipe();
+            var pipe = GetPipe();
 
             pipe.Write(text.ToUTF8EncodedByteArray());
 
@@ -38,7 +39,7 @@ namespace Gint.Tests
         [InlineData("hello world", "hello again, world")]
         public void Pipe_Write_Read_AdvanceCursor(string first, string second)
         {
-            var pipe = new GintPipe();
+            var pipe = GetPipe();
 
             void WriteAndRead(string text)
             {
@@ -58,7 +59,7 @@ namespace Gint.Tests
         [InlineData("hello world", "hello again, world")]
         public void Pipe_Write_Read_Without_AdvancingCursor(string first, string second)
         {
-            var pipe = new GintPipe();
+            var pipe = GetPipe();
 
             void WriteAndRead(string text)
             {
@@ -78,7 +79,7 @@ namespace Gint.Tests
         [InlineData("small", "really large text that will cause a buffer extension...")]
         public void Pipe_Write_With_Advance_And_Buffer_Resize(string first, string second)
         {
-            var pipe = new GintPipe(new PipeOptions { PreferredBufferSegmentSize = 16 });
+            var pipe = GetPipe(new PipeOptions { PreferredBufferSegmentSize = 16 });
 
             void WriteAndRead(string text)
             {
@@ -98,7 +99,7 @@ namespace Gint.Tests
         [InlineData("small", "really large text that will cause a buffer extension...")]
         public void Pipe_Write_Without_Advance_And_Buffer_Resize(string first, string second)
         {
-            var pipe = new GintPipe(new PipeOptions { PreferredBufferSegmentSize = 16 });
+            var pipe = GetPipe(new PipeOptions { PreferredBufferSegmentSize = 16 });
 
             void WriteAndRead(string text)
             {
@@ -115,10 +116,27 @@ namespace Gint.Tests
         }
 
         [Theory]
+        [InlineData("hello world")]
+        public void Pipe_Write_And_Read_From_Stream(string text)
+        {
+            var pipe = GetPipe();
+
+            var bytesToWrite = text.ToUTF8EncodedByteArray();
+            pipe.Write(bytesToWrite);
+
+            var stream = pipe.AsStream();
+            var buffer = new byte[stream.Length];
+            stream.Read(buffer, 0, buffer.Length);
+            var streamString = buffer.ToUTF8String();
+
+            Assert.Equal(text, streamString);
+        }
+
+        [Theory]
         [InlineData("hello", " world")]
         public void Pipe_Simple_Write_And_Seek(string first, string second)
         {
-            var pipe = new GintPipe();
+            var pipe = GetPipe();
 
             pipe.Write(first.ToUTF8EncodedByteArray());
             pipe.Write(second.ToUTF8EncodedByteArray());
@@ -136,7 +154,7 @@ namespace Gint.Tests
         [InlineData("small", "really large text that will cause a buffer extension...")]
         public void Pipe_Write_And_Seek_With_Buffer_resize(string first, string second)
         {
-            var pipe = new GintPipe(new PipeOptions { PreferredBufferSegmentSize = 16 });
+            var pipe = GetPipe(new PipeOptions { PreferredBufferSegmentSize = 16 });
 
             pipe.Write(first.ToUTF8EncodedByteArray());
             pipe.Write(second.ToUTF8EncodedByteArray());
@@ -155,7 +173,7 @@ namespace Gint.Tests
         [InlineData("hello", " world")]
         public void Pipe_Read_To_End_And_Seek(string first, string second)
         {
-            var pipe = new GintPipe();
+            var pipe = GetPipe();
 
             pipe.Write(first.ToUTF8EncodedByteArray());
             pipe.Write(second.ToUTF8EncodedByteArray());

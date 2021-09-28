@@ -11,5 +11,6 @@ namespace Gint.Pipes
         void Flush();
         void Complete();
         Stream AsStream();
+        int Length { get; }
     }
 }

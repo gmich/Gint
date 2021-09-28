@@ -43,6 +43,7 @@ namespace Gint.Pipes
         private PipeReadResult ReadResult(byte[] readbuffer) => new PipeReadResult(readbuffer, pipeOperationState.IsCancelled, pipeOperationState.IsCompleted);
 
         private int BytesRemainingInBuffer => buffer.Length - bytesBuffered;
+        public int Length => WriteCursor;
 
         public void Flush()
         {
