@@ -12,13 +12,13 @@ namespace Gint.Markup
             document.Write("Hello markup");
             fgred.Close();
 
-            document.NewLine().Timestamp().Whitespace();
+            document.WriteLine().Timestamp().Whitespace();
             var fgred_bgwhite = document.AddFormat(new[] { "fg.red", "bg.white" });
             document.Write("Lorem Ipsum");
             fgred_bgwhite.Close();
-            document.NewLine();
+            document.WriteLine();
 
-            var txt = document.Document;
+            var txt = document.Buffer;
             Console.WriteLine(txt);
             Console.WriteLine();
             new ConsoleMarkupWriter().Print(txt);

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Gint.Markup;
+using System;
 using System.Text;
 
 namespace Gint
@@ -34,7 +35,7 @@ namespace Gint
         public ExecutionBuffer Buffer { get; }
     }
 
-    internal class BufferOutputWriter : OutputWriter
+    internal class BufferOutputWriter : MarkupWriter
     {
         private readonly ExecutionBuffer buffer;
         public event EventHandler<BufferOutputEventArgs> OnBufferStreamEnd;
@@ -54,29 +55,58 @@ namespace Gint
             builderWithoutFormat.Clear();
         }
 
-        protected override void Format(OutputSyntaxToken token)
-        {
-            rawBuilder.Append(token.Text);
-        }
-
-        protected override void NewLine(OutputSyntaxToken token)
-        {
-            builderWithoutFormat.AppendLine();
-            rawBuilder.AppendLine();
-        }
-
-        protected override void PrintText(OutputSyntaxToken token)
-        {
-            builderWithoutFormat.AppendLine(token.Value);
-            rawBuilder.Append(token.Value);
-        }
-
-        protected override void EndOfStream(OutputSyntaxToken token)
-        {
-            OnBufferStreamEnd?.Invoke(this, new BufferOutputEventArgs(buffer));
-        }
-
         protected override void StartOfStream()
+        {
+        }
+
+        protected override bool OnLintingError(Markup.DiagnosticCollection diagnostics, string text)
+        {
+            return true;
+        }
+
+        protected override void Bind(MarkupSyntaxToken[] tokens, string text, Markup.DiagnosticCollection diagnostics)
+        {
+            foreach (var token in tokens)
+            {
+                if (token.Kind == MarkupTokenKind.Text
+                || token.Kind == MarkupTokenKind.WhiteSpace
+                || token.Kind == MarkupTokenKind.NewLine)
+                {
+                    builderWithoutFormat.Append(token.Text);
+                    rawBuilder.Append(token.Text);
+                }
+                else
+                {
+                    rawBuilder.Append(token.Text);
+                }
+            }
+        }
+
+        protected override void EndOfStream()
+        {
+        }
+
+        protected override void FormatStart(string tag, string variable)
+        {
+        }
+
+        protected override void FormatEnd(string tag)
+        {
+        }
+
+        protected override void FormatToken(string tag, string variable)
+        {
+        }
+
+        protected override void NewLine()
+        {
+        }
+
+        protected override void PrintWhitespace(string whitespace)
+        {
+        }
+
+        protected override void PrintText(string text)
         {
         }
     }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Gint.Markup;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -34,9 +35,9 @@ namespace Gint
 
                     ctx.Info.Write("Showing bind / parse trees: ");
                     if (Options.LogBindTree)
-                        ctx.Info.WriteFormatted("✓", FormatType.GreenForeground);
+                        ctx.Info.WithForegroundColor().Green().Write("✓");
                     else
-                        ctx.Info.WriteFormatted("x", FormatType.RedForeground);
+                        ctx.Info.WithForegroundColor().Red().Write("x");
 
                     return CommandOutput.SuccessfulTask;
                 });

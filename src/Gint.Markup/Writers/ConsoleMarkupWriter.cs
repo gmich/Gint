@@ -85,6 +85,10 @@ namespace Gint.Markup
         {
             appliedFormats.Clear();
         }
+
+        public override void Flush()
+        {
+        }
     }
 
 }

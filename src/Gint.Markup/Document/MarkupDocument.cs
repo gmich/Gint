@@ -92,7 +92,6 @@ namespace Gint.Markup
             CloseFormat(string.Empty);
         }
 
-
         public void Write(string text)
         {
             var tempBuffer = new StringBuilder();
@@ -108,9 +107,9 @@ namespace Gint.Markup
             buffer.Append(tempBuffer);
         }
 
-        public string Document => buffer.ToString();
+        public string Buffer => buffer.ToString();
 
-        public override string ToString() => Document;
+        public override string ToString() => Buffer;
 
         public void Clear() => buffer.Clear();
 

@@ -83,6 +83,8 @@ namespace Gint.Markup
         protected abstract void NewLine();
         protected abstract void PrintWhitespace(string whitespace);
         protected abstract void PrintText(string text);
+
+        public abstract void Flush();
     }
 
 }
