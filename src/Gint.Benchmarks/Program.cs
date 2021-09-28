@@ -12,7 +12,8 @@ namespace Gint.Benchmarks
     {
         static void Main(string[] args)
         {
-            var summary = BenchmarkRunner.Run<MarkupBenchmark>();
+            //var markupSummary = BenchmarkRunner.Run<MarkupBenchmark>();
+            var pipesSummary = BenchmarkRunner.Run<PipesBenchmark>();
             Console.ReadLine();
         }
     }

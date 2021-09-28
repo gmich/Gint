@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Gint.Markup\Gint.Markup.csproj" />
+    <ProjectReference Include="..\Gint.Pipes\Gint.Pipes.csproj" />
     <ProjectReference Include="..\Gint\Gint.csproj" />
   </ItemGroup>
 

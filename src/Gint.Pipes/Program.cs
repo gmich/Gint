@@ -9,7 +9,7 @@ namespace Gint.Pipes
             var pipe = new GintPipe(new PipeOptions { PreferredBufferSegmentSize = 8 });
 
             var bytesToWrite = "hello world".ToUTF8EncodedByteArray();
-            pipe.Write(bytesToWrite);
+            pipe.WriteUnsafe(bytesToWrite);
 
             var bytesRead = pipe.Read(advanceCursor: false);
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace Gint.Pipes
 {
@@ -9,5 +10,6 @@ namespace Gint.Pipes
 
         void Flush();
         void Complete();
+        Stream AsStream();
     }
 }

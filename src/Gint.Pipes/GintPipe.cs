@@ -2,7 +2,9 @@
 using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -79,14 +81,38 @@ namespace Gint.Pipes
         {
             lock (sync)
             {
-                pipeOperationState.BeginWrite();
+                if (pipeOperationState.IsCancelled) return;
 
+                pipeOperationState.BeginWrite();
+                var ptr = Marshal.UnsafeAddrOfPinnedArrayElement(buffer, 0);
                 if (buffer.Length <= (WriteCursor + bytes.Length))
                 {
                     ExtendBuffer(bytes.Length);
                 }
 
                 Buffer.BlockCopy(bytes, 0, buffer, WriteCursor, bytes.Length);
+                bytesBuffered += bytes.Length;
+
+                pipeOperationState.EndWrite();
+            }
+        }
+
+        public unsafe void WriteUnsafe(byte[] bytes)
+        {
+            lock (sync)
+            {
+                if (pipeOperationState.IsCancelled) return;
+
+                pipeOperationState.BeginWrite();
+                if (buffer.Length <= (WriteCursor + bytes.Length))
+                {
+                    ExtendBuffer(bytes.Length);
+                }
+
+                var bufferPointer = Marshal.UnsafeAddrOfPinnedArrayElement(buffer, WriteCursor);
+                var bytesPointer = Marshal.UnsafeAddrOfPinnedArrayElement(bytes, 0);
+                Buffer.MemoryCopy(bytesPointer.ToPointer(), bufferPointer.ToPointer(), bytes.Length, bytes.Length);
+
                 bytesBuffered += bytes.Length;
 
                 pipeOperationState.EndWrite();
@@ -118,6 +144,35 @@ namespace Gint.Pipes
                 return ReadResult(readBuffer);
             }
         }
+
+        public unsafe PipeReadResult ReadUnsafe(bool advanceCursor = true)
+        {
+            lock (sync)
+            {
+                if (pipeOperationState.IsCancelled)
+                {
+                    return ReadResult(new byte[0]);
+                }
+
+                pipeOperationState.BeginRead();
+
+                var bytesToRead = bytesBuffered - bytesConsumed;
+                byte[] readBuffer = new byte[bytesToRead];
+
+                var bufferPointer = Marshal.UnsafeAddrOfPinnedArrayElement(buffer, ReadCursor);
+                var bytesPointer = Marshal.UnsafeAddrOfPinnedArrayElement(readBuffer, 0);
+                Buffer.MemoryCopy(bufferPointer.ToPointer(), bytesPointer.ToPointer(), readBuffer.Length, readBuffer.Length);
+
+                bytesConsumed += bytesToRead;
+
+                if (advanceCursor) AdvanceReadCursor(bytesToRead);
+
+                pipeOperationState.EndRead();
+
+                return ReadResult(readBuffer);
+            }
+        }
+
 
         /// <summary>
         /// Move the read cursor forward so the write cursor can re-write the readen blocks and avoid a buffer resize
@@ -191,6 +246,12 @@ namespace Gint.Pipes
             }
             var readRes = Read(offset, count);
             return Task.FromResult(readRes);
+        }
+
+        public Stream AsStream()
+        {
+            var readRes = Read(advanceCursor: false);
+            return new MemoryStream(readRes.Buffer);
         }
 
         #region Dispose
