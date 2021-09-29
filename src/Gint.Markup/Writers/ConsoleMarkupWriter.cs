@@ -53,6 +53,7 @@ namespace Gint.Markup
                 {
                     format.Remove();
                     appliedFormats.Remove(format);
+                    return;
                 }
             }
         }
@@ -66,10 +67,8 @@ namespace Gint.Markup
 
         protected override void FormatToken(string tag, string variable)
         {
-
             var format = formatFactory.GetFormat(tag);
             format.Apply(variable);
-
         }
 
         protected override void NewLine()
