@@ -6,6 +6,12 @@ namespace Gint.Markup
 
     public class ConsoleMarkupWriter : MarkupWriter
     {
+        public bool UseNewLineCharacterToPrintLines { get; set; }
+
+        public ConsoleMarkupWriter(bool useNewLineCharacterToPrintLines = true)
+        {
+            UseNewLineCharacterToPrintLines = useNewLineCharacterToPrintLines;
+        }
 
         private readonly static Format.ConsoleMarkupWriterFormatFactory formatFactory = new();
         private readonly List<Format.IConsoleMarkupFormat> appliedFormats = new();
@@ -57,18 +63,19 @@ namespace Gint.Markup
             format.Apply(variable);
             appliedFormats.Add(format);
         }
-            
+
         protected override void FormatToken(string tag, string variable)
         {
-   
-                var format = formatFactory.GetFormat(tag);
-                format.Apply(variable);
-            
+
+            var format = formatFactory.GetFormat(tag);
+            format.Apply(variable);
+
         }
 
         protected override void NewLine()
         {
-            //Console.WriteLine();
+            if (UseNewLineCharacterToPrintLines)
+                Console.WriteLine();
         }
 
         protected override void PrintText(string text)

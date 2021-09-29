@@ -2,6 +2,7 @@
 using System.Text;
 using System.Threading.Tasks;
 using System.Linq;
+using Gint.Markup;
 
 namespace Gint
 {
@@ -61,10 +62,12 @@ namespace Gint
             commandExecutionContext.Error
                 .Write("error: ")
                 .Write(prefix)
-                .WriteFormatted(error, FormatType.RedForeground)
+                .WithForegroundColor().Red()
+                .Write(error)
                 .Write(suffix)
-                .WriteLine()
-                .Flush();
+                .WriteLine();
+
+            commandExecutionContext.Error.Flush();
         }
 
         private void EvaluateNode(BoundNode node, CommandScope scope)

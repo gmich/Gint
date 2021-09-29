@@ -38,7 +38,6 @@ namespace Gint
     internal class BufferOutputWriter : MarkupWriter
     {
         private readonly ExecutionBuffer buffer;
-        public event EventHandler<BufferOutputEventArgs> OnBufferStreamEnd;
         private readonly StringBuilder rawBuilder = new StringBuilder();
         private readonly StringBuilder builderWithoutFormat = new StringBuilder();
 

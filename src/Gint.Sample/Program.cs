@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Gint.Markup;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -9,7 +10,7 @@ namespace Gint.Sample
 
         static async Task Main()
         { 
-            var consoleOutputWriter = new ConsoleOutputWriter();
+            var consoleOutputWriter = new ConsoleMarkupWriter();
 
             var runtime = new CommandRuntime(
                 commandRegistry: CommandRegistry.Empty,
@@ -42,9 +43,9 @@ namespace Gint.Sample
             {
                 //print prompt
                 runtime.Options.Out
-                    .Format(FormatType.GreenForeground)
-                    .Write($"{Environment.MachineName} » ")
-                    .Flush();
+                    .WithForegroundColor().Green()
+                    .Write($"{Environment.MachineName} » ");
+                runtime.Options.Out.Flush();
 
                 await runtime.Run(Console.ReadLine());
             }

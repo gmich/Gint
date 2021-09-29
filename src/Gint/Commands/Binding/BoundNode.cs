@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Gint.Markup;
 
 namespace Gint
 {
@@ -64,6 +65,8 @@ namespace Gint
         {
             var isToConsole = writer == Console.Out;
             Out @out = null;
+            FluentDocument doc = null;
+
             if (writer is OutTextWriterAdapter o)
                 @out = o.Out;
 
@@ -71,14 +74,19 @@ namespace Gint
 
             if (isToConsole)
                 Console.ForegroundColor = ConsoleColor.DarkGray;
-            @out?.Format(FormatType.DarkGrayForeground);
+            doc = @out?.WithForegroundColor().DarkGray();
 
             writer.Write(indent);
             writer.Write(marker);
 
+            doc?.End();
             if (isToConsole)
                 Console.ForegroundColor = (node is BoundNode) ? ConsoleColor.Cyan : ConsoleColor.Yellow;
-            @out?.Format((node is BoundNode) ? FormatType.CyanForeground : FormatType.YellowForeground);
+
+            if (node is BoundNode)
+                doc = @out?.WithForegroundColor().Cyan();
+            else
+                doc = @out?.WithForegroundColor().Yellow();
 
             var text = GetText(node);
             writer.Write(text);
@@ -93,7 +101,9 @@ namespace Gint
                 {
                     if (isToConsole)
                         Console.ForegroundColor = ConsoleColor.DarkGray;
-                    @out?.Format(FormatType.DarkGrayForeground);
+
+                    doc?.End();
+                    doc = @out?.WithForegroundColor().DarkGray();
 
                     writer.Write(",");
                 }
@@ -102,26 +112,30 @@ namespace Gint
 
                 if (isToConsole)
                     Console.ForegroundColor = ConsoleColor.Yellow;
-                @out?.Format(FormatType.YellowForeground);
+
+                doc?.End();
+                doc = @out?.WithForegroundColor().Yellow();
 
                 writer.Write(p.Name);
 
                 if (isToConsole)
                     Console.ForegroundColor = ConsoleColor.DarkGray;
-                @out?.Format(FormatType.DarkGrayForeground);
+                doc?.End();
+                doc = @out?.WithForegroundColor().DarkGray();
 
                 writer.Write(" = ");
 
                 if (isToConsole)
                     Console.ForegroundColor = ConsoleColor.DarkYellow;
-                @out?.Format(FormatType.DarkYellowForeground);
+                doc?.End();
+                doc = @out?.WithForegroundColor().DarkYellow();
 
                 writer.Write(p.Value);
             }
 
             if (isToConsole)
                 Console.ResetColor();
-            @out?.ClearFormat();
+            doc?.End();
 
             writer.WriteLine();
 

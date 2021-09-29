@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Gint.Markup;
 
 namespace Gint
 {
@@ -62,6 +63,7 @@ namespace Gint
         {
             var isToConsole = writer == Console.Out;
             Out @out = null;
+            FluentDocument doc = null;
             if (writer is OutTextWriterAdapter o)
                 @out = o.Out;
 
@@ -69,14 +71,19 @@ namespace Gint
 
             if (isToConsole)
                 Console.ForegroundColor = ConsoleColor.DarkGray;
-            @out?.Format(FormatType.DarkGrayForeground);
+            doc = @out?.WithForegroundColor().DarkGray();
 
             writer.Write(indent);
             writer.Write(marker);
 
+            doc?.End();
             if (isToConsole)
                 Console.ForegroundColor = node is CommandSyntaxToken ? ConsoleColor.Yellow : ConsoleColor.Cyan;
-            @out?.Format(node is CommandSyntaxToken ? FormatType.YellowForeground : FormatType.CyanForeground);
+
+            if (node is CommandSyntaxToken)
+                doc = @out?.WithForegroundColor().Yellow();
+            else
+                doc = @out?.WithForegroundColor().Cyan();
 
 
             writer.Write(node.Kind);
@@ -89,7 +96,7 @@ namespace Gint
 
             if (isToConsole)
                 Console.ResetColor();
-            @out?.ClearFormat();
+            doc?.End();
 
             writer.WriteLine();
 

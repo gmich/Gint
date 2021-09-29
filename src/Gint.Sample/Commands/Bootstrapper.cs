@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Gint.Markup;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,7 +18,7 @@ namespace Gint.Sample
                         if (input.Options.Contains("-c"))
                         {
                             ctx.OutStream.Write("CPU count: ")
-                            .WriteFormatted($"{Environment.ProcessorCount}", FormatType.DarkGrayForeground);
+                            .WithForegroundColor().DarkGray().Write($"{Environment.ProcessorCount}");
                         }
                         else
                             ctx.OutStream.Write("CPU utilities");

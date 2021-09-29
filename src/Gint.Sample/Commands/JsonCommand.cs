@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Gint.Markup;
+using System;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -28,7 +29,8 @@ namespace Gint.Sample
                 catch (Exception ex)
                 {
                     ctx.Error
-                        .WriteFormatted($"Json reader exception", FormatType.RedForeground)
+                        .WithForegroundColor().Red()
+                        .Write($"Json reader exception")
                         .WriteLine()
                         .Write($"JSON: {jsonToParse}")
                         .WriteLine();

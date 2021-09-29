@@ -92,7 +92,7 @@ namespace Gint.Markup
             CloseFormat(string.Empty);
         }
 
-        public void Write(string text)
+        public MarkupDocument Write(string text)
         {
             var tempBuffer = new StringBuilder();
             foreach (var c in text)
@@ -105,6 +105,13 @@ namespace Gint.Markup
                 }
             }
             buffer.Append(tempBuffer);
+            return this;
+        }
+
+        public MarkupDocument WriteRaw(string text)
+        {
+            buffer.Append(text);
+            return this;
         }
 
         public string Buffer => buffer.ToString();

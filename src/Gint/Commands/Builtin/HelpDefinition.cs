@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Generic;
+using Gint.Markup;
 
 namespace Gint.Builtin
 {
@@ -62,19 +63,20 @@ namespace Gint.Builtin
             ctx.OutStream.Write(entry.CommandName).WriteWhitespace();
             if (entry is CommandWithVariable cwv)
             {
-                ctx.OutStream.Format(FormatType.DarkGrayForeground)
-                    .Write("<var")
-                    .Write(cwv.Required ? string.Empty : "?")
-                    .Write(">")
-                    .ClearFormat()
+                var required = cwv.Required ? string.Empty : "?";
+                ctx.OutStream.WithForegroundColor().DarkGray()
+                    .Write($"<var{required}>")
                     .WriteWhitespace();
             }
             PrintCommandOptions(ctx, cmd, false);
-            ctx.OutStream.WriteLine()
+            var format = ctx.OutStream.WriteLine()
                 .Intent()
-                .Format(FormatType.YellowForeground);
+                .WithForegroundColor()
+                .Yellow();
             entry.HelpCallback(ctx.OutStream);
-            ctx.OutStream.WriteLine().ClearFormat();
+            ctx.OutStream.WriteLine();
+
+            format.End();
         }
 
         private void HelpHelp(Out @out)
@@ -104,7 +106,7 @@ namespace Gint.Builtin
                 ctx.OutStream.Write($"[{option.Argument} / {option.LongArgument}");
 
                 if (needsArgument != null)
-                    ctx.OutStream.WriteFormatted(needsArgument, FormatType.DarkGrayForeground);
+                    ctx.OutStream.WithForegroundColor().DarkGray().Write(needsArgument);
 
                 ctx.OutStream.Write("]");
 
@@ -116,9 +118,9 @@ namespace Gint.Builtin
 
                 if (detailed)
                 {
-                    ctx.OutStream.Intent().Format(FormatType.YellowForeground);
+                    var format = ctx.OutStream.Intent().WithForegroundColor().Yellow();
                     option.HelpCallback(ctx.OutStream);
-                    ctx.OutStream.ClearFormat().WriteLine();
+                    format.End().WriteLine();
                 }
             }
         }
