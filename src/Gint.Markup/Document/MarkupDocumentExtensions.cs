@@ -44,7 +44,7 @@ namespace Gint.Markup
 
         public static FluentDocument WithForegroundColor(this MarkupDocument document)
         {
-            return new FluentDocument(new Stack<string>(), FluentDocument.Type.Foreground, document);
+            return new FluentDocument(new Stack<CloseFormat>(), FluentDocument.Type.Foreground, document);
         }
     }
 }

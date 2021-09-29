@@ -39,22 +39,27 @@ namespace Gint.Markup
         public CloseFormat AddFormatWithVariable(string token, string variable)
         {
             var newtoken = $"{token}{MarkupFormatConsts.FormatVariableStart}{EscapeVariable(variable)}";
-            return AddFormat(newtoken);
+            return AddFormatInternal(newtoken,token);
         }
 
 
         public CloseFormat AddFormat(string token)
         {
+            return AddFormatInternal(token, null);
+        }
+
+        private CloseFormat AddFormatInternal(string token, string tokenWithoutVariable)
+        {
             var formatWithTag = $"{MarkupFormatConsts.FormatTagOpen}{token}{MarkupFormatConsts.FormatTagClose}";
             buffer.Append(formatWithTag);
             return new CloseFormat(() =>
             {
-                var closeFormatWithTag = $"{MarkupFormatConsts.FormatTagOpen}{MarkupFormatConsts.FormatEnd}{token}{MarkupFormatConsts.FormatTagClose}";
+                var closeFormatWithTag = $"{MarkupFormatConsts.FormatTagOpen}{MarkupFormatConsts.FormatEnd}{tokenWithoutVariable ?? token}{MarkupFormatConsts.FormatTagClose}";
                 buffer.Append(closeFormatWithTag);
             });
         }
 
-        public CloseFormat AddFormat(string[] tokens)
+        public CloseFormat AddFormat(params string[] tokens)
         {
             var formatWithTag = $"{MarkupFormatConsts.FormatTagOpen}{tokens.Aggregate((fst, snd) => $"{fst}{MarkupFormatConsts.FormatSeparator}{snd}")}{MarkupFormatConsts.FormatTagClose}";
             buffer.Append(formatWithTag);
@@ -62,6 +67,25 @@ namespace Gint.Markup
             {
                 var closeFormat = tokens
                 .Select(c => $"{MarkupFormatConsts.FormatEnd}{c}")
+                .Aggregate((fst, snd) => $"{fst}{MarkupFormatConsts.FormatSeparator}{snd}");
+
+                var closeFormatWithTag = $"{MarkupFormatConsts.FormatTagOpen}{closeFormat}{MarkupFormatConsts.FormatTagClose}";
+                buffer.Append(closeFormatWithTag);
+            });
+        }
+
+        public CloseFormat AddFormatWithVariable(params (string Token, string Variable)[] tokens)
+        {
+            var format = tokens
+                .Select(c => $"{c.Token}{MarkupFormatConsts.FormatVariableStart}{EscapeVariable(c.Variable)}")
+                .Aggregate((fst, snd) => $"{fst}{MarkupFormatConsts.FormatSeparator}{snd}");
+
+            var formatWithTag = $"{MarkupFormatConsts.FormatTagOpen}{format}{MarkupFormatConsts.FormatTagClose}";
+            buffer.Append(formatWithTag);
+            return new CloseFormat(() =>
+            {
+                var closeFormat = tokens
+                .Select(c => $"{MarkupFormatConsts.FormatEnd}{c.Token}")
                 .Aggregate((fst, snd) => $"{fst}{MarkupFormatConsts.FormatSeparator}{snd}");
 
                 var closeFormatWithTag = $"{MarkupFormatConsts.FormatTagOpen}{closeFormat}{MarkupFormatConsts.FormatTagClose}";

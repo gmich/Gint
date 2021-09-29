@@ -5,7 +5,7 @@ namespace Gint.Markup
     public class FluentDocument
     {
         private readonly MarkupDocument document;
-        private readonly Stack<string> tokens;
+        private readonly Stack<CloseFormat> tokens;
         private readonly Type formatType;
 
         internal enum Type
@@ -14,7 +14,7 @@ namespace Gint.Markup
             Background
         }
 
-        internal FluentDocument(Stack<string> tokens, Type type, MarkupDocument document)
+        internal FluentDocument(Stack<CloseFormat> tokens, Type type, MarkupDocument document)
         {
             formatType = type;
             this.document = document;
@@ -25,9 +25,8 @@ namespace Gint.Markup
 
         private FluentDocument Color(string color)
         {
-            var token = $"{FormatPrefix}.{color}";
-            tokens.Push(token);
-            document.AddFormat(token);
+            var close = document.AddFormatWithVariable(FormatPrefix, color);
+            tokens.Push(close);
             return this;
         }
         public FluentDocument Red()
@@ -83,9 +82,9 @@ namespace Gint.Markup
 
         public MarkupDocument End()
         {
-            foreach (string token in tokens)
+            foreach (var token in tokens)
             {
-                document.CloseFormat(token);
+                token.Close();
             }
             return document;
         }

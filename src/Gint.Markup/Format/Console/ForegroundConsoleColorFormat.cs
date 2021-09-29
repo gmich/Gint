@@ -2,23 +2,20 @@
 
 namespace Gint.Markup.Format
 {
-    internal abstract class ForegroundConsoleColorFormat : IConsoleMarkupFormat
+
+    internal class ForegroundConsoleColorFormat : ConsoleColorFormat
     {
-        public abstract string Tag { get; }
+        public override string Tag => "fg";
 
-        protected abstract ConsoleColor Color { get; }
-
-        private ConsoleColor previousColor;
-
-        public void Apply(string variable)
+        public override void Apply(string variable)
         {
             previousColor = Console.ForegroundColor;
-            Console.ForegroundColor = Color;
+            Console.ForegroundColor = GetColor(variable);
         }
-        public void Remove()
+
+        public override void Remove()
         {
             Console.ForegroundColor = previousColor;
         }
     }
-
 }

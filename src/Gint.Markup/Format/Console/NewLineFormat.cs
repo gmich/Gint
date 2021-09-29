@@ -10,6 +10,7 @@ namespace Gint.Markup.Format
         {
             Console.WriteLine();
         }
+
         public void Remove()
         {
         }
