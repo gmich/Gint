@@ -2,18 +2,14 @@
 
 namespace Gint.Markup.Format
 {
-    internal class DateFormat : IConsoleMarkupFormat
+    internal class DateFormat : AConsoleMarkupTokenFormat
     {
-        public string Tag { get; } = "date";
+        public override string Tag { get; } = "date";
 
-        public void Apply(string variable)
+        public override void Apply(string variable)
         {
             Console.Write(DateTime.UtcNow.ToString(variable));
         }
 
-        public void Remove()
-        {
-        }
     }
-
 }
