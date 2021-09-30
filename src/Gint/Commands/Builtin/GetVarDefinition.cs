@@ -14,7 +14,7 @@ namespace Gint.Builtin
         {
             if (ctx.GlobalScope.ContainsKey(input.Variable))
             {
-                ctx.OutStream.Write((string)ctx.GlobalScope[input.Variable]);
+                input.Scope.WriteString((string)ctx.GlobalScope[input.Variable]);
                 return CommandOutput.SuccessfulTask;
             }
             else

@@ -17,11 +17,10 @@ namespace Gint.Sample
                     {
                         if (input.Options.Contains("-c"))
                         {
-                            ctx.OutStream.Write("CPU count: ")
-                            .WithForegroundColor().DarkGray().Write($"{Environment.ProcessorCount}");
+                            input.Scope.WriteString($"CPU count: {Environment.ProcessorCount}");
                         }
                         else
-                            ctx.OutStream.Write("CPU utilities");
+                            input.Scope.WriteString("CPU utilities");
                         return CommandOutput.SuccessfulTask;
                     })
                 .AddOption(1, "-c", "--count", false, o => o.Write("Machine cpu count"),

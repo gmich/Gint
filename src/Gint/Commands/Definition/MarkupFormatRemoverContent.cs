@@ -1,8 +1,8 @@
 ﻿namespace Gint
 {
-    public class InputStream
+    public class MarkupFormatRemoverContent
     {
-        public InputStream(string raw, string unformatted)
+        public MarkupFormatRemoverContent(string raw, string unformatted)
         {
             Raw = raw;
             Unformatted = unformatted;

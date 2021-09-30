@@ -3,15 +3,28 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Linq;
 using Gint.Markup;
+using System.Collections;
+using System.Collections.Generic;
+using Gint.Pipes;
 
 namespace Gint
 {
+
+    internal class Pipeline
+    {
+        public CommandScope PreviousScope { get; init; }
+        public IPipe PreviousPipe { get; init; }
+        public CommandScope Scope { get; init; }
+        public IPipe Pipe { get; init; }
+    }
+
     internal class Evaluator
     {
-        private CommandExecutionContext commandExecutionContext;
-        private readonly ExecutionBuffer buffer;
+        private readonly MarkupFormatRemoverBuffer buffer;
         private readonly EvaluationChain evaluationChain = new EvaluationChain();
+        private readonly Stack<Pipeline> pipelines = new Stack<Pipeline>();
 
+        private CommandExecutionContext commandExecutionContext;
         private int executionId = 1;
         private int GetExecutionId => executionId++;
         private string[] boundOptionsCache = Array.Empty<string>();
@@ -19,14 +32,37 @@ namespace Gint
         private Evaluator(CommandExecutionContext commandExecutionContext)
         {
             this.commandExecutionContext = commandExecutionContext;
-            buffer = new ExecutionBuffer();
-            commandExecutionContext.OutStream.AddWriter(new BufferOutputWriter(buffer));
+            SeedFirstPipeline();
         }
+
+        //TODO: use a factory
+        private IPipe CreatePipe() => new GintPipe();
+
+        private void SeedFirstPipeline()
+        {
+            if (pipelines.Count > 0) return;
+
+            var inputPipe = CreatePipe();
+            var firstPipe = CreatePipe();
+            pipelines.Push(new Pipeline
+            {
+                PreviousScope = new CommandScope(inputPipe.Writer, inputPipe.Reader),
+                PreviousPipe = inputPipe,
+                Scope = new CommandScope(firstPipe.Writer, firstPipe.Reader),
+                Pipe = firstPipe
+            });
+        }
+
+        private Pipeline GetLastPipeline()
+        {
+            return pipelines.Peek();
+        }
+
 
         public static async Task Evaluate(BoundNode root, string command, CommandExecutionContext commandExecutionContext)
         {
             var evaluator = new Evaluator(commandExecutionContext);
-            evaluator.EvaluateNode(root, new CommandScope());
+            evaluator.EvaluateNode(root);
 
             try
             {
@@ -42,8 +78,10 @@ namespace Gint
             }
             finally
             {
-                var stream = evaluator.GetStream();
-                evaluator.commandExecutionContext.Info.WriteRaw(stream.Raw).WriteLine();
+                var lastPipe = evaluator.GetLastPipeline();
+                var stream = lastPipe.Scope.PipeReader.Read().Buffer;
+                var parsedStream = stream?.ToUTF8String() ?? string.Empty;
+                evaluator.commandExecutionContext.Info.WriteRaw(parsedStream).WriteLine();
                 evaluator.commandExecutionContext.Info.Flush();
                 if (evaluator.evaluationChain.Error)
                 {
@@ -70,88 +108,98 @@ namespace Gint
             commandExecutionContext.Error.Flush();
         }
 
-        private void EvaluateNode(BoundNode node, CommandScope scope)
+        private void EvaluateNode(BoundNode node)
         {
             switch (node.Kind)
             {
                 case BoundNodeKind.Command:
-                    EvaluateCommand((BoundCommand)node, scope);
+                    EvaluateCommand((BoundCommand)node);
                     break;
                 case BoundNodeKind.CommandWithVariable:
-                    EvaluateCommandWithVariable((BoundCommandWithVariable)node, scope);
+                    EvaluateCommandWithVariable((BoundCommandWithVariable)node);
                     break;
                 case BoundNodeKind.Option:
-                    EvaluateOption((BoundOption)node, scope);
+                    EvaluateOption((BoundOption)node);
                     break;
                 case BoundNodeKind.VariableOption:
-                    EvaluateVariableOption((BoundVariableOption)node, scope);
+                    EvaluateVariableOption((BoundVariableOption)node);
                     break;
                 case BoundNodeKind.Pipe:
-                    EvaluatePipe((BoundPipe)node, scope);
+                    EvaluatePipe((BoundPipe)node);
                     break;
                 case BoundNodeKind.Pipeline:
-                    EvaluatePipeline((BoundPipeline)node, scope);
+                    EvaluatePipeline((BoundPipeline)node);
                     break;
             }
         }
 
-        private void EvaluatePipeline(BoundPipeline boundPipeline, CommandScope scope)
+        private void EvaluatePipeline(BoundPipeline boundPipeline)
         {
-            EvaluateNode(boundPipeline.FirstNode, scope);
-            EvaluatePipe(boundPipeline.Pipe, scope);
-            EvaluateNode(boundPipeline.SecondNode, scope);
+            EvaluateNode(boundPipeline.FirstNode);
+            EvaluatePipe(boundPipeline.Pipe);
+            EvaluateNode(boundPipeline.SecondNode);
         }
 
-        private void EvaluatePipe(BoundPipe boundPipe, CommandScope scope)
+        private void EvaluatePipe(BoundPipe boundPipe)
         {
-
+            var lastPipeline = GetLastPipeline();
+            var newPipe = CreatePipe();
+            var pipeline = new Pipeline
+            {
+                PreviousScope = lastPipeline.Scope,
+                PreviousPipe = lastPipeline.Pipe,
+                Pipe = newPipe,
+                Scope = new CommandScope(newPipe.Writer, lastPipeline.Pipe.Reader)
+            };
+            pipelines.Push(pipeline);
         }
 
-        private void EvaluateVariableOption(BoundVariableOption boundVariableOption, CommandScope scope)
+        private void EvaluateVariableOption(BoundVariableOption boundVariableOption)
         {
             var capturedBoundOptions = BoundOptionsCopy;
+            var scope = GetLastPipeline().Scope;
             evaluationChain.Add(() =>
             {
-                return boundVariableOption.VariableOption.Callback.Invoke(new CommandInput(GetExecutionId, boundVariableOption.Variable, GetStream(), capturedBoundOptions, scope), commandExecutionContext, Next)
+                return boundVariableOption.VariableOption.Callback.Invoke(new CommandInput(GetExecutionId, boundVariableOption.Variable, capturedBoundOptions, scope), commandExecutionContext, Next)
                 .ContinueWith(c => OnExecutionEnd(c.Result), TaskContinuationOptions.AttachedToParent);
             }, boundVariableOption.TextSpanWithVariable);
         }
 
-        private void EvaluateOption(BoundOption boundOption, CommandScope scope)
+        private void EvaluateOption(BoundOption boundOption)
         {
             var capturedBoundOptions = BoundOptionsCopy;
-
+            var scope = GetLastPipeline().Scope;
             evaluationChain.Add(() =>
             {
-                return boundOption.Option.Callback.Invoke(new CommandInput(GetExecutionId, string.Empty, GetStream(), capturedBoundOptions, scope), commandExecutionContext, Next)
+                return boundOption.Option.Callback.Invoke(new CommandInput(GetExecutionId, string.Empty, capturedBoundOptions, scope), commandExecutionContext, Next)
                 .ContinueWith(c => OnExecutionEnd(c.Result), TaskContinuationOptions.AttachedToParent);
             }, boundOption.TextSpan);
         }
 
-        private void EvaluateCommand(BoundCommand boundCommand, CommandScope scope)
+        private void EvaluateCommand(BoundCommand boundCommand)
         {
-            EvaluateCommand(boundCommand, string.Empty, boundCommand.TextSpan, scope);
+            EvaluateCommand(boundCommand, string.Empty, boundCommand.TextSpan);
         }
 
-        private void EvaluateCommandWithVariable(BoundCommandWithVariable boundCommand, CommandScope scope)
+        private void EvaluateCommandWithVariable(BoundCommandWithVariable boundCommand)
         {
-            EvaluateCommand(boundCommand, boundCommand.Variable, boundCommand.TextSpanWithVariable, scope);
+            EvaluateCommand(boundCommand, boundCommand.Variable, boundCommand.TextSpanWithVariable);
         }
 
-        private void EvaluateCommand(BoundCommand boundCommand, string variable, TextSpan span, CommandScope scope)
+        private void EvaluateCommand(BoundCommand boundCommand, string variable, TextSpan span)
         {
-            var newScope = new CommandScope();
+            var newScope = GetLastPipeline().Scope;
             boundOptionsCache = boundCommand.BoundOptions.Select(c => c.Argument).ToArray();
             var capturedBoundOptions = BoundOptionsCopy;
 
             foreach (var opt in boundCommand.BoundOptions)
             {
-                EvaluateNode(opt, newScope);
+                EvaluateNode(opt);
             }
 
             evaluationChain.Add(() =>
             {
-                return boundCommand.Command.Callback.Invoke(new CommandInput(GetExecutionId, variable, GetStream(), capturedBoundOptions, newScope), commandExecutionContext, Next)
+                return boundCommand.Command.Callback.Invoke(new CommandInput(GetExecutionId, variable,  capturedBoundOptions, newScope), commandExecutionContext, Next)
                 .ContinueWith(c => OnExecutionEnd(c.Result), TaskContinuationOptions.AttachedToParent);
             }, span);
         }
@@ -177,13 +225,6 @@ namespace Gint
             if (output.CommandState == CommandState.Error)
                 evaluationChain.Error = true;
             Next();
-        }
-
-        private InputStream GetStream()
-        {
-            commandExecutionContext.OutStream.Flush();
-            var stream = buffer.Drain();
-            return stream;
         }
     }
 }

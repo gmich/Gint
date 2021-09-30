@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Gint
 {
-    internal class ExecutionBuffer
+    internal class MarkupFormatRemoverBuffer
     {
         public StringBuilder RawBuilder { get; } = new StringBuilder();
         public StringBuilder BuilderWithoutFormat { get; } = new StringBuilder();
@@ -14,9 +14,9 @@ namespace Gint
             return RawBuilder.ToString();
         }
 
-        public InputStream Drain()
+        public MarkupFormatRemoverContent Drain()
         {
-            var stream = new InputStream(RawBuilder.ToString(), BuilderWithoutFormat.ToString());
+            var stream = new MarkupFormatRemoverContent(RawBuilder.ToString(), BuilderWithoutFormat.ToString());
 
             RawBuilder.Clear();
             BuilderWithoutFormat.Clear();
@@ -25,25 +25,24 @@ namespace Gint
         }
     }
 
-    internal class BufferOutputEventArgs
+    internal class MarkupFormatRemover : MarkupWriter
     {
-        public BufferOutputEventArgs(ExecutionBuffer buffer)
-        {
-            Buffer = buffer;
-        }
-
-        public ExecutionBuffer Buffer { get; }
-    }
-
-    internal class BufferOutputWriter : MarkupWriter
-    {
-        private readonly ExecutionBuffer buffer;
+        private readonly MarkupFormatRemoverBuffer buffer;
         private readonly StringBuilder rawBuilder = new StringBuilder();
         private readonly StringBuilder builderWithoutFormat = new StringBuilder();
 
-        public BufferOutputWriter(ExecutionBuffer buffer)
+        public MarkupFormatRemover(MarkupFormatRemoverBuffer buffer)
         {
             this.buffer = buffer;
+        }
+
+        public static MarkupFormatRemoverContent Parse(string text)
+        {
+            var buffer = new MarkupFormatRemoverBuffer();
+            var writer = new MarkupFormatRemover(buffer);
+            writer.Print(text);
+            writer.Flush();
+            return buffer.Drain();
         }
 
         public override void Flush()

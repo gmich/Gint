@@ -14,7 +14,7 @@ namespace Gint.Builtin
         {
             if (!ctx.GlobalScope.ContainsKey(input.Variable))
             {
-                ctx.GlobalScope.Add(input.Variable, input.Stream.Raw);
+                ctx.GlobalScope.Add(input.Variable, input.Scope.ReadInputAsString());
                 return CommandOutput.SuccessfulTask;
 
             }

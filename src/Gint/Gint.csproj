@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Gint.Markup\Gint.Markup.csproj" />
+    <ProjectReference Include="..\Gint.Pipes\Gint.Pipes.csproj" />
   </ItemGroup>
 
 </Project>

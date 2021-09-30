@@ -1,4 +1,5 @@
 ﻿using Gint.Markup;
+using Gint.Pipes;
 using System;
 using System.Linq;
 using System.Text.Json;
@@ -11,9 +12,10 @@ namespace Gint.Sample
         [Command("json", helpCallback: nameof(JsonHelp))]
         public Task<ICommandOutput> Json(ICommandInput input, CommandExecutionContext ctx, Func<Task> next)
         {
-            if (!input.Stream.IsEmpty)
+            var inputStream = input.Scope.ReadInputAsString();
+            if (!string.IsNullOrEmpty(inputStream))
             {
-                var jsonToParse = input.Stream.Raw;
+                var jsonToParse = inputStream;
                 try
                 {
                     using (JsonDocument doc = JsonDocument.Parse(jsonToParse))
@@ -55,7 +57,6 @@ namespace Gint.Sample
         [Option(1, "-p", "--pretty", false, nameof(PrettyHelp))]
         private Task<ICommandOutput> Prettify(ICommandInput input, CommandExecutionContext ctx, Func<Task> next)
         {
-            ctx.OutStream.Write(input.Stream.Raw);
             return CommandOutput.SuccessfulTask;
         }
 

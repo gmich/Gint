@@ -22,6 +22,7 @@ namespace Gint.Builtin
 
         private Task<ICommandOutput> Help(ICommandInput input, CommandExecutionContext ctx, Func<Task> next)
         {
+            var writer = new Out();
             var printDetailed = input.Options.Contains("-d");
 
             // if there's a variable, show help for that command only
@@ -30,9 +31,9 @@ namespace Gint.Builtin
                 if (registry.Registry.ContainsKey(input.Variable))
                 {
                     var entry = registry.Registry[input.Variable];
-                    PrintCommand(ctx, entry);
+                    PrintCommand(writer,ctx, entry);
                     if (printDetailed)
-                        PrintCommandOptions(ctx, entry, printDetailed);
+                        PrintCommandOptions(writer,ctx, entry, printDetailed);
                 }
                 else
                 {
@@ -45,36 +46,37 @@ namespace Gint.Builtin
                 var count = 0;
                 foreach (var cmd in registry.Registry)
                 {
-                    PrintCommand(ctx, cmd.Value);
+                    PrintCommand(writer,ctx, cmd.Value);
                     if (printDetailed)
-                        PrintCommandOptions(ctx, cmd.Value, printDetailed);
+                        PrintCommandOptions(writer,ctx, cmd.Value, printDetailed);
 
                     count++;
                     if (count < registry.Registry.Count)
-                        ctx.OutStream.WriteLine();
+                        writer.WriteLine();
                 }
             }
+            input.Scope.WriteString(writer.Buffer);
             return CommandOutput.SuccessfulTask;
         }
 
-        private static void PrintCommand(CommandExecutionContext ctx, CommandEntry cmd)
+        private static void PrintCommand(Out writer,CommandExecutionContext ctx, CommandEntry cmd)
         {
             var entry = cmd.Command;
-            ctx.OutStream.Write(entry.CommandName).WriteWhitespace();
+            writer.Write(entry.CommandName).WriteWhitespace();
             if (entry is CommandWithVariable cwv)
             {
                 var required = cwv.Required ? string.Empty : "?";
-                ctx.OutStream.WithForegroundColor().DarkGray()
+                writer.WithForegroundColor().DarkGray()
                     .Write($"<var{required}>")
                     .WriteWhitespace();
             }
-            PrintCommandOptions(ctx, cmd, false);
-            var format = ctx.OutStream.WriteLine()
+            PrintCommandOptions(writer, ctx, cmd, false);
+            var format = writer.WriteLine()
                 .Intent()
                 .WithForegroundColor()
                 .Yellow();
-            entry.HelpCallback(ctx.OutStream);
-            ctx.OutStream.WriteLine();
+            entry.HelpCallback(writer);
+            writer.WriteLine();
 
             format.End();
         }
@@ -95,7 +97,7 @@ namespace Gint.Builtin
         }
 
 
-        private static void PrintCommandOptions(CommandExecutionContext ctx, CommandEntry entry, bool detailed)
+        private static void PrintCommandOptions(Out writer, CommandExecutionContext ctx, CommandEntry entry, bool detailed)
         {
             foreach (var option in entry.Options)
             {
@@ -103,26 +105,26 @@ namespace Gint.Builtin
                 if (option is VariableOption vop)
                     needsArgument = " <var>";
 
-                ctx.OutStream.Write($"[{option.Argument} / {option.LongArgument}");
+                writer.Write($"[{option.Argument} / {option.LongArgument}");
 
                 if (needsArgument != null)
-                    ctx.OutStream.WithForegroundColor().DarkGray().Write(needsArgument);
+                    writer.WithForegroundColor().DarkGray().Write(needsArgument);
 
-                ctx.OutStream.Write("]");
+                writer.Write("]");
 
                 if (detailed)
-                    ctx.OutStream.WriteLine();
+                    writer.WriteLine();
                 else
-                    ctx.OutStream.WriteWhitespace();
+                    writer.WriteWhitespace();
 
 
                 if (detailed)
                 {
-                    var format = ctx.OutStream.Intent().WithForegroundColor().Yellow();
-                    option.HelpCallback(ctx.OutStream);
+                    var format = writer.Intent().WithForegroundColor().Yellow();
+                    option.HelpCallback(writer);
                     format.End().WriteLine();
                 }
-            }
+            }            
         }
 
 

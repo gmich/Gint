@@ -1,4 +1,6 @@
-﻿namespace Gint.Builtin
+﻿using Gint.Pipes;
+
+namespace Gint.Builtin
 {
     internal sealed class OutDefinition : ICommandDefinition
     {
@@ -8,7 +10,7 @@
                 .AddVariableCommand("out", required: true, helpCallback: o => o.Write("Prints to stream out"),
                     (input, ctx, next) =>
                     {
-                        ctx.OutStream.Write(input.Variable);
+                        input.Scope.PipeWriter.Write(input.Variable.ToUTF8EncodedByteArray());
                         return CommandOutput.SuccessfulTask;
                     });
         }
