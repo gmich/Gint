@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Gint.Markup;
+using System;
 using System.Collections.Generic;
+using Gint.Markup.Format;
 
-namespace Gint.Markup
+namespace Gint
 {
 
     public class ConsoleMarkupWriter : MarkupWriter
@@ -9,10 +11,10 @@ namespace Gint.Markup
         public bool UseNewLineCharacterToPrintLines { get; set; } = true;
         public bool PrintLintingErrors { get; set; } = true;
    
-        private readonly static Format.ConsoleMarkupWriterFormatFactory formatFactory = new();
-        private readonly List<Format.IConsoleMarkupFormat> appliedFormats = new();
+        private readonly static ConsoleMarkupWriterFormatFactory formatFactory = new();
+        private readonly List<IConsoleMarkupFormat> appliedFormats = new();
 
-        protected override bool OnLintingError(DiagnosticCollection diagnostics, string text)
+        protected override bool OnLintingError(Markup.DiagnosticCollection diagnostics, string text)
         {
             if (PrintLintingErrors)
             {
@@ -33,7 +35,7 @@ namespace Gint.Markup
             return false;
         }
 
-        protected override void Bind(MarkupSyntaxToken[] tokens, string text, DiagnosticCollection diagnostic)
+        protected override void Bind(MarkupSyntaxToken[] tokens, string text, Markup.DiagnosticCollection diagnostic)
         {
         }
 

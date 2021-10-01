@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 
-namespace Gint.Markup
+namespace Gint
 {
+    using Markup;
+
     public static class MarkupDocumentExtensions
     {
         public static MarkupDocument WriteLine(this MarkupDocument document)

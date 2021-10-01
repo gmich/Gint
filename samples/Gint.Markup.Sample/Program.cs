@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Gint.Markup
+namespace Gint.Markup.Sample
 {
     class Program
     {

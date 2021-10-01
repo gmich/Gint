@@ -3,7 +3,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Gint.Sample
+namespace Gint.Commands.Sample
 {
     internal class Program
     {

@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace Gint.Pipes
+namespace Gint
 {
     public static class PipeHelperExtensions
     {

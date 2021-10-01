@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Gint.Markup
+namespace Gint
 {
     public class FluentDocument
     {

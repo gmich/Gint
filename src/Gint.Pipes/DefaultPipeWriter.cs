@@ -11,6 +11,7 @@ namespace Gint.Pipes
         {
             this.pipe = pipe;
         }
+
         public void Write(byte[] bytes)
         {
             pipe.Write(bytes);

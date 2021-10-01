@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Gint.Sample
+namespace Gint.Commands.Sample
 {
     public static class Bootstrapper
     {

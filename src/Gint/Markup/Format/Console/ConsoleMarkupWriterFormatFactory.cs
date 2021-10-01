@@ -13,7 +13,7 @@ namespace Gint.Markup.Format
         public ConsoleMarkupWriterFormatFactory()
         {
             var formatType = typeof(IConsoleMarkupFormat);
-            var formats = Assembly.Load("Gint.Markup")
+            var formats = Assembly.Load("Gint")
             .GetTypes()
             .Where(type => type.Namespace == "Gint.Markup.Format" && formatType.IsAssignableFrom(type) && !type.IsAbstract)
             .Select(t => new

@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.31205.134
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gint", "src\Gint\Gint.csproj", "{7B1C29D3-125B-4007-9BE9-A9280314A6ED}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gint.Sample", "src\Gint.Sample\Gint.Sample.csproj", "{55E7A87D-C1B7-4DE4-BFEB-CFA118F81A0C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gint.Commands.Sample", "samples\Gint.Commands.Sample\Gint.Commands.Sample.csproj", "{55E7A87D-C1B7-4DE4-BFEB-CFA118F81A0C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gint.Tests", "src\Gint.Tests\Gint.Tests.csproj", "{4217EAB8-A54E-4BEC-B464-66D408BAE002}"
 EndProject
@@ -14,6 +14,12 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gint.Pipes", "src\Gint.Pipes\Gint.Pipes.csproj", "{3AC19BD0-4931-47F3-8155-0E647A549089}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gint.Markup", "src\Gint.Markup\Gint.Markup.csproj", "{81EBB19A-7BD5-4CC6-932B-31C644528561}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{001FBE5C-6DFE-4482-9517-245C56C7F63C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gint.Markup.Sample", "samples\Gint.Markup.Sample\Gint.Markup.Sample.csproj", "{F55E1441-BAFB-4653-B5E8-1BE8ABF31E75}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{2531F7D8-E791-4706-8699-F1F33C8D571D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -71,9 +77,23 @@ Global
 		{81EBB19A-7BD5-4CC6-932B-31C644528561}.Release|Any CPU.Build.0 = Release|Any CPU
 		{81EBB19A-7BD5-4CC6-932B-31C644528561}.Release|x64.ActiveCfg = Release|Any CPU
 		{81EBB19A-7BD5-4CC6-932B-31C644528561}.Release|x64.Build.0 = Release|Any CPU
+		{F55E1441-BAFB-4653-B5E8-1BE8ABF31E75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F55E1441-BAFB-4653-B5E8-1BE8ABF31E75}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F55E1441-BAFB-4653-B5E8-1BE8ABF31E75}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F55E1441-BAFB-4653-B5E8-1BE8ABF31E75}.Debug|x64.Build.0 = Debug|Any CPU
+		{F55E1441-BAFB-4653-B5E8-1BE8ABF31E75}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F55E1441-BAFB-4653-B5E8-1BE8ABF31E75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F55E1441-BAFB-4653-B5E8-1BE8ABF31E75}.Release|x64.ActiveCfg = Release|Any CPU
+		{F55E1441-BAFB-4653-B5E8-1BE8ABF31E75}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{55E7A87D-C1B7-4DE4-BFEB-CFA118F81A0C} = {001FBE5C-6DFE-4482-9517-245C56C7F63C}
+		{4217EAB8-A54E-4BEC-B464-66D408BAE002} = {2531F7D8-E791-4706-8699-F1F33C8D571D}
+		{ABD8C457-7C11-49D0-B8BE-28E7CD0E4CE9} = {2531F7D8-E791-4706-8699-F1F33C8D571D}
+		{F55E1441-BAFB-4653-B5E8-1BE8ABF31E75} = {001FBE5C-6DFE-4482-9517-245C56C7F63C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {34C65C2C-15DB-4A5A-8E9E-AA56535F67B7}

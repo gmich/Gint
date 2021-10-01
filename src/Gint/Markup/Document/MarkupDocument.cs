@@ -4,8 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Gint.Markup
+namespace Gint
 {
+    using Markup;
+
     public class CloseFormat
     {
         private readonly Action close;
