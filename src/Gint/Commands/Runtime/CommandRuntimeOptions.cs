@@ -1,10 +1,42 @@
-﻿namespace Gint
+﻿using Gint.Markup;
+using Gint.Pipes;
+using System;
+using System.Collections.Generic;
+
+namespace Gint
 {
     public class CommandRuntimeOptions
     {
+        public CommandRuntimeOptions(Func<IPipe> pipeFactory, Func<IPipe> initialPipe)
+        {
+            CommandExecutionContextFactory = () => new CommandExecutionContext(InfoOut, ErrorOut);
+            PipeFactory = pipeFactory;
+            EntryPipe = initialPipe;
+        }
+
         public bool LogParseTree { get; set; }
         public bool LogBindTree { get; set; }
+        public bool AbortOnCancelKeyPress { get; set; }
 
-        public Out Out { get; set; } = new Out();
+        public Out RuntimeInfo { get; init; } = new Out();
+        public Out InfoOut { get; init; } = new Out();
+        public Out ErrorOut { get; init; } = new Out();
+
+        public Func<CommandExecutionContext> CommandExecutionContextFactory { get; }
+        public Func<IPipe> PipeFactory { get; init; }
+        public Func<IPipe> EntryPipe { get; init; }
+
+        public static CommandRuntimeOptions DefaultConsole =>
+            new CommandRuntimeOptions(
+                initialPipe: () => new GintPipe(new PipeOptions { PreferredBufferSegmentSize = 64 }),
+                pipeFactory: () => new GintPipe(new PipeOptions { PreferredBufferSegmentSize = 64 }))
+            {
+                LogParseTree = false,
+                LogBindTree = false,
+                AbortOnCancelKeyPress = true,
+                RuntimeInfo = Out.WithConsoleWriter,
+                InfoOut = Out.WithConsoleWriter,
+                ErrorOut = Out.WithConsoleWriter
+            };
     }
 }

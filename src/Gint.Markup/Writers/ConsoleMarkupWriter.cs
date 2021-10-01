@@ -6,30 +6,29 @@ namespace Gint.Markup
 
     public class ConsoleMarkupWriter : MarkupWriter
     {
-        public bool UseNewLineCharacterToPrintLines { get; set; }
-
-        public ConsoleMarkupWriter(bool useNewLineCharacterToPrintLines = true)
-        {
-            UseNewLineCharacterToPrintLines = useNewLineCharacterToPrintLines;
-        }
-
+        public bool UseNewLineCharacterToPrintLines { get; set; } = true;
+        public bool PrintLintingErrors { get; set; } = true;
+   
         private readonly static Format.ConsoleMarkupWriterFormatFactory formatFactory = new();
         private readonly List<Format.IConsoleMarkupFormat> appliedFormats = new();
 
         protected override bool OnLintingError(DiagnosticCollection diagnostics, string text)
         {
-            foreach (var diagnostic in diagnostics)
+            if (PrintLintingErrors)
             {
-                var error = text.Substring(diagnostic.Location.Start, diagnostic.Location.Length);
-                var prefix = text.Substring(0, diagnostic.Location.Start);
-                var suffix = text[diagnostic.Location.End..];
-                Console.Write(prefix);
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write(error);
-                Console.ResetColor();
-                Console.WriteLine(suffix);
-                Console.WriteLine(diagnostic.ToString());
-                Console.WriteLine();
+                foreach (var diagnostic in diagnostics)
+                {
+                    var error = text.Substring(diagnostic.Location.Start, diagnostic.Location.Length);
+                    var prefix = text.Substring(0, diagnostic.Location.Start);
+                    var suffix = text[diagnostic.Location.End..];
+                    Console.Write(prefix);
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.Write(error);
+                    Console.ResetColor();
+                    Console.WriteLine(suffix);
+                    Console.WriteLine(diagnostic.ToString());
+                    Console.WriteLine();
+                }
             }
             return false;
         }

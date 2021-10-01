@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Gint
 {
-    internal class MarkupFormatRemoverBuffer
+    public class MarkupFormatRemoverBuffer
     {
         public StringBuilder RawBuilder { get; } = new StringBuilder();
         public StringBuilder BuilderWithoutFormat { get; } = new StringBuilder();
@@ -25,7 +25,7 @@ namespace Gint
         }
     }
 
-    internal class MarkupFormatRemover : MarkupWriter
+    public class MarkupFormatRemover : MarkupWriter
     {
         private readonly MarkupFormatRemoverBuffer buffer;
         private readonly StringBuilder rawBuilder = new StringBuilder();

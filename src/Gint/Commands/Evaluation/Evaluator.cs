@@ -20,30 +20,30 @@ namespace Gint
 
     internal class Evaluator
     {
-        private readonly MarkupFormatRemoverBuffer buffer;
         private readonly EvaluationChain evaluationChain = new EvaluationChain();
         private readonly Stack<Pipeline> pipelines = new Stack<Pipeline>();
 
         private CommandExecutionContext commandExecutionContext;
+        private readonly Func<IPipe> entryPipe;
+        private readonly Func<IPipe> pipeFactory;
         private int executionId = 1;
         private int GetExecutionId => executionId++;
         private string[] boundOptionsCache = Array.Empty<string>();
 
-        private Evaluator(CommandExecutionContext commandExecutionContext)
+        private Evaluator(CommandExecutionContext commandExecutionContext, Func<IPipe> entryPipe, Func<IPipe> pipeFactory)
         {
             this.commandExecutionContext = commandExecutionContext;
+            this.entryPipe = entryPipe;
+            this.pipeFactory = pipeFactory;
             SeedFirstPipeline();
         }
-
-        //TODO: use a factory
-        private IPipe CreatePipe() => new GintPipe();
 
         private void SeedFirstPipeline()
         {
             if (pipelines.Count > 0) return;
 
-            var inputPipe = CreatePipe();
-            var firstPipe = CreatePipe();
+            var inputPipe = entryPipe();
+            var firstPipe = pipeFactory();
             pipelines.Push(new Pipeline
             {
                 PreviousScope = new CommandScope(inputPipe.Writer, inputPipe.Reader),
@@ -59,9 +59,9 @@ namespace Gint
         }
 
 
-        public static async Task Evaluate(BoundNode root, string command, CommandExecutionContext commandExecutionContext)
+        public static async Task Evaluate(BoundNode root, string command, CommandExecutionContext commandExecutionContext, Func<IPipe> entryPipe, Func<IPipe> pipeFactory)
         {
-            var evaluator = new Evaluator(commandExecutionContext);
+            var evaluator = new Evaluator(commandExecutionContext, entryPipe, pipeFactory);
             evaluator.EvaluateNode(root);
 
             try
@@ -143,7 +143,7 @@ namespace Gint
         private void EvaluatePipe(BoundPipe boundPipe)
         {
             var lastPipeline = GetLastPipeline();
-            var newPipe = CreatePipe();
+            var newPipe = pipeFactory();
             var pipeline = new Pipeline
             {
                 PreviousScope = lastPipeline.Scope,
@@ -199,7 +199,7 @@ namespace Gint
 
             evaluationChain.Add(() =>
             {
-                return boundCommand.Command.Callback.Invoke(new CommandInput(GetExecutionId, variable,  capturedBoundOptions, newScope), commandExecutionContext, Next)
+                return boundCommand.Command.Callback.Invoke(new CommandInput(GetExecutionId, variable, capturedBoundOptions, newScope), commandExecutionContext, Next)
                 .ContinueWith(c => OnExecutionEnd(c.Result), TaskContinuationOptions.AttachedToParent);
             }, span);
         }

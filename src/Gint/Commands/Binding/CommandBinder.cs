@@ -56,14 +56,14 @@ namespace Gint
         private CommandEntry GetCommand(CommandExpressionSyntax n)
         {
             var cmd = n.CommandToken.Value;
-            if (!commandRegistry.Registry.ContainsKey(cmd))
+            if (!commandRegistry.Collection.ContainsKey(cmd))
             {
                 diagnostics.ReportCommandUnknown(n.CommandToken.Span, cmd);
                 return new CommandEntry(new Command(cmd, NoopHelp, NoopExecutionBlock), new Option[0]);
             }
             else
             {
-                return commandRegistry.Registry[cmd];
+                return commandRegistry.Collection[cmd];
             }
         }
 

@@ -28,9 +28,9 @@ namespace Gint.Builtin
             // if there's a variable, show help for that command only
             if (!string.IsNullOrEmpty(input.Variable))
             {
-                if (registry.Registry.ContainsKey(input.Variable))
+                if (registry.Collection.ContainsKey(input.Variable))
                 {
-                    var entry = registry.Registry[input.Variable];
+                    var entry = registry.Collection[input.Variable];
                     PrintCommand(writer,ctx, entry);
                     if (printDetailed)
                         PrintCommandOptions(writer,ctx, entry, printDetailed);
@@ -44,14 +44,14 @@ namespace Gint.Builtin
             else
             {
                 var count = 0;
-                foreach (var cmd in registry.Registry)
+                foreach (var cmd in registry.Collection)
                 {
                     PrintCommand(writer,ctx, cmd.Value);
                     if (printDetailed)
                         PrintCommandOptions(writer,ctx, cmd.Value, printDetailed);
 
                     count++;
-                    if (count < registry.Registry.Count)
+                    if (count < registry.Collection.Count)
                         writer.WriteLine();
                 }
             }

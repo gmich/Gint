@@ -20,6 +20,7 @@ namespace Gint.Markup
     public class MarkupDocument
     {
         private readonly StringBuilder buffer = new();
+        public event EventHandler OnChange;
 
         private static string EscapeVariable(string variable)
         {
@@ -36,12 +37,23 @@ namespace Gint.Markup
             return tempBuffer.ToString();
         }
 
+        private void Add(string str)
+        {
+            buffer.Append(str);
+            OnChange?.Invoke(this,EventArgs.Empty);
+        }
+
+        private void Add(StringBuilder builder)
+        {
+            buffer.Append(builder);
+            OnChange?.Invoke(this, EventArgs.Empty);
+        }
+
         public CloseFormat AddFormatWithVariable(string token, string variable)
         {
             var newtoken = $"{token}{MarkupFormatConsts.FormatVariableStart}{EscapeVariable(variable)}";
             return AddFormatInternal(newtoken,token);
         }
-
 
         public CloseFormat AddFormat(string token)
         {
@@ -51,18 +63,18 @@ namespace Gint.Markup
         private CloseFormat AddFormatInternal(string token, string tokenWithoutVariable)
         {
             var formatWithTag = $"{MarkupFormatConsts.FormatTagOpen}{token}{MarkupFormatConsts.FormatTagClose}";
-            buffer.Append(formatWithTag);
+            Add(formatWithTag);
             return new CloseFormat(() =>
             {
                 var closeFormatWithTag = $"{MarkupFormatConsts.FormatTagOpen}{MarkupFormatConsts.FormatEnd}{tokenWithoutVariable ?? token}{MarkupFormatConsts.FormatTagClose}";
-                buffer.Append(closeFormatWithTag);
+                Add(closeFormatWithTag);
             });
         }
 
         public CloseFormat AddFormat(params string[] tokens)
         {
             var formatWithTag = $"{MarkupFormatConsts.FormatTagOpen}{tokens.Aggregate((fst, snd) => $"{fst}{MarkupFormatConsts.FormatSeparator}{snd}")}{MarkupFormatConsts.FormatTagClose}";
-            buffer.Append(formatWithTag);
+            Add(formatWithTag);
             return new CloseFormat(() =>
             {
                 var closeFormat = tokens
@@ -70,7 +82,7 @@ namespace Gint.Markup
                 .Aggregate((fst, snd) => $"{fst}{MarkupFormatConsts.FormatSeparator}{snd}");
 
                 var closeFormatWithTag = $"{MarkupFormatConsts.FormatTagOpen}{closeFormat}{MarkupFormatConsts.FormatTagClose}";
-                buffer.Append(closeFormatWithTag);
+                Add(closeFormatWithTag);
             });
         }
 
@@ -81,7 +93,7 @@ namespace Gint.Markup
                 .Aggregate((fst, snd) => $"{fst}{MarkupFormatConsts.FormatSeparator}{snd}");
 
             var formatWithTag = $"{MarkupFormatConsts.FormatTagOpen}{format}{MarkupFormatConsts.FormatTagClose}";
-            buffer.Append(formatWithTag);
+            Add(formatWithTag);
             return new CloseFormat(() =>
             {
                 var closeFormat = tokens
@@ -89,14 +101,14 @@ namespace Gint.Markup
                 .Aggregate((fst, snd) => $"{fst}{MarkupFormatConsts.FormatSeparator}{snd}");
 
                 var closeFormatWithTag = $"{MarkupFormatConsts.FormatTagOpen}{closeFormat}{MarkupFormatConsts.FormatTagClose}";
-                buffer.Append(closeFormatWithTag);
+                Add(closeFormatWithTag);
             });
         }
 
         public void AddFormatToken(string token)
         {
             var formatWithTag = $"{MarkupFormatConsts.FormatTagOpen}{MarkupFormatConsts.FormatToken}{token}{MarkupFormatConsts.FormatTagClose}";
-            buffer.Append(formatWithTag);
+            Add(formatWithTag);
         }
 
         public void AddFormatTokenWithVariable(string token, string variable)
@@ -108,7 +120,7 @@ namespace Gint.Markup
         public void CloseFormat(string token)
         {
             var closeFormatWithTag = $"{MarkupFormatConsts.FormatTagOpen}{MarkupFormatConsts.FormatEnd}{token}{MarkupFormatConsts.FormatTagClose}";
-            buffer.Append(closeFormatWithTag);
+            Add(closeFormatWithTag);
         }
 
         public void CloseFormat()
@@ -128,13 +140,13 @@ namespace Gint.Markup
                     tempBuffer.Append(MarkupFormatConsts.FormatTagOpen);
                 }
             }
-            buffer.Append(tempBuffer);
+            Add(tempBuffer);
             return this;
         }
 
         public MarkupDocument WriteRaw(string text)
         {
-            buffer.Append(text);
+            Add(text);
             return this;
         }
 

@@ -8,8 +8,8 @@ namespace Gint
 {
     public class CommandRegistry
     {
-        private readonly Dictionary<string, CommandEntry> registry = new Dictionary<string, CommandEntry>();
-        public IReadOnlyDictionary<string, CommandEntry> Registry => registry;
+        private readonly Dictionary<string, CommandEntry> collection = new Dictionary<string, CommandEntry>();
+        public IReadOnlyDictionary<string, CommandEntry> Collection => collection;
 
         internal CommandRegistry()
         {
@@ -41,7 +41,7 @@ namespace Gint
                 options.Add(option);
                 var optionsArray = options.ToArray();
                 registry.ThrowIfDuplicate(commandName, optionsArray);
-                registry.Registry[commandName].Options = optionsArray;
+                registry.Collection[commandName].Options = optionsArray;
                 return this;
             }
             public AddOptionsBuilder AddVariableOption(int priority, string argument, string longArgument, bool allowMultiple, HelpCallback helpCallback, ExecutionBlock callback)
@@ -50,7 +50,7 @@ namespace Gint
                 options.Add(option);
                 var optionsArray = options.ToArray();
                 registry.ThrowIfDuplicate(commandName, optionsArray);
-                registry.Registry[commandName].Options = optionsArray;
+                registry.Collection[commandName].Options = optionsArray;
                 return this;
             }
 
@@ -69,13 +69,13 @@ namespace Gint
 
         public void Add(Command command, params Option[] options)
         {
-            if (registry.ContainsKey(command.CommandName))
+            if (collection.ContainsKey(command.CommandName))
             {
                 throw new CommandRegistrationException($"Command {command.CommandName} has already been registered.");
             }
             ThrowIfDuplicate(command.CommandName, options);
 
-            registry.Add(command.CommandName, new CommandEntry(command, options?.ToArray() ?? new Option[0]));
+            collection.Add(command.CommandName, new CommandEntry(command, options?.ToArray() ?? new Option[0]));
         }
 
         internal void ThrowIfDuplicate(string commandName, Option[] options)

@@ -9,19 +9,33 @@ namespace Gint
     public class CommandRuntime
     {
         public CommandRegistry CommandRegistry { get; }
-        public CommandRuntimeOptions Options { get; } = new CommandRuntimeOptions();
-        public Func<CommandExecutionContext> CommandExecutionContextFactory { get; set; }
-        private OutTextWriterAdapter OutAdapter => new OutTextWriterAdapter(Options.Out);
+        public CommandRuntimeOptions Options { get; }
+        private OutTextWriterAdapter OutAdapter => new OutTextWriterAdapter(Options.RuntimeInfo);
 
         public event EventHandler<CommandExecutionEventArgs> OnCommandExecuting;
         public event EventHandler<CommandExecutionEventArgs> OnCommandExecuted;
 
-        public CommandRuntime(CommandRegistry commandRegistry, Func<CommandExecutionContext> commandExecutionContextFactory)
+        public CommandRuntime(CommandRegistry commandRegistry, CommandRuntimeOptions options)
         {
+            Options = options;
             CommandRegistry = commandRegistry;
-            CommandExecutionContextFactory = commandExecutionContextFactory;
 
+            SetCancelKeyPressToAbort();
             AddShowTreesCommand();
+        }
+
+        private void SetCancelKeyPressToAbort()
+        {
+            OnCommandExecuting += (sender, args) =>
+            {
+                Console.CancelKeyPress += (s, a) =>
+                {
+                    if (Options.AbortOnCancelKeyPress)
+                    {
+                        args.CommandExecutionContext.CancellationToken.Cancel();
+                    }
+                };
+            };
         }
 
         private void AddShowTreesCommand()
@@ -43,6 +57,7 @@ namespace Gint
                 });
         }
 
+
         public async Task Run(string command)
         {
             var parserRes = CommandExpressionTree.Parse(command);
@@ -53,10 +68,10 @@ namespace Gint
             {
                 if (Options.LogParseTree)
                 {
-                    Options.Out.WriteLine().WithForegroundColor().Magenta().Write("Parse tree").WriteLine();
+                    Options.RuntimeInfo.WriteLine().WithForegroundColor().Magenta().Write("Parse tree").WriteLine();
                     parserRes.Root.WriteTo(OutAdapter);
-                    Options.Out.WriteLine();
-                    Options.Out.Flush();
+                    Options.RuntimeInfo.WriteLine();
+                    Options.RuntimeInfo.Flush();
                 }
 
                 var binder = new CommandBinder(parserRes.Root, CommandRegistry);
@@ -68,15 +83,15 @@ namespace Gint
                 {
                     if (Options.LogBindTree)
                     {
-                        Options.Out.WithForegroundColor().Magenta().Write("Bind tree")
+                        Options.RuntimeInfo.WithForegroundColor().Magenta().Write("Bind tree")
                             .WriteLine();
                         boundNode.WriteTo(OutAdapter);
-                        Options.Out.WriteLine();
-                        Options.Out.Flush();
+                        Options.RuntimeInfo.WriteLine();
+                        Options.RuntimeInfo.Flush();
                     }
-                    var ctx = CommandExecutionContextFactory();
+                    var ctx = Options.CommandExecutionContextFactory();
                     OnCommandExecuting?.Invoke(this, new CommandExecutionEventArgs(ctx));
-                    await Evaluator.Evaluate(boundNode, command, ctx);
+                    await Evaluator.Evaluate(boundNode, command, ctx, Options.EntryPipe,Options.PipeFactory);
                     OnCommandExecuted?.Invoke(this, new CommandExecutionEventArgs(ctx));
                 }
             }
@@ -89,13 +104,13 @@ namespace Gint
                 var error = text.Substring(diagnostic.Location.Start, diagnostic.Location.Length);
                 var prefix = text.Substring(0, diagnostic.Location.Start);
                 var suffix = text[diagnostic.Location.End..];
-                Options.Out.Write(prefix)
+                Options.RuntimeInfo.Write(prefix)
                     .WithForegroundColor().Red().Write(error)
                     .WriteLine(suffix.ToString())
                     .WriteLine(diagnostic.Message)
                     .WriteLine();
 
-                Options.Out.Flush();
+                Options.RuntimeInfo.Flush();
             }
         }
     }

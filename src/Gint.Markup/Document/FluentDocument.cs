@@ -29,6 +29,7 @@ namespace Gint.Markup
             tokens.Push(close);
             return this;
         }
+
         public FluentDocument Red()
         {
             return Color("red");
@@ -62,6 +63,16 @@ namespace Gint.Markup
         public FluentDocument DarkYellow()
         {
             return Color("darkyellow");
+        }
+
+        public FluentDocument White()
+        {
+            return Color("white");
+        }
+
+        public FluentDocument Black()
+        {
+            return Color("black");
         }
 
         public FluentDocument AndForeground()

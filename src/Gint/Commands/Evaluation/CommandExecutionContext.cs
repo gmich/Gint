@@ -9,12 +9,12 @@ namespace Gint
 
     public class CommandExecutionContext
     {
-        public CommandExecutionContext(Out info, Out error, CancellationTokenSource cancellationToken, Dictionary<string, object> globalMetadata)
+        public CommandExecutionContext(Out info, Out error)
         {
             Info = info;
             Error = error;
-            CancellationToken = cancellationToken;
-            GlobalScope = globalMetadata;
+            CancellationToken = new CancellationTokenSource();
+            GlobalScope = new Dictionary<string, object>();
         }
 
         public Out Info { get; }
@@ -23,7 +23,7 @@ namespace Gint
 
         public CancellationTokenSource CancellationToken { get; }
 
-        public static CommandExecutionContext New => new(new Out(), new Out(), new CancellationTokenSource(), new Dictionary<string, object>());
+        public static CommandExecutionContext Empty => new(new Out(), new Out());
     
     }
 

@@ -30,9 +30,37 @@ namespace Gint
     {
         public List<MarkupWriter> OutputWriters { get; }
 
+
         public Out()
         {
             OutputWriters = new List<MarkupWriter>();
+            OnChange += (sender, args) =>
+            {
+                if (AutoFlush)
+                {
+                    if (Buffer.Length >= FlushLimit)
+                        Flush();
+                }
+            };
+        }
+
+        public event EventHandler<string> OnFlush;
+        public bool AutoFlush { get; set; } = false;
+
+        /// <summary>
+        /// Flush when buffer is equal or greater than character count
+        /// </summary>
+        public int FlushLimit { get; set; } = 0;
+
+        public static Out WithConsoleWriter
+        {
+            get
+            {
+                var writer = new ConsoleMarkupWriter();
+                var o = new Out();
+                o.AddWriter(writer);
+                return o;
+            }
         }
 
         public Out(IEnumerable<MarkupWriter> writters)
@@ -50,7 +78,7 @@ namespace Gint
         {
             OutputWriters.Remove(writer);
         }
-    
+
         public void Print()
         {
             var str = Buffer;
@@ -71,7 +99,8 @@ namespace Gint
             {
                 writter.Print(str);
                 writter.Flush();
-            }         
+            }
+            OnFlush?.Invoke(this, str);
         }
 
         public void WriteContentsTo(MarkupWriter writer)
