@@ -24,6 +24,8 @@ namespace Gint
         private readonly StringBuilder buffer = new();
         public event EventHandler OnChange;
 
+        public static MarkupDocument New => new MarkupDocument();
+
         private static string EscapeVariable(string variable)
         {
             var tempBuffer = new StringBuilder();
