@@ -21,6 +21,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gint.Markup.Sample", "sampl
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{2531F7D8-E791-4706-8699-F1F33C8D571D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gint.SyntaxHighlighting", "src\Gint.SyntaxHighlighting\Gint.SyntaxHighlighting.csproj", "{A4EE5830-053E-4580-B5B0-2C8C83B60C99}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -85,6 +87,14 @@ Global
 		{F55E1441-BAFB-4653-B5E8-1BE8ABF31E75}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F55E1441-BAFB-4653-B5E8-1BE8ABF31E75}.Release|x64.ActiveCfg = Release|Any CPU
 		{F55E1441-BAFB-4653-B5E8-1BE8ABF31E75}.Release|x64.Build.0 = Release|Any CPU
+		{A4EE5830-053E-4580-B5B0-2C8C83B60C99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4EE5830-053E-4580-B5B0-2C8C83B60C99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4EE5830-053E-4580-B5B0-2C8C83B60C99}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A4EE5830-053E-4580-B5B0-2C8C83B60C99}.Debug|x64.Build.0 = Debug|Any CPU
+		{A4EE5830-053E-4580-B5B0-2C8C83B60C99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4EE5830-053E-4580-B5B0-2C8C83B60C99}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4EE5830-053E-4580-B5B0-2C8C83B60C99}.Release|x64.ActiveCfg = Release|Any CPU
+		{A4EE5830-053E-4580-B5B0-2C8C83B60C99}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
