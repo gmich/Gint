@@ -7,9 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gint", "src\Gint\Gint.cspro
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gint.Commands.Sample", "samples\Gint.Commands.Sample\Gint.Commands.Sample.csproj", "{55E7A87D-C1B7-4DE4-BFEB-CFA118F81A0C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gint.Tests", "src\Gint.Tests\Gint.Tests.csproj", "{4217EAB8-A54E-4BEC-B464-66D408BAE002}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gint.UnitTests", "tests\Gint.UnitTests\Gint.UnitTests.csproj", "{4217EAB8-A54E-4BEC-B464-66D408BAE002}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gint.Benchmarks", "src\Gint.Benchmarks\Gint.Benchmarks.csproj", "{ABD8C457-7C11-49D0-B8BE-28E7CD0E4CE9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gint.Benchmarks", "tests\Gint.Benchmarks\Gint.Benchmarks.csproj", "{ABD8C457-7C11-49D0-B8BE-28E7CD0E4CE9}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gint.Pipes", "src\Gint.Pipes\Gint.Pipes.csproj", "{3AC19BD0-4931-47F3-8155-0E647A549089}"
 EndProject

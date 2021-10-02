@@ -11,9 +11,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Gint.Markup\Gint.Markup.csproj" />
-    <ProjectReference Include="..\Gint.Pipes\Gint.Pipes.csproj" />
-    <ProjectReference Include="..\Gint\Gint.csproj" />
+    <ProjectReference Include="..\..\src\Gint.Markup\Gint.Markup.csproj" />
+    <ProjectReference Include="..\..\src\Gint.Pipes\Gint.Pipes.csproj" />
+    <ProjectReference Include="..\..\src\Gint\Gint.csproj" />
   </ItemGroup>
 
 </Project>
