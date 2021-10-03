@@ -6,7 +6,12 @@ namespace Gint.SyntaxHighlighting
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            var inputManager = new ConsoleInputManager();
+
+            while(true)
+            {
+                inputManager.Run();
+            }
         }
     }
 }
