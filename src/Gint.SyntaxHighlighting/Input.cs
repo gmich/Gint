@@ -13,19 +13,19 @@ namespace Gint.SyntaxHighlighting
         private readonly ConsoleWindowResizer consoleWindowResizer;
         private readonly SystemConsoleAdapter systemConsoleAdapter;
         private readonly CommandText commandText;
-        private readonly CommandPrinter commandPrinter;
+        private readonly CommandRenderer commandPrinter;
 
         private int GetTotalSize() => commandText.Command.Length;
 
         public ConsoleInputManager()
         {
             prompt = new Prompt("cli>");
-            virtualCursor = new VirtualCursor(GetTotalSize);
+            virtualCursor = new VirtualCursor(GetTotalSize,prompt);
             consoleInputInterceptor = new ConsoleInputInterceptor();
             consoleWindowResizer = new ConsoleWindowResizer(virtualCursor);
             systemConsoleAdapter = new SystemConsoleAdapter(prompt, consoleWindowResizer, virtualCursor);
             commandText = new CommandText(virtualCursor);
-            commandPrinter = new CommandPrinter();
+            commandPrinter = new CommandRenderer();
 
             Setup();
         }
@@ -37,9 +37,10 @@ namespace Gint.SyntaxHighlighting
 
             commandText.OnChange += (sender, args) =>
             {
-                systemConsoleAdapter.ClearConsoleInput(args.Previous.Length);
+                systemConsoleAdapter.ClearConsoleInput(args.Previous.Length + prompt.Length);
                 prompt.Print();
                 commandPrinter.Print(commandText.Command);
+                systemConsoleAdapter.AdjustToVirtualCursor();
             };
 
             virtualCursor.OnPositionChanged += (sender, args) =>
@@ -176,20 +177,28 @@ namespace Gint.SyntaxHighlighting
         }
     }
 
-    internal class CommandPrinter
+    internal class CommandRenderer
     {
         public void Print(string command)
         {
+            Console.ForegroundColor = ConsoleColor.White;
             Console.Write(command);
+            Console.ResetColor();
         }
     }
 
     internal interface IReadonlyVirtualCursor
     {
         public int Index { get; }
+        public int IndexWithPrompt { get; }
     }
+
     internal class VirtualCursor : IReadonlyVirtualCursor
     {
+        public event EventHandler OnPositionChanged;
+        public Func<int> RightBound;
+        private readonly Prompt prompt;
+
         private int _index;
         public int Index
         {
@@ -209,12 +218,12 @@ namespace Gint.SyntaxHighlighting
             }
         }
 
-        public event EventHandler OnPositionChanged;
-        public Func<int> RightBound;
+        public int IndexWithPrompt => Index + prompt.Length;
 
-        public VirtualCursor(Func<int> rightBound)
+        public VirtualCursor(Func<int> rightBound, Prompt prompt)
         {
             RightBound = rightBound;
+            this.prompt = prompt;
         }
 
         private void MoveCursor(int steps)
@@ -299,12 +308,11 @@ namespace Gint.SyntaxHighlighting
     }
     internal class ConsoleWindowResizer
     {
-        private readonly IReadonlyVirtualCursor virtualCursor;
-
         private int beforeReadKeyTop;
         private int beforeReadKeyBufferWidth;
         private int linesBeforeRead;
         private bool cursorTopRecorded = false;
+        private readonly IReadonlyVirtualCursor virtualCursor;
 
         public int InputCursorTop { get; private set; }
 
@@ -329,7 +337,7 @@ namespace Gint.SyntaxHighlighting
             //get buffer and console top location
             beforeReadKeyTop = Console.CursorTop;
             beforeReadKeyBufferWidth = Console.BufferWidth;
-            linesBeforeRead = virtualCursor.Index / Console.BufferWidth;
+            linesBeforeRead = virtualCursor.IndexWithPrompt / Console.BufferWidth;
         }
 
         public void AdjustIfNeeded()
@@ -337,7 +345,7 @@ namespace Gint.SyntaxHighlighting
             //compare and reset
             if (beforeReadKeyBufferWidth != Console.BufferWidth)
             {
-                var linesAfterRead = virtualCursor.Index / Console.BufferWidth;
+                var linesAfterRead = virtualCursor.IndexWithPrompt / Console.BufferWidth;
                 var topDifference = (Console.CursorTop - beforeReadKeyTop);
                 if (linesAfterRead != linesBeforeRead)
                 {
@@ -365,15 +373,15 @@ namespace Gint.SyntaxHighlighting
             Console.ResetColor();
         }
     }
+    
+
     internal class SystemConsoleAdapter
     {
-        private readonly Prompt prompt;
         private readonly ConsoleWindowResizer consoleWindowResizer;
         private readonly IReadonlyVirtualCursor virtualCursor;
 
         public SystemConsoleAdapter(Prompt prompt, ConsoleWindowResizer consoleWindowResizer, IReadonlyVirtualCursor virtualCursor)
         {
-            this.prompt = prompt;
             this.consoleWindowResizer = consoleWindowResizer;
             this.virtualCursor = virtualCursor;
         }
@@ -382,10 +390,10 @@ namespace Gint.SyntaxHighlighting
 
         public void ClearConsoleInput(int characters)
         {
-            var totalLines = (characters) / Console.BufferWidth;
+            var totalLines = characters / Console.BufferWidth;
             totalLines += 1;
 
-            var total = (totalLines) * (Console.WindowWidth - 1);
+            var total = totalLines * Console.WindowWidth;
             SetConsoleCursorToInputStart();
 
             var cleanup = new string(' ', total);
@@ -394,15 +402,14 @@ namespace Gint.SyntaxHighlighting
             OnInputCleared?.Invoke(this, EventArgs.Empty);
         }
 
-        private int VirtualCursorWithPromptPosition => virtualCursor.Index + prompt.Length;
 
         public void AdjustToVirtualCursor()
         {
-            int line = (VirtualCursorWithPromptPosition / Console.BufferWidth);
+            int line = (virtualCursor.IndexWithPrompt / Console.BufferWidth);
 
             var shouldBe = consoleWindowResizer.InputCursorTop + line;
             Console.CursorTop = shouldBe;
-            Console.CursorLeft = VirtualCursorWithPromptPosition % Console.BufferWidth;
+            Console.CursorLeft = virtualCursor.IndexWithPrompt % Console.BufferWidth;
         }
 
         public void SetConsoleCursorToInputStart()
