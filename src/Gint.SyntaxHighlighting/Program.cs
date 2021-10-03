@@ -10,7 +10,7 @@ namespace Gint.SyntaxHighlighting
 
             while(true)
             {
-                inputManager.Run();
+                inputManager.WaitNext();
             }
         }
     }

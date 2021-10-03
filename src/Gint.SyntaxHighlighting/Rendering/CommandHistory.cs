@@ -6,10 +6,10 @@ namespace Gint.SyntaxHighlighting
     {
         private readonly int limit;
 
-        public CommandHistory(int Limit)
+        public CommandHistory(int limit)
             : base()
         {
-            limit = Limit;
+            this.limit = limit;
         }
 
         public new void Push(string history)
@@ -18,6 +18,11 @@ namespace Gint.SyntaxHighlighting
             {
                 Pop();
             }
+            Push(history);
+        }
+
+        public void Record(string history)
+        {
             Push(history);
         }
     }
