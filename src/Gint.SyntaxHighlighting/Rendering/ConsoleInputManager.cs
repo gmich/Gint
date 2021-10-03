@@ -9,7 +9,7 @@ namespace Gint.SyntaxHighlighting
     {
         private readonly ConsoleInputInterceptor consoleInputInterceptor;
         private readonly Prompt prompt;
-        private readonly CommandRenderer commandPrinter;
+        private readonly CommandRenderer renderer;
         private readonly CommandHistory history;
 
         private VirtualCursor virtualCursor;
@@ -26,7 +26,7 @@ namespace Gint.SyntaxHighlighting
         {
             prompt = new Prompt("cli>");
             consoleInputInterceptor = new ConsoleInputInterceptor();
-            commandPrinter = new CommandRenderer();
+            renderer = new CommandRenderer();
             history = new CommandHistory(limit: 20);
             Reset();
         }
@@ -45,9 +45,10 @@ namespace Gint.SyntaxHighlighting
 
             commandText.OnChange += (sender, args) =>
             {
-                systemConsoleAdapter.ClearConsoleInput(args.Previous.Length + prompt.Length);
+                var totalCharactersWritten = args.Previous.Length + prompt.Length + renderer.SuggestionLength;
+                systemConsoleAdapter.ClearConsoleInput(totalCharactersWritten);
                 prompt.Print();
-                commandPrinter.Render(commandText.Value);
+                renderer.Render(commandText.Value);
                 systemConsoleAdapter.AdjustToVirtualCursor();
             };
 

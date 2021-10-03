@@ -10,12 +10,16 @@ namespace Gint.SyntaxHighlighting
         public string Suggested { get; set; }
         public string Actual { get; set; }
         public string Printed { get; set; }
-        public string PrintedDetailed { get; set; }
+
+        public int TotalSize => Printed.Length;
     }
 
 
     internal class CommandRenderer
     {
+        private Suggestion suggestion = null;
+        public int SuggestionLength => suggestion?.TotalSize ?? 0;
+
         private void RenderInternal(string text)
         {
             var tokens = SyntaxHighlighterLexer.Tokenize(text);
@@ -49,7 +53,6 @@ namespace Gint.SyntaxHighlighting
                         break;
                 }
             }
-
         }
 
         private void RenderUnknown(HighlightToken token)
