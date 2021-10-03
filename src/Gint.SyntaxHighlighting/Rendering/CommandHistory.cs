@@ -18,7 +18,7 @@ namespace Gint.SyntaxHighlighting
             {
                 Pop();
             }
-            Push(history);
+            base.Push(history);
         }
 
         public void Record(string history)

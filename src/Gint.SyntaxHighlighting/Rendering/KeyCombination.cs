@@ -19,7 +19,7 @@ namespace Gint.SyntaxHighlighting
             {
                 Dequeue();
             }
-            Enqueue(modifier);
+            base.Enqueue(modifier);
         }
     }
 }
