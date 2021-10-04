@@ -19,16 +19,16 @@ namespace Gint.SyntaxHighlighting.Analysis
             this.text = text;
         }
 
-        private char Current => Peek(0);
+        private char? Current => Peek(0);
 
-        private char Lookahead => Peek(1);
+        private char? Lookahead => Peek(1);
 
-        private char Peek(int offset)
+        private char? Peek(int offset)
         {
             var index = position + offset;
 
             if (index >= text.Length)
-                return '\0';
+                return null;
 
             return text[index];
         }
@@ -57,7 +57,7 @@ namespace Gint.SyntaxHighlighting.Analysis
             start = position;
             kind = HighlightTokenKind.Unknown;
 
-            if (Current == '\0')
+            if (Current == null)
             {
                 kind = HighlightTokenKind.EOF;
                 return new HighlightToken(kind, start, string.Empty);
@@ -77,7 +77,7 @@ namespace Gint.SyntaxHighlighting.Analysis
                 kind = HighlightTokenKind.SingleQuote;
                 position++;
             }
-            else if (char.IsWhiteSpace(Current))
+            else if (char.IsWhiteSpace(Current.Value))
             {
                 ReadWhiteSpace();
             }
@@ -94,7 +94,7 @@ namespace Gint.SyntaxHighlighting.Analysis
 
         private void ReadWhiteSpace()
         {
-            while (char.IsWhiteSpace(Current) && !EndOfText)
+            while (Current != null && char.IsWhiteSpace(Current.Value))
                 position++;
 
             kind = HighlightTokenKind.Whitespace;
@@ -112,7 +112,8 @@ namespace Gint.SyntaxHighlighting.Analysis
             }
 
 
-            while (!char.IsWhiteSpace(Current)
+            while (Current.HasValue
+                && !char.IsWhiteSpace(Current.Value)
                 && !EndOfText
                 && Current != '"'
                 && Current != '\''

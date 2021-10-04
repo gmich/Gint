@@ -76,7 +76,6 @@ namespace Gint
 
                 var binder = new CommandBinder(parserRes.Root, CommandRegistry);
                 var boundNode = binder.Bind();
-
                 WriteDiagnostics(binder.Diagnostics, command);
 
                 if (!binder.Diagnostics.Any())

@@ -24,6 +24,17 @@ namespace Gint
             return BindExpression(root);
         }
 
+        public static BoundNode Bind(string command, CommandRegistry commandRegistry, out DiagnosticCollection diagnostics)
+        {
+            var parserRes = CommandExpressionTree.Parse(command);
+            var binder = new CommandBinder(parserRes.Root, commandRegistry);
+            var boundNode = binder.Bind();
+            parserRes.Diagnostics.AddRange(binder.Diagnostics);
+            diagnostics = parserRes.Diagnostics;
+
+            return boundNode;
+        }
+
         private BoundNode BindExpression(ExpressionSyntax node)
         {
             switch (node.Kind)
@@ -56,7 +67,7 @@ namespace Gint
         private CommandEntry GetCommand(CommandExpressionSyntax n)
         {
             var cmd = n.CommandToken.Value;
-            if (!commandRegistry.Collection.ContainsKey(cmd))
+            if (cmd == null || !commandRegistry.Collection.ContainsKey(cmd))
             {
                 diagnostics.ReportCommandUnknown(n.CommandToken.Span, cmd);
                 return new CommandEntry(new Command(cmd, NoopHelp, NoopExecutionBlock), new Option[0]);
