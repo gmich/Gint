@@ -31,6 +31,13 @@ namespace Gint.SyntaxHighlighting
             RaiseOnChangeEvent(previous);
         }
 
+        public void Replace(string newCommand)
+        {
+            var previous = Value;
+            Value = newCommand;
+            RaiseOnChangeEvent(previous);
+        }
+
         public void InsertCharacter(char c)
         {
             var previous = Value;

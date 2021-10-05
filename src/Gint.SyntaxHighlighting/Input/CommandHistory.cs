@@ -1,29 +1,56 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Gint.SyntaxHighlighting
 {
-    public class CommandHistory : Stack<string>
+    public class CommandHistory : List<string>
     {
         private readonly int limit;
+        private int lastLookup = 0;
 
         public CommandHistory(int limit)
             : base()
         {
-            this.limit = limit;
+            this.limit = Math.Max(1, limit);
         }
 
-        public new void Push(string history)
+        private void InternalAdd(string history)
         {
             if (Count >= limit)
             {
-                Pop();
+                RemoveAt(0);
             }
-            base.Push(history);
+            Add(history);
+            lastLookup = Count;
         }
 
         public void Record(string history)
         {
-            Push(history);
+           InternalAdd(history);
+        }
+
+        internal bool GetPrevious(out string command)
+        {
+            if (lastLookup > 0)
+            {
+                lastLookup--;
+                command = this[lastLookup];
+                return true;
+            }
+            command = default;
+            return false;
+        }
+
+        internal bool GetNext(out string command)
+        {
+            if (Count > lastLookup + 1)
+            {
+                lastLookup++;
+                command = this[lastLookup];
+                return true;
+            }
+            command = string.Empty;
+            return true;
         }
     }
 }

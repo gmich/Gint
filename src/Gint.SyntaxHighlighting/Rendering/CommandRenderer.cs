@@ -8,99 +8,97 @@ using Gint.SyntaxHighlighting.Analysis;
 
 namespace Gint.SyntaxHighlighting
 {
-    internal class TextSpanEqualityComparer : IEqualityComparer<TextSpan>
-    {
-        public bool Equals(TextSpan x, TextSpan y)
-        {
-            return (x.Start == y.Start) && (x.End == y.End);
-        }
-
-        public int GetHashCode([DisallowNull] TextSpan obj)
-        {
-            return obj.GetHashCode();
-        }
-    }
-
-    internal class RenderItemEqualityComparer : IEqualityComparer<RenderItem>
-    {
-        public bool Equals(RenderItem x, RenderItem y)
-        {
-            return (x.Location.Start == y.Location.Start) && (x.Location.End == y.Location.End);
-        }
-
-        public int GetHashCode([DisallowNull] RenderItem obj)
-        {
-            return obj.GetHashCode();
-        }
-    }
 
     internal class CommandRenderer
     {
-        private Suggestion suggestion = null;
+        private Suggestion suggestion;
         public int SuggestionLength => suggestion?.TotalSize ?? 0;
+        private IEnumerable<int> errorCells;
+        private string textRendered;
+        private Action<ConsoleColor> cellColorer;
+        private Action renderCallback;
 
-        private IEnumerable<int> errorPositions = null;
-        private void _Render(string command, CommandRegistry registry)
+        public CommandRenderer()
         {
-            if (string.IsNullOrEmpty(command)) return;
+            cellColorer = PlainCellColorer;
+            Reset();
+        }
 
-            testbuffer = string.Empty;
-            //var boundNode = CommandBinder.Bind(command, registry, out var diagnostics);
+        public CommandRegistry Registry { get; init; }
 
-            //var errorRenderItems = diagnostics.Select(c => new ErrorRenderItem(c.Location, c));
-            //var boundRenderItems = BoundNodeRenderItemTraverser.GetRenderItems(boundNode);
+        private void Noop() { }
 
+        private void Reset()
+        {
+            renderCallback = Noop;
+            suggestion = null;
+            errorCells = Enumerable.Empty<int>();
+            textRendered = string.Empty;
+        }
+
+        private void SetErrorCells(DiagnosticCollection diagnostics)
+        {
+            errorCells = diagnostics
+                .SelectMany(c => Enumerable.Range(c.Location.Start, c.Location.End))
+                .Distinct();
+        }
+
+
+        private bool _displayErrorCells = false;
+        public bool DisplayErrorCells
+        {
+            get
+            {
+                return _displayErrorCells;
+            }
+            set
+            {
+                _displayErrorCells = value;
+                cellColorer = _displayErrorCells ? ErrorAwareCellColorer : PlainCellColorer;
+            }
+        }
+        private void ErrorAwareCellColorer(ConsoleColor color)
+        {
+            if (errorCells.Contains(textRendered.Length))
+                Console.ForegroundColor = ConsoleColor.Red;
+            else
+                Console.ForegroundColor = color;
+        }
+
+        private void PlainCellColorer(ConsoleColor color)
+        {
+            Console.ForegroundColor = color;
+        }
+
+        private void RenderInternal(string command)
+        {
+            Reset();
             var expressionTree = CommandExpressionTree.Parse(command);
-            errorPositions = expressionTree.Diagnostics.SelectMany(c => Enumerable.Range(c.Location.Start, c.Location.End)).Distinct();
+
+            if (DisplayErrorCells)
+                SetErrorCells(expressionTree.Diagnostics);
+
             var expressionRenderitems = ExpressionRenderItemTraverser.GetRenderItems(expressionTree.Root);
             var highlightedRenderItems = SyntaxHighlighterLexer.Tokenize(command).Select(c => new HighlighterRenderItem(c));
 
-            //var renderGroups = errorRenderItems.Concat(boundRenderItems).Concat(highlightedRenderItems).GroupBy(c => c.Location, new TextSpanEqualityComparer());
-            var renderGroups = expressionRenderitems.Concat(highlightedRenderItems).GroupBy(c => c.Location, new TextSpanEqualityComparer());
-            //var renderGroups = boundRenderItems.GroupBy(c => c.Location, new TextSpanEqualityComparer());
+            var renderItems = expressionRenderitems.Concat(highlightedRenderItems).OrderBy(c => c.Location.Start);
 
-            var renderItems = new List<RenderItem>();
-            foreach (var group in renderGroups)
-            {
-                var mostImportantOfGroup = group.OrderBy(c => (int)c.RenderItemType).First();
-                renderItems.Add(mostImportantOfGroup);
-            }
-            var orderedRenderItems = renderItems.Distinct(new RenderItemEqualityComparer()).OrderBy(c => c.Location.Start);
-
-            var test = expressionRenderitems.Concat(highlightedRenderItems).OrderBy(c => c.Location.Start);
-            EvaluateRenderItems(test, command);
+            EvaluateRenderItems(renderItems, command);
         }
 
         private void EvaluateRenderItems(IEnumerable<RenderItem> renderItems, string command)
         {
-            RenderItem previous = null;
             foreach (var item in renderItems)
             {
-                var location = item.Location;
-                if (previous != null)
-                {
-                    if (location.Start < previous.Location.End)
-                    {
-                        var shift = previous.Location.End - location.Start;
-                        location = new TextSpan(item.Location.Start + shift, item.Location.Length - shift);
-                    }
-                }
                 switch (item.RenderItemType)
                 {
-                    case RenderItemType.Error:
-                        RenderError(GetString(location, command));
-                        break;
-                    case RenderItemType.BoundNode:
-                        RenderBoundToken(((BoundRenderItem)item).BoundNodeKind, GetString(item.Location, command));
-                        break;
                     case RenderItemType.HighlighterLexer:
                         RenderHighlightToken(((HighlighterRenderItem)item).Token);
                         break;
                     case RenderItemType.ExpressionSyntax:
-                        RenderExpressionToken(((ExpressionRenderItem)item).Kind, GetString(item.Location, command));
+                        RenderExpressionToken(((ExpressionRenderItem)item).Kind, GetStringFromSpan(item.Location, command));
                         break;
                 }
-                previous = item;
             }
         }
 
@@ -115,13 +113,7 @@ namespace Gint.SyntaxHighlighting
                     RenderText(text, ConsoleColor.Green);
                     break;
                 case CommandTokenKind.Keyword:
-                    for (int i = 0; i < text.Length; i++)
-                    {
-                        if (text[i] == '\'' || text[i] == '\"')
-                            RenderText(text[i].ToString(), ConsoleColor.Magenta);
-                        else
-                            RenderText(text[i].ToString(), ConsoleColor.White);
-                    }
+                    RenderKeyword(text);
                     break;
                 case CommandTokenKind.OptionExpression:
                     RenderText(text, ConsoleColor.Yellow);
@@ -138,150 +130,54 @@ namespace Gint.SyntaxHighlighting
             }
         }
 
-        private string GetString(TextSpan span, string text)
+        private void RenderKeyword(string text)
+        {
+            for (int i = 0; i < text.Length; i++)
+            {
+                if (text[i] == '\'' || text[i] == '\"')
+                    RenderText(text[i].ToString(), ConsoleColor.Magenta);
+                else
+                    RenderText(text[i].ToString(), ConsoleColor.Gray);
+            }
+        }
+
+        private static string GetStringFromSpan(TextSpan span, string text)
         {
             return text.Substring(span.Start, span.Length);
-        }
-
-        private void RenderError(string text)
-        {
-            RenderText(text, ConsoleColor.Red);
-        }
-        private void RenderBoundToken(BoundNodeKind kind, string text)
-        {
-            switch (kind)
-            {
-                case BoundNodeKind.Command:
-                    RenderText(text, ConsoleColor.DarkGreen);
-                    break;
-                case BoundNodeKind.CommandWithVariable:
-                    RenderText(text, ConsoleColor.DarkGreen);
-                    break;
-                case BoundNodeKind.Option:
-                    RenderText(text, ConsoleColor.DarkYellow);
-                    break;
-                case BoundNodeKind.VariableOption:
-                    RenderText(text, ConsoleColor.DarkYellow);
-                    break;
-                case BoundNodeKind.Pipe:
-                    RenderText(text, ConsoleColor.DarkMagenta);
-                    break;
-                case BoundNodeKind.Pipeline:
-                    break;
-            }
-        }
-
-        private void RenderInternal(string text)
-        {
-            var tokens = SyntaxHighlighterLexer.Tokenize(text);
-
-            foreach (var token in tokens)
-            {
-                RenderHighlightToken(token);
-            }
         }
 
         private void RenderHighlightToken(HighlightToken token)
         {
             if (token.Kind == HighlightTokenKind.Whitespace)
             {
-                if (testbuffer.Length > token.Span.Start) return;
-                RenderWhiteSpace(token);
-            }
-            if (token.Kind == HighlightTokenKind.SingleQuote)
-            {
-                if (testbuffer.Length > token.Span.Start) return;
-                RenderDoubleQuotes(token);
-            }
-            if (token.Kind == HighlightTokenKind.DoubleQuotes)
-            {
-                if (testbuffer.Length > token.Span.Start) return;
-                RenderSingleQuote(token);
-            }
-            return;
-            switch (token.Kind)
-            {
-                case HighlightTokenKind.Unknown:
-                    RenderUnknown(token);
-                    break;
-                case HighlightTokenKind.Whitespace:
-                    RenderWhiteSpace(token);
-                    break;
-                case HighlightTokenKind.Option:
-                    RenderOption(token);
-                    break;
-                case HighlightTokenKind.Keyword:
-                    RenderKeyword(token);
-                    break;
-                case HighlightTokenKind.EOF:
-                    break;
-                case HighlightTokenKind.Pipe:
-                    RenderPipe(token);
-                    break;
-                case HighlightTokenKind.DoubleQuotes:
-                    RenderDoubleQuotes(token);
-                    break;
-                case HighlightTokenKind.SingleQuote:
-                    RenderSingleQuote(token);
-                    break;
+                if (textRendered.Length > token.Span.Start) return;
+
+                RenderText(token.Text, ConsoleColor.White);
             }
         }
 
-        private void RenderUnknown(HighlightToken token)
-        {
-            RenderText(token.Text, ConsoleColor.White);
-        }
-
-        private void RenderWhiteSpace(HighlightToken token)
-        {
-            RenderText(token.Text, ConsoleColor.White);
-        }
-
-        private void RenderOption(HighlightToken token)
-        {
-            RenderText(token.Text, ConsoleColor.Yellow);
-        }
-
-        private void RenderKeyword(HighlightToken token)
-        {
-            RenderText(token.Text, ConsoleColor.Green);
-        }
-
-        private void RenderPipe(HighlightToken token)
-        {
-            RenderText(token.Text, ConsoleColor.Magenta);
-        }
-
-        private void RenderDoubleQuotes(HighlightToken token)
-        {
-            RenderText(token.Text, ConsoleColor.Magenta);
-        }
-
-        private void RenderSingleQuote(HighlightToken token)
-        {
-            RenderText(token.Text, ConsoleColor.Magenta);
-        }
-
-        private string testbuffer = string.Empty;
         private void RenderText(string text, ConsoleColor color)
+        {
+            renderCallback += () => RenderCell(text, color);
+        }
+
+        private void RenderCell(string text, ConsoleColor color)
         {
             for (int i = 0; i < text.Length; i++)
             {
-                if (errorPositions.Contains(testbuffer.Length))
-                    Console.ForegroundColor = ConsoleColor.Red;
-                else
-                    Console.ForegroundColor = color;
-
+                cellColorer(color);
                 Console.Write(text[i]);
-                testbuffer += text[i];
+                textRendered += text[i];
             }
             Console.ResetColor();
         }
 
-        public void Render(string command)
+        public Action GenerateRenderCallback(string command)
         {
-            _Render(command, CommandRegistry.Empty);
-            //RenderInternal(command);
+            if (string.IsNullOrEmpty(command)) return Noop;
+
+            RenderInternal(command);
+            return renderCallback;
         }
     }
 

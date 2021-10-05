@@ -24,11 +24,16 @@ namespace Gint.SyntaxHighlighting
 
         public ConsoleInputManager()
         {
-            prompt = new Prompt("cli>");
+            prompt = new Prompt("cli> ");
             consoleInputInterceptor = new ConsoleInputInterceptor();
             renderer = new CommandRenderer();
             history = new CommandHistory(limit: 20);
             Reset();
+
+            OnCommandReady += (sender, args) =>
+            {
+                history.Record(args);
+            };
         }
 
         private void CreateActors()
@@ -46,20 +51,16 @@ namespace Gint.SyntaxHighlighting
             commandText.OnChange += (sender, args) =>
             {
                 var totalCharactersWritten = args.Previous.Length + prompt.Length + renderer.SuggestionLength;
+                var renderCallback = renderer.GenerateRenderCallback(commandText.Value);
                 systemConsoleAdapter.ClearConsoleInput(totalCharactersWritten);
                 prompt.Print();
-                renderer.Render(commandText.Value);
+                renderCallback();
                 systemConsoleAdapter.AdjustToVirtualCursor();
             };
 
             virtualCursor.OnPositionChanged += (sender, args) =>
             {
                 systemConsoleAdapter.AdjustToVirtualCursor();
-            };
-
-            OnCommandReady += (sender, args) =>
-            {
-                 history.Record(args);
             };
 
             commandText.Clear();
@@ -116,14 +117,11 @@ namespace Gint.SyntaxHighlighting
                     EscapeArrowPressed();
                     break;
                 default:
-                    if (key.Modifiers == ConsoleModifiers.Control && key.Key == ConsoleKey.V)
-                    {
-                        CopyCombinationPressed();
-                    }
-                    else
-                    {
+                    //No need, .net console handles paste is as a stream of characters so it works
+                    //if (key.Modifiers == ConsoleModifiers.Control && key.Key == ConsoleKey.V)
+                    //    CopyCombinationPressed();
+                    //else
                         CharacterKeyPress(key);
-                    }
 
                     break;
             }
@@ -140,27 +138,32 @@ namespace Gint.SyntaxHighlighting
 
         private void TabKeyPressed()
         {
-            throw new NotImplementedException();
         }
 
         private void UpArrowKeyPressed()
         {
-            throw new NotImplementedException();
+            if (history.GetPrevious(out var command))
+            {
+                commandText.Replace(command);
+                virtualCursor.Forward(command.Length);
+            }
         }
 
         private void DownArrowKeyPressed()
         {
-            throw new NotImplementedException();
+            if (history.GetNext(out var command))
+            {
+                commandText.Replace(command);
+                virtualCursor.Forward(command.Length);
+            }
         }
 
         private void PageUpPressed()
         {
-            throw new NotImplementedException();
         }
 
         private void PageDownPressed()
         {
-            throw new NotImplementedException();
         }
 
         private void LeftArrowPressed()
@@ -192,7 +195,15 @@ namespace Gint.SyntaxHighlighting
 
         private void CopyCombinationPressed()
         {
-            throw new NotImplementedException();
+            if (!OperatingSystem.IsWindows()) return;
+
+            var clipboardStr = WindowsClipboard.GetText();
+
+            if (!string.IsNullOrEmpty(clipboardStr))
+            {
+                commandText.Replace(clipboardStr);
+                virtualCursor.Forward(clipboardStr.Length);
+            }
         }
 
         private void CharacterKeyPress(ConsoleKeyInfo key)
