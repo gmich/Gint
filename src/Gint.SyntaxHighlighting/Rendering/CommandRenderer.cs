@@ -14,6 +14,7 @@ namespace Gint.SyntaxHighlighting
         private Suggestion suggestion;
         public int SuggestionLength => suggestion?.TotalSize ?? 0;
         private IEnumerable<int> errorCells;
+        private string textProcessed;
         private string textRendered;
         private Action<ConsoleColor> cellColorer;
         private Action renderCallback;
@@ -33,6 +34,7 @@ namespace Gint.SyntaxHighlighting
             renderCallback = Noop;
             suggestion = null;
             errorCells = Enumerable.Empty<int>();
+            textProcessed = string.Empty;
             textRendered = string.Empty;
         }
 
@@ -57,6 +59,7 @@ namespace Gint.SyntaxHighlighting
                 cellColorer = _displayErrorCells ? ErrorAwareCellColorer : PlainCellColorer;
             }
         }
+
         private void ErrorAwareCellColorer(ConsoleColor color)
         {
             if (errorCells.Contains(textRendered.Length))
@@ -150,7 +153,7 @@ namespace Gint.SyntaxHighlighting
         {
             if (token.Kind == HighlightTokenKind.Whitespace)
             {
-                if (textRendered.Length > token.Span.Start) return;
+                if (textProcessed.Length > token.Span.Start) return;
 
                 RenderText(token.Text, ConsoleColor.White);
             }
@@ -158,7 +161,7 @@ namespace Gint.SyntaxHighlighting
 
         private void RenderText(string text, ConsoleColor color)
         {
-            textRendered += text;
+            textProcessed += text;
             renderCallback += () => RenderCell(text, color);
         }
 
@@ -167,7 +170,8 @@ namespace Gint.SyntaxHighlighting
             for (int i = 0; i < text.Length; i++)
             {
                 cellColorer(color);
-                Console.Write(text[i]);         
+                Console.Write(text[i]);
+                textRendered += text[i];
             }
             Console.ResetColor();
         }
