@@ -158,6 +158,7 @@ namespace Gint.SyntaxHighlighting
 
         private void RenderText(string text, ConsoleColor color)
         {
+            textRendered += text;
             renderCallback += () => RenderCell(text, color);
         }
 
@@ -166,8 +167,7 @@ namespace Gint.SyntaxHighlighting
             for (int i = 0; i < text.Length; i++)
             {
                 cellColorer(color);
-                Console.Write(text[i]);
-                textRendered += text[i];
+                Console.Write(text[i]);         
             }
             Console.ResetColor();
         }

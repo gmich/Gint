@@ -26,7 +26,11 @@ namespace Gint.SyntaxHighlighting
         {
             prompt = new Prompt("cli> ");
             consoleInputInterceptor = new ConsoleInputInterceptor();
-            renderer = new CommandRenderer();
+            renderer = new CommandRenderer()
+            {
+                DisplayErrorCells = true
+            };
+
             history = new CommandHistory(limit: 20);
             Reset();
 
