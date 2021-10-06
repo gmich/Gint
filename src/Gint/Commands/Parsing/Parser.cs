@@ -84,19 +84,25 @@ namespace Gint
             {
                 var pipe = ParsePipe();
                 var second = ParseExecutionPipeline();
-                if(commandExpressionSyntax==null)
+                if (commandExpressionSyntax == null)
                 {
                     diagnostics.ReportMissingCommandToPipe(pipe.Span);
+                    return new PipedCommandExpressionSyntax(StubCommand, pipe, second);
                 }
                 return new PipedCommandExpressionSyntax(commandExpressionSyntax, pipe, second);
             }
             if (commandExpressionSyntax == null)
             {
                 diagnostics.ReportUnterminatedPipeline(Current.Span);
+
+                //Return a stub if commandExpression syntax is null 
+                var stubPipe = new PipeExpressionSyntax(new CommandSyntaxToken(CommandTokenKind.Pipe, Current.Position, null, null));
+                return new PipedCommandExpressionSyntax(StubCommand, stubPipe, StubCommand);
             }
-            //TODO: dont allow null expression syntax
             return commandExpressionSyntax;
         }
+
+        private CommandExpressionSyntax StubCommand => new CommandExpressionSyntax(new CommandSyntaxToken(CommandTokenKind.CommandExpression, Current.Position, null, null), new OptionExpressionSyntax[0]);
 
         private CommandExpressionSyntax ParseCommand()
         {

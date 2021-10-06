@@ -15,82 +15,84 @@ namespace Gint
             this.diagnostics.AddRange(diagnostics);
         }
 
-        private void ReportError(TextSpan location, string message)
+        private void ReportError(string errorCode, TextSpan location, string message)
         {
-            var diagnostic = Diagnostic.Error(location, message);
+            var diagnostic = Diagnostic.Error(errorCode, location, message);
             diagnostics.Add(diagnostic);
         }
 
-        private void ReportWarning(TextSpan location, string message)
+        private void ReportWarning(string errorCode, TextSpan location, string message)
         {
-            var diagnostic = Diagnostic.Warning(location, message);
+            var diagnostic = Diagnostic.Warning(errorCode, location, message);
             diagnostics.Add(diagnostic);
         }
 
         internal void ReportUnterminatedString(TextSpan span)
         {
             var message = "Unterminated string literal.";
-            ReportError(span, message);
+            ReportError(DiagnosticsErrorCode.UnterminatedString, span, message);
         }
 
         internal void ReportUnexpectedToken(TextSpan span, CommandTokenKind actualKind, CommandTokenKind expectedKind)
         {
             var message = $"Unexpected token <{actualKind}>, expected <{expectedKind}>.";
-            ReportError(span, message);
+            ReportError(DiagnosticsErrorCode.UnexpectedToken, span, message);
         }
 
         internal void ReportCommandUnknown(TextSpan span, string cmd)
         {
+            var errorCode = string.IsNullOrEmpty(cmd) ? DiagnosticsErrorCode.NullCommand : DiagnosticsErrorCode.CommandUnknown;
             var message = $"Unknown command <{cmd}>.";
-            ReportError(span, message);
+            ReportError(errorCode, span, message);
         }
 
         internal void ReportOptionUnknown(TextSpan span, string option)
         {
+            var errorCode = string.IsNullOrEmpty(option) ? DiagnosticsErrorCode.NullOption : DiagnosticsErrorCode.OptionUnknown;
             var message = $"Unknown option <{option}>.";
-            ReportError(span, message);
+            ReportError(errorCode, span, message);
         }
 
         internal void ReportUnecessaryVariable(TextSpan span)
         {
             var message = $"Option does not require a variable.";
-            ReportError(span, message);
+            ReportError(DiagnosticsErrorCode.UnecessaryVariable, span, message);
         }
 
         internal void ReportMissingVariable(TextSpan span)
         {
             var message = $"Missing variable.";
-            ReportError(span, message);
+            ReportError(DiagnosticsErrorCode.MissingVariable, span, message);
         }
 
         internal void ReportUnterminatedPipeline(TextSpan span)
         {
             var message = $"Unterminated pipeline, expected command.";
-            ReportError(span, message);
+            ReportError(DiagnosticsErrorCode.UnterminatedPipeline, span, message);
         }
 
         internal void ReportMultipleOptionsNotAllowed(TextSpan span)
         {
             var message = $"Multiple calls to this option are not allowed.";
-            ReportError(span, message);
+            ReportError(DiagnosticsErrorCode.MultipleOptionsNotAllowed, span, message);
         }
 
         internal void ReportCommandHasRequiredVariable(TextSpan span)
         {
             var message = $"Command requires a variable.";
-            ReportError(span, message);
+            ReportError(DiagnosticsErrorCode.CommandHasRequiredVariable, span, message);
         }
 
         internal void ReportCommandIsNotACommandWithVariable(TextSpan span)
         {
             var message = $"Command does not accept variables.";
-            ReportError(span, message);
+            ReportError(DiagnosticsErrorCode.CommandIsNotACommandWithVariable, span, message);
         }
 
         internal void ReportMissingCommandToPipe(TextSpan span)
         {
             var message = $"Missing command before pipe.";
-            ReportError(span, message);
+            ReportError(DiagnosticsErrorCode.MissingCommandToPipe, span, message);
         }
     }
 }

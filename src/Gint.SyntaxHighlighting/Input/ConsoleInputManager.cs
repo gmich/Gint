@@ -13,7 +13,7 @@ namespace Gint.SyntaxHighlighting
         private readonly CommandHistory history;
 
         private VirtualCursor virtualCursor;
-        private ConsoleWindowResizer consoleWindowResizer;
+        private ConsoleVirtualBufferHandler consoleVirtualBuffer;
         private SystemConsoleAdapter systemConsoleAdapter;
         private CommandText commandText;
 
@@ -22,13 +22,17 @@ namespace Gint.SyntaxHighlighting
         private int GetTotalSize() => commandText.Value.Length;
         private bool requiresReset = true;
 
-        public ConsoleInputManager()
+        public bool AcceptInput { get; set; } = true;
+
+        public ConsoleInputManager(CommandRegistry registry = null)
         {
             prompt = new Prompt("cli> ");
             consoleInputInterceptor = new ConsoleInputInterceptor();
             renderer = new CommandRenderer()
             {
-                DisplayErrorCells = true
+                DisplayErrorCells = false,
+                DisplayDiagnostics = true,
+                Registry = registry ?? CommandRegistry.Empty
             };
 
             history = new CommandHistory(limit: 20);
@@ -43,9 +47,9 @@ namespace Gint.SyntaxHighlighting
         private void CreateActors()
         {
             virtualCursor = new VirtualCursor(GetTotalSize, prompt);
-            consoleWindowResizer = new ConsoleWindowResizer(virtualCursor);
-            systemConsoleAdapter = new SystemConsoleAdapter(prompt, consoleWindowResizer, virtualCursor);
             commandText = new CommandText(virtualCursor);
+            consoleVirtualBuffer = new ConsoleVirtualBufferHandler(virtualCursor, commandText);
+            systemConsoleAdapter = new SystemConsoleAdapter(prompt, consoleVirtualBuffer, virtualCursor);
         }
 
         private void Reset()
@@ -54,11 +58,11 @@ namespace Gint.SyntaxHighlighting
 
             commandText.OnChange += (sender, args) =>
             {
-                var totalCharactersWritten = args.Previous.Length + prompt.Length + renderer.SuggestionLength;
                 var renderCallback = renderer.GenerateRenderCallback(commandText.Value);
-                systemConsoleAdapter.ClearConsoleInput(totalCharactersWritten);
+                systemConsoleAdapter.ClearConsoleInput(consoleVirtualBuffer.GetTotalCharactersInVirtualBuffer());
                 prompt.Print();
                 renderCallback();
+                consoleVirtualBuffer.RecordLastCursorLine();
                 systemConsoleAdapter.AdjustToVirtualCursor();
             };
 
@@ -74,11 +78,13 @@ namespace Gint.SyntaxHighlighting
 
         public void WaitNext()
         {
+            if (!AcceptInput) return;
+
             if (requiresReset) Reset();
 
-            consoleWindowResizer.RecordBufferState();
+            consoleVirtualBuffer.RecordBufferState();
             var key = consoleInputInterceptor.GetNextKey();
-            consoleWindowResizer.AdjustIfNeeded();
+            consoleVirtualBuffer.AdjustIfNeeded();
 
             HandleKey(key);
         }
@@ -125,7 +131,7 @@ namespace Gint.SyntaxHighlighting
                     //if (key.Modifiers == ConsoleModifiers.Control && key.Key == ConsoleKey.V)
                     //    CopyCombinationPressed();
                     //else
-                        CharacterKeyPress(key);
+                    CharacterKeyPress(key);
 
                     break;
             }
@@ -135,8 +141,10 @@ namespace Gint.SyntaxHighlighting
         {
             if (string.IsNullOrEmpty(commandText.Value)) return;
 
-            OnCommandReady?.Invoke(this, commandText.Value);
             systemConsoleAdapter.NewLine();
+            consoleVirtualBuffer.RecordInputTop();
+            systemConsoleAdapter.ClearConsoleInput(consoleVirtualBuffer.GetTotalCharactersInVirtualBuffer());
+            OnCommandReady?.Invoke(this, commandText.Value);
             requiresReset = true;
         }
 

@@ -4,10 +4,10 @@ namespace Gint.SyntaxHighlighting
 {
     internal class SystemConsoleAdapter
     {
-        private readonly ConsoleWindowResizer consoleWindowResizer;
+        private readonly ConsoleVirtualBufferHandler consoleWindowResizer;
         private readonly IReadonlyVirtualCursor virtualCursor;
 
-        public SystemConsoleAdapter(Prompt prompt, ConsoleWindowResizer consoleWindowResizer, IReadonlyVirtualCursor virtualCursor)
+        public SystemConsoleAdapter(Prompt prompt, ConsoleVirtualBufferHandler consoleWindowResizer, IReadonlyVirtualCursor virtualCursor)
         {
             this.consoleWindowResizer = consoleWindowResizer;
             this.virtualCursor = virtualCursor;

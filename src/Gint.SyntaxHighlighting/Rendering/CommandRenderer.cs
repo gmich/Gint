@@ -12,7 +12,6 @@ namespace Gint.SyntaxHighlighting
     internal class CommandRenderer
     {
         private Suggestion suggestion;
-        public int SuggestionLength => suggestion?.TotalSize ?? 0;
         private IEnumerable<int> errorCells;
         private string textProcessed;
         private string textRendered;
@@ -60,6 +59,8 @@ namespace Gint.SyntaxHighlighting
             }
         }
 
+        public bool DisplayDiagnostics { get; set; } = false;
+
         private void ErrorAwareCellColorer(ConsoleColor color)
         {
             if (errorCells.Contains(textRendered.Length))
@@ -75,11 +76,27 @@ namespace Gint.SyntaxHighlighting
 
         private void RenderInternal(string command)
         {
+            if (string.IsNullOrEmpty(command))
+            {
+                renderCallback = Noop;
+                RenderDiagnosticsFrame();
+                return;
+            }
+
             Reset();
+
             var expressionTree = CommandExpressionTree.Parse(command);
 
             if (DisplayErrorCells)
                 SetErrorCells(expressionTree.Diagnostics);
+
+            var binder = new CommandBinder(expressionTree.Root, Registry);
+            try
+            {
+                binder.Bind();
+            }
+            catch { }
+            expressionTree.Diagnostics.AddRange(binder.Diagnostics);
 
             var expressionRenderitems = ExpressionRenderItemTraverser.GetRenderItems(expressionTree.Root);
             var highlightedRenderItems = SyntaxHighlighterLexer.Tokenize(command).Select(c => new HighlighterRenderItem(c));
@@ -87,6 +104,71 @@ namespace Gint.SyntaxHighlighting
             var renderItems = expressionRenderitems.Concat(highlightedRenderItems).OrderBy(c => c.Location.Start);
 
             EvaluateRenderItems(renderItems, command);
+
+            RenderDiagnostics(expressionTree.Diagnostics, command);
+        }
+
+        private void RenderDiagnosticsFrame()
+        {
+            renderCallback += () =>
+            {
+                Console.WriteLine();
+                Console.WriteLine();
+                Console.WriteLine(new string('-', Console.BufferWidth));
+            };
+        }
+
+        private bool ShouldPrintDiagnostic(Diagnostic diagnostic)
+        {
+            return (diagnostic.ErrorCode != DiagnosticsErrorCode.NullCommand
+             && diagnostic.ErrorCode != DiagnosticsErrorCode.NullOption);
+        }
+
+        private void RenderDiagnostics(DiagnosticCollection diagnostics, string text)
+        {
+            RenderDiagnosticsFrame();
+
+            renderCallback += () =>
+            {
+                for (int i = 0; i < diagnostics.Count(); i++)
+                {
+                    var diagnostic = diagnostics.ElementAt(i);
+                    if (!ShouldPrintDiagnostic(diagnostic)) continue;
+
+                    var error = text.Substring(diagnostic.Location.Start, diagnostic.Location.Length);
+                    var prefix = text.Substring(0, diagnostic.Location.Start);
+                    var suffix = text[diagnostic.Location.End..];
+                    Console.Write("    ");
+                    Console.Write(prefix);
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.Write(error);
+                    Console.ResetColor();
+                    Console.WriteLine(suffix);
+
+                    if (diagnostic.IsError)
+                    {
+                        Console.BackgroundColor = ConsoleColor.Red;
+                        Console.ForegroundColor = ConsoleColor.White;
+                        Console.Write(" X ");
+                        Console.ResetColor();
+                        Console.Write(" ");
+                    }
+                    else //warning
+                    {
+                        Console.BackgroundColor = ConsoleColor.Yellow;
+                        Console.ForegroundColor = ConsoleColor.Black;
+                        Console.Write("!");
+                        Console.ResetColor();
+                        Console.Write(" ");
+                    }
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.Write(diagnostic.ErrorCode);
+                    Console.ResetColor();
+                    Console.Write(" ");
+                    Console.WriteLine(diagnostic.Message);
+                    Console.WriteLine();
+                }
+            };
         }
 
         private void EvaluateRenderItems(IEnumerable<RenderItem> renderItems, string command)
@@ -178,11 +260,10 @@ namespace Gint.SyntaxHighlighting
 
         public Action GenerateRenderCallback(string command)
         {
-            if (string.IsNullOrEmpty(command)) return Noop;
-
             RenderInternal(command);
             return renderCallback;
         }
+
     }
 
 

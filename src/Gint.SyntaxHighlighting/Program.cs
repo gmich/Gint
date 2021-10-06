@@ -6,9 +6,21 @@ namespace Gint.SyntaxHighlighting
     {
         static void Main(string[] args)
         {
-            var inputManager = new ConsoleInputManager();
+            var runtime = new CommandRuntime(
+                commandRegistry: CommandRegistry.Empty,
+                options: CommandRuntimeOptions.DefaultConsole
+              );
 
-            while(true)
+            var inputManager = new ConsoleInputManager(runtime.CommandRegistry);
+            inputManager.OnCommandReady += async (sender, cmd) =>
+            {
+                inputManager.AcceptInput = false;
+                Console.WriteLine();
+                await runtime.Run(cmd);
+                inputManager.AcceptInput = true;
+            };
+
+            while (true)
             {
                 inputManager.WaitNext();
             }
