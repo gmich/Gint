@@ -38,6 +38,13 @@ namespace Gint.SyntaxHighlighting
             RaiseOnChangeEvent(previous);
         }
 
+        public void AddSuffix(string suffix)
+        {
+            var previous = Value;
+            Value += suffix;
+            RaiseOnChangeEvent(previous);
+        }
+
         public void InsertCharacter(char c)
         {
             var previous = Value;

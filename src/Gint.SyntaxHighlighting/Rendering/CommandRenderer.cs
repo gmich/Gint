@@ -157,7 +157,7 @@ namespace Gint.SyntaxHighlighting
                     {
                         Console.BackgroundColor = ConsoleColor.Yellow;
                         Console.ForegroundColor = ConsoleColor.Black;
-                        Console.Write("!");
+                        Console.Write(" ! ");
                         Console.ResetColor();
                         Console.Write(" ");
                     }

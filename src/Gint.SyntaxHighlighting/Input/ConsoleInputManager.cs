@@ -16,6 +16,7 @@ namespace Gint.SyntaxHighlighting
         private ConsoleVirtualBufferHandler consoleVirtualBuffer;
         private SystemConsoleAdapter systemConsoleAdapter;
         private CommandText commandText;
+        private SuggestionRenderer suggestionRenderer;
 
         public event EventHandler<string> OnCommandReady;
 
@@ -34,7 +35,7 @@ namespace Gint.SyntaxHighlighting
                 DisplayDiagnostics = true,
                 Registry = registry ?? CommandRegistry.Empty
             };
-
+            suggestionRenderer = new SuggestionRenderer();
             history = new CommandHistory(limit: 20);
             Reset();
 
@@ -66,6 +67,8 @@ namespace Gint.SyntaxHighlighting
                 systemConsoleAdapter.AdjustToVirtualCursor();
             };
 
+            ResetSuggestions();
+
             virtualCursor.OnPositionChanged += (sender, args) =>
             {
                 systemConsoleAdapter.AdjustToVirtualCursor();
@@ -75,6 +78,32 @@ namespace Gint.SyntaxHighlighting
 
             requiresReset = false;
         }
+
+        private void ResetSuggestions()
+        {
+            suggestionRenderer.OnLostFocus += (sender, args) =>
+            {
+                AcceptInput = false;
+                if (args.SuggestionAccepted)
+                    commandText.AddSuffix(args.Value);
+                else
+                    commandText.Replace(commandText.Value);
+                virtualCursor.Forward(GetTotalSize());
+                AcceptInput = true;
+            };
+
+            suggestionRenderer.OnChange += (sender, args) =>
+            {
+                var renderCallback = renderer.GenerateRenderCallback(commandText.Value);
+                systemConsoleAdapter.ClearConsoleInput(consoleVirtualBuffer.GetTotalCharactersInVirtualBuffer());
+                prompt.Print();
+                renderCallback();
+                consoleVirtualBuffer.RecordLastCursorLine();
+                systemConsoleAdapter.AdjustToVirtualCursor();
+                suggestionRenderer.Render();
+            };
+        }
+
 
         public void WaitNext()
         {
@@ -176,6 +205,7 @@ namespace Gint.SyntaxHighlighting
 
         private void PageDownPressed()
         {
+            suggestionRenderer.Init();
         }
 
         private void LeftArrowPressed()
