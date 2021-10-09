@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Gint
 {
-    using static ExecutionBlockUtilities;
+    using static CallbackUtilities;
 
     internal class CommandBinder
     {

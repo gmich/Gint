@@ -31,6 +31,11 @@ namespace Gint.SyntaxHighlighting
             RaiseOnChangeEvent(previous);
         }
 
+        public bool IsLastCharacterWhitespace()
+        {
+            return char.IsWhiteSpace(Value[Value.Length - 1]);
+        }
+
         public void Replace(string newCommand)
         {
             var previous = Value;

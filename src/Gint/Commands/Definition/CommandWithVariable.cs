@@ -2,7 +2,7 @@
 {
     public class CommandWithVariable : Command
     {
-        public CommandWithVariable(string commandName, bool required, HelpCallback helpCallback, ExecutionBlock callback) : base(commandName, helpCallback, callback)
+        public CommandWithVariable(string commandName, bool required, HelpCallback helpCallback, ExecutionBlock callback, SuggestionsCallback suggestions = null) : base(commandName, helpCallback, callback, suggestions)
         {
             Required = required;
         }

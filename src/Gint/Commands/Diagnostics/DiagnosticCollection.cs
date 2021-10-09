@@ -74,7 +74,7 @@ namespace Gint
         internal void ReportMultipleOptionsNotAllowed(TextSpan span)
         {
             var message = $"Multiple calls to this option are not allowed.";
-            ReportError(DiagnosticsErrorCode.MultipleOptionsNotAllowed, span, message);
+            ReportWarning(DiagnosticsErrorCode.MultipleOptionsNotAllowed, span, message);
         }
 
         internal void ReportCommandHasRequiredVariable(TextSpan span)

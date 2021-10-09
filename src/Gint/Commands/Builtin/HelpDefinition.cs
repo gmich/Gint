@@ -15,9 +15,17 @@ namespace Gint.Builtin
             this.registry = registry;
 
             registry.Add(
-                  new CommandWithVariable("help", required: false, HelpHelp, Help),
+                  new CommandWithVariable("help", required: false, HelpHelp, Help, HelpSuggestions),
                   new Option(1, "-d", "--detail", false, Detail, DetailHelp)
               );
+        }
+
+        private IEnumerable<Suggestion> HelpSuggestions(string variable)
+        {
+            if (!string.IsNullOrEmpty(variable))
+                return Enumerable.Empty<Suggestion>();
+
+            return registry.Collection.Select(c => new Suggestion(c.Key, c.Key));
         }
 
         private Task<ICommandOutput> Help(ICommandInput input, CommandExecutionContext ctx, Func<Task> next)
@@ -31,9 +39,9 @@ namespace Gint.Builtin
                 if (registry.Collection.ContainsKey(input.Variable))
                 {
                     var entry = registry.Collection[input.Variable];
-                    PrintCommand(writer,ctx, entry);
+                    PrintCommand(writer, ctx, entry);
                     if (printDetailed)
-                        PrintCommandOptions(writer,ctx, entry, printDetailed);
+                        PrintCommandOptions(writer, ctx, entry, printDetailed);
                 }
                 else
                 {
@@ -46,9 +54,9 @@ namespace Gint.Builtin
                 var count = 0;
                 foreach (var cmd in registry.Collection)
                 {
-                    PrintCommand(writer,ctx, cmd.Value);
+                    PrintCommand(writer, ctx, cmd.Value);
                     if (printDetailed)
-                        PrintCommandOptions(writer,ctx, cmd.Value, printDetailed);
+                        PrintCommandOptions(writer, ctx, cmd.Value, printDetailed);
 
                     count++;
                     if (count < registry.Collection.Count)
@@ -59,7 +67,7 @@ namespace Gint.Builtin
             return CommandOutput.SuccessfulTask;
         }
 
-        private static void PrintCommand(Out writer,CommandExecutionContext ctx, CommandEntry cmd)
+        private static void PrintCommand(Out writer, CommandExecutionContext ctx, CommandEntry cmd)
         {
             var entry = cmd.Command;
             writer.Write(entry.CommandName).WriteWhitespace();
@@ -124,7 +132,7 @@ namespace Gint.Builtin
                     option.HelpCallback(writer);
                     format.End().WriteLine();
                 }
-            }            
+            }
         }
 
 

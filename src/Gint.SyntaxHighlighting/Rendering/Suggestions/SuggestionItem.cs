@@ -8,12 +8,15 @@ namespace Gint.SyntaxHighlighting
 {
     internal class SuggestionItem : Renderable
     {
-        public SuggestionItem(string value)
+        public SuggestionItem(SuggestionModel suggestion)
         {
-            Value = value;
+            RenderValue = suggestion.RenderValue;
+            Suggestion = suggestion;
         }
 
         public bool HasFocus { get; set; }
+        public SuggestionModel Suggestion { get; }
+
         public override void Render()
         {
             if (HasFocus)
@@ -21,7 +24,7 @@ namespace Gint.SyntaxHighlighting
                 Console.ForegroundColor = ConsoleColor.Black;
                 Console.BackgroundColor = ConsoleColor.White;
             }
-            Console.Write(Value);
+            Console.Write(RenderValue);
             Console.ResetColor();
             HasFocus = false;
         }
@@ -29,36 +32,52 @@ namespace Gint.SyntaxHighlighting
 
     internal class Renderable
     {
-        public string Value { get; init; }
-        public int Length => Value.Length;
+        public string RenderValue { get; init; }
+        public int Length => RenderValue.Length;
 
         public virtual void Render()
         {
-            Console.Write(Value);
+            Console.Write(RenderValue);
         }
     }
 
 
     public class LostFocusEventArgs
     {
-        public LostFocusEventArgs(bool suggestionAccepted, string value)
+        public LostFocusEventArgs(bool suggestionAccepted, string value, SuggestionType suggestionType)
         {
             SuggestionAccepted = suggestionAccepted;
             Value = value;
+            SuggestionType = suggestionType;
         }
 
         public bool SuggestionAccepted { get; }
         public string Value { get; }
 
-        public static LostFocusEventArgs Denied => new LostFocusEventArgs(false, null);
-        public static LostFocusEventArgs Accepted(string value) => new LostFocusEventArgs(true, value);
+        public SuggestionType SuggestionType { get; }
+        public static LostFocusEventArgs Denied => new LostFocusEventArgs(false, null, SuggestionType.Autocomplete);
+        public static LostFocusEventArgs Accepted(SuggestionType suggestionType, string value) => new LostFocusEventArgs(true, value, suggestionType);
     }
 
-    internal record SuggestionRecord
+    public enum SuggestionType
     {
+        Autocomplete,
+        Keyword
+    }
+
+    internal struct SuggestionModel
+    {
+        public SuggestionModel(string renderValue, string value, SuggestionType type)
+        {
+            RenderValue = renderValue;
+            Value = value;
+            Type = type;
+        }
+
+        public string RenderValue { get; init; }
         public string Value { get; init; }
-        public string ExtraInfo { get; init; }
-        public int Length => Value.Length + (ExtraInfo?.Length ?? 0);
+        public SuggestionType Type { get; init; }
+        public int Length => RenderValue.Length;
     }
 
     internal class SuggestionList : List<SuggestionItem>
@@ -76,13 +95,13 @@ namespace Gint.SyntaxHighlighting
         public SuggestionCursor Cursor { get; }
 
         public int MaxRenderablesPerRow = 5;
-        public SuggestionContainer(SuggestionRecord[] suggestions)
+        public SuggestionContainer(SuggestionModel[] suggestions)
         {
             int index = 0;
             SuggestionList.Add(new SuggestionList());
             void AddTab()
             {
-                SuggestionList[index].Renderables.Add(new Renderable { Value = "     " });
+                SuggestionList[index].Renderables.Add(new Renderable { RenderValue = "     " });
             }
 
             for (int i = 0; i < suggestions.Length; i++)
@@ -95,7 +114,7 @@ namespace Gint.SyntaxHighlighting
                     index++;
                     AddTab();
                 }
-                var suggestionItem = new SuggestionItem(sug.Value);
+                var suggestionItem = new SuggestionItem(sug);
                 SuggestionList[index].Add(suggestionItem);
                 SuggestionList[index].Renderables.Add(suggestionItem);
             }
@@ -122,7 +141,7 @@ namespace Gint.SyntaxHighlighting
             });
         }
 
-        public string Value => SuggestionList[Cursor.Row][Cursor.Column].Value;
+        public SuggestionModel CurrentSuggestion => SuggestionList[Cursor.Row][Cursor.Column].Suggestion;
     }
 
 
@@ -131,7 +150,7 @@ namespace Gint.SyntaxHighlighting
         private SuggestionCursor cursor;
         private SuggestionContainer suggestionContainer;
 
-        public void Init(SuggestionRecord[] suggestions)
+        public void Init(SuggestionModel[] suggestions)
         {
             HasFocus = true;
             suggestionContainer = new SuggestionContainer(suggestions);
@@ -188,8 +207,8 @@ namespace Gint.SyntaxHighlighting
         private void SuggestionAccepted()
         {
             HasFocus = false;
-            var suggestionValue = suggestionContainer.Value;
-            OnLostFocus?.Invoke(this, LostFocusEventArgs.Accepted(suggestionValue));
+            var suggestion = suggestionContainer.CurrentSuggestion;
+            OnLostFocus?.Invoke(this, LostFocusEventArgs.Accepted(suggestion.Type,suggestion.Value));
         }
 
         public Action GenerateRenderCallback()

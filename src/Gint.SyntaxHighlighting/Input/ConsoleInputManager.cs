@@ -62,7 +62,6 @@ namespace Gint.SyntaxHighlighting
                 Rerender();
             };
 
-
             virtualCursor.OnPositionChanged += (sender, args) =>
             {
                 systemConsoleAdapter.AdjustToVirtualCursor();
@@ -89,7 +88,14 @@ namespace Gint.SyntaxHighlighting
             {
                 AcceptInput = false;
                 if (args.SuggestionAccepted)
-                    commandText.AddSuffix(args.Value);
+                {
+                    if (args.SuggestionType == SuggestionType.Autocomplete)
+                        commandText.AddSuffix(args.Value);
+                    else if (commandText.IsLastCharacterWhitespace())
+                        commandText.AddSuffix(args.Value);
+                    else
+                        commandText.AddSuffix(" " + args.Value);
+                }
                 else
                     commandText.Replace(commandText.Value);
                 virtualCursor.Forward(GetTotalSize());
@@ -158,7 +164,7 @@ namespace Gint.SyntaxHighlighting
                     //if (key.Modifiers == ConsoleModifiers.Control && key.Key == ConsoleKey.V)
                     //    CopyCombinationPressed();
                     //else
-                    if (((key.Modifiers & (ConsoleModifiers.Control | ConsoleModifiers.Shift)) != 0) 
+                    if (((key.Modifiers & (ConsoleModifiers.Control | ConsoleModifiers.Shift)) != 0)
                         && key.Key == ConsoleKey.D)
                     {
                         ToggleDiagnostics();

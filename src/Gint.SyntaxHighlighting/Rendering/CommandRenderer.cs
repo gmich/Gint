@@ -16,6 +16,8 @@ namespace Gint.SyntaxHighlighting
         private string textRendered;
         private Action<ConsoleColor> cellColorer;
         private Action renderCallback;
+        private BoundNode boundNode;
+        private CommandExpressionTree expressionTree;
 
         public CommandRenderer()
         {
@@ -87,7 +89,7 @@ namespace Gint.SyntaxHighlighting
 
             Reset();
 
-            var expressionTree = CommandExpressionTree.Parse(command);
+            expressionTree = CommandExpressionTree.Parse(command);
 
             if (DisplayErrorCells)
                 SetErrorCells(expressionTree.Diagnostics);
@@ -95,7 +97,7 @@ namespace Gint.SyntaxHighlighting
             var binder = new CommandBinder(expressionTree.Root, Registry);
             try
             {
-                binder.Bind();
+                boundNode = binder.Bind();
             }
             catch { }
             expressionTree.Diagnostics.AddRange(binder.Diagnostics);
@@ -122,18 +124,7 @@ namespace Gint.SyntaxHighlighting
 
         public void DisplaySuggestions()
         {
-            Suggestions.Init(new[]
-{
-                new SuggestionRecord { Value = "test1" },
-                new SuggestionRecord { Value = "test2" },
-                new SuggestionRecord { Value = "test3" },
-                new SuggestionRecord { Value = "test4" },
-                new SuggestionRecord { Value = "test5sds" },
-                new SuggestionRecord { Value = "test6" },
-                new SuggestionRecord { Value = "test7ds" },
-                new SuggestionRecord { Value = "test8" },
-                new SuggestionRecord { Value = "test9sdas" }
-            });
+            SuggestionsEngine.DisplaySuggestions(textProcessed, Suggestions, expressionTree, boundNode, Registry);
         }
 
         private void RenderDiagnosticsFrame()
