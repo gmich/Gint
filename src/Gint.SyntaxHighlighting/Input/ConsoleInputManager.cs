@@ -16,7 +16,6 @@ namespace Gint.SyntaxHighlighting
         private ConsoleVirtualBufferHandler consoleVirtualBuffer;
         private SystemConsoleAdapter systemConsoleAdapter;
         private CommandText commandText;
-        private SuggestionRenderer suggestionRenderer;
 
         public event EventHandler<string> OnCommandReady;
 
@@ -35,7 +34,6 @@ namespace Gint.SyntaxHighlighting
                 DisplayDiagnostics = true,
                 Registry = registry ?? CommandRegistry.Empty
             };
-            suggestionRenderer = new SuggestionRenderer();
             history = new CommandHistory(limit: 20);
             Reset();
 
@@ -43,6 +41,8 @@ namespace Gint.SyntaxHighlighting
             {
                 history.Record(args);
             };
+
+            SetupSuggestions();
         }
 
         private void CreateActors()
@@ -59,15 +59,9 @@ namespace Gint.SyntaxHighlighting
 
             commandText.OnChange += (sender, args) =>
             {
-                var renderCallback = renderer.GenerateRenderCallback(commandText.Value);
-                systemConsoleAdapter.ClearConsoleInput(consoleVirtualBuffer.GetTotalCharactersInVirtualBuffer());
-                prompt.Print();
-                renderCallback();
-                consoleVirtualBuffer.RecordLastCursorLine();
-                systemConsoleAdapter.AdjustToVirtualCursor();
+                Rerender();
             };
 
-            ResetSuggestions();
 
             virtualCursor.OnPositionChanged += (sender, args) =>
             {
@@ -79,9 +73,19 @@ namespace Gint.SyntaxHighlighting
             requiresReset = false;
         }
 
-        private void ResetSuggestions()
+        private void Rerender()
         {
-            suggestionRenderer.OnLostFocus += (sender, args) =>
+            var renderCallback = renderer.GenerateRenderCallback(commandText.Value);
+            systemConsoleAdapter.ClearConsoleInput(consoleVirtualBuffer.GetTotalCharactersInVirtualBuffer());
+            prompt.Print();
+            renderCallback();
+            consoleVirtualBuffer.RecordLastCursorLine();
+            systemConsoleAdapter.AdjustToVirtualCursor();
+        }
+
+        private void SetupSuggestions()
+        {
+            renderer.Suggestions.OnLostFocus += (sender, args) =>
             {
                 AcceptInput = false;
                 if (args.SuggestionAccepted)
@@ -92,15 +96,9 @@ namespace Gint.SyntaxHighlighting
                 AcceptInput = true;
             };
 
-            suggestionRenderer.OnChange += (sender, args) =>
+            renderer.Suggestions.OnChange += (sender, args) =>
             {
-                var renderCallback = renderer.GenerateRenderCallback(commandText.Value);
-                systemConsoleAdapter.ClearConsoleInput(consoleVirtualBuffer.GetTotalCharactersInVirtualBuffer());
-                prompt.Print();
-                renderCallback();
-                consoleVirtualBuffer.RecordLastCursorLine();
-                systemConsoleAdapter.AdjustToVirtualCursor();
-                suggestionRenderer.Render();
+                Rerender();
             };
         }
 
@@ -160,10 +158,22 @@ namespace Gint.SyntaxHighlighting
                     //if (key.Modifiers == ConsoleModifiers.Control && key.Key == ConsoleKey.V)
                     //    CopyCombinationPressed();
                     //else
+                    if (((key.Modifiers & (ConsoleModifiers.Control | ConsoleModifiers.Shift)) != 0) 
+                        && key.Key == ConsoleKey.D)
+                    {
+                        ToggleDiagnostics();
+                        break;
+                    }
                     CharacterKeyPress(key);
 
                     break;
             }
+        }
+
+        private void ToggleDiagnostics()
+        {
+            renderer.DisplayDiagnostics = !renderer.DisplayDiagnostics;
+            Rerender();
         }
 
         private void EnterKeyPressed()
@@ -179,6 +189,7 @@ namespace Gint.SyntaxHighlighting
 
         private void TabKeyPressed()
         {
+            renderer.DisplaySuggestions();
         }
 
         private void UpArrowKeyPressed()
@@ -205,7 +216,6 @@ namespace Gint.SyntaxHighlighting
 
         private void PageDownPressed()
         {
-            suggestionRenderer.Init();
         }
 
         private void LeftArrowPressed()

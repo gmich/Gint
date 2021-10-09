@@ -11,7 +11,6 @@ namespace Gint.SyntaxHighlighting
 
     internal class CommandRenderer
     {
-        private Suggestion suggestion;
         private IEnumerable<int> errorCells;
         private string textProcessed;
         private string textRendered;
@@ -21,8 +20,11 @@ namespace Gint.SyntaxHighlighting
         public CommandRenderer()
         {
             cellColorer = PlainCellColorer;
+            Suggestions = new SuggestionRenderer();
             Reset();
         }
+
+        public SuggestionRenderer Suggestions { get; }
 
         public CommandRegistry Registry { get; init; }
 
@@ -31,7 +33,6 @@ namespace Gint.SyntaxHighlighting
         private void Reset()
         {
             renderCallback = Noop;
-            suggestion = null;
             errorCells = Enumerable.Empty<int>();
             textProcessed = string.Empty;
             textRendered = string.Empty;
@@ -79,7 +80,8 @@ namespace Gint.SyntaxHighlighting
             if (string.IsNullOrEmpty(command))
             {
                 renderCallback = Noop;
-                RenderDiagnosticsFrame();
+                if (DisplayDiagnostics)
+                    RenderDiagnosticsFrame();
                 return;
             }
 
@@ -105,7 +107,33 @@ namespace Gint.SyntaxHighlighting
 
             EvaluateRenderItems(renderItems, command);
 
+            RenderSuggestions();
+
             RenderDiagnostics(expressionTree.Diagnostics, command);
+        }
+
+        public void RenderSuggestions()
+        {
+            if (Suggestions.HasFocus)
+            {
+                renderCallback += Suggestions.GenerateRenderCallback();
+            }
+        }
+
+        public void DisplaySuggestions()
+        {
+            Suggestions.Init(new[]
+{
+                new SuggestionRecord { Value = "test1" },
+                new SuggestionRecord { Value = "test2" },
+                new SuggestionRecord { Value = "test3" },
+                new SuggestionRecord { Value = "test4" },
+                new SuggestionRecord { Value = "test5sds" },
+                new SuggestionRecord { Value = "test6" },
+                new SuggestionRecord { Value = "test7ds" },
+                new SuggestionRecord { Value = "test8" },
+                new SuggestionRecord { Value = "test9sdas" }
+            });
         }
 
         private void RenderDiagnosticsFrame()
@@ -114,7 +142,12 @@ namespace Gint.SyntaxHighlighting
             {
                 Console.WriteLine();
                 Console.WriteLine();
-                Console.WriteLine(new string('-', Console.BufferWidth));
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                var diagnosticsText = "--Diagnostics";
+                Console.Write(diagnosticsText);
+                Console.WriteLine(new string('—', Console.BufferWidth - diagnosticsText.Length));
+                Console.ResetColor();
+                Console.WriteLine();
             };
         }
 
@@ -126,6 +159,8 @@ namespace Gint.SyntaxHighlighting
 
         private void RenderDiagnostics(DiagnosticCollection diagnostics, string text)
         {
+            if (!DisplayDiagnostics) return;
+
             RenderDiagnosticsFrame();
 
             renderCallback += () =>
@@ -222,7 +257,7 @@ namespace Gint.SyntaxHighlighting
                 if (text[i] == '\'' || text[i] == '\"')
                     RenderText(text[i].ToString(), ConsoleColor.Magenta);
                 else
-                    RenderText(text[i].ToString(), ConsoleColor.Gray);
+                    RenderText(text[i].ToString(), ConsoleColor.White);
             }
         }
 

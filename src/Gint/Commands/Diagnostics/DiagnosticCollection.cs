@@ -43,14 +43,14 @@ namespace Gint
         {
             var errorCode = string.IsNullOrEmpty(cmd) ? DiagnosticsErrorCode.NullCommand : DiagnosticsErrorCode.CommandUnknown;
             var message = $"Unknown command <{cmd}>.";
-            ReportError(errorCode, span, message);
+            ReportWarning(errorCode, span, message);
         }
 
         internal void ReportOptionUnknown(TextSpan span, string option)
         {
             var errorCode = string.IsNullOrEmpty(option) ? DiagnosticsErrorCode.NullOption : DiagnosticsErrorCode.OptionUnknown;
             var message = $"Unknown option <{option}>.";
-            ReportError(errorCode, span, message);
+            ReportWarning(errorCode, span, message);
         }
 
         internal void ReportUnecessaryVariable(TextSpan span)

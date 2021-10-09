@@ -6,30 +6,35 @@ using System.Threading.Tasks;
 
 namespace Gint.SyntaxHighlighting
 {
-    internal class SuggestionItem
+    internal class SuggestionItem : Renderable
     {
-        public SuggestionItem(string renderValue, string value)
+        public SuggestionItem(string value)
         {
-            RenderValue = renderValue;
             Value = value;
         }
 
-        public string RenderValue { get; }
-        public string Value { get; }
-
-        public int Width => RenderValue.Length;
-
         public bool HasFocus { get; set; }
-        public void Render()
+        public override void Render()
         {
             if (HasFocus)
             {
                 Console.ForegroundColor = ConsoleColor.Black;
                 Console.BackgroundColor = ConsoleColor.White;
             }
-            Console.Write(RenderValue);
+            Console.Write(Value);
             Console.ResetColor();
             HasFocus = false;
+        }
+    }
+
+    internal class Renderable
+    {
+        public string Value { get; init; }
+        public int Length => Value.Length;
+
+        public virtual void Render()
+        {
+            Console.Write(Value);
         }
     }
 
@@ -49,20 +54,89 @@ namespace Gint.SyntaxHighlighting
         public static LostFocusEventArgs Accepted(string value) => new LostFocusEventArgs(true, value);
     }
 
+    internal record SuggestionRecord
+    {
+        public string Value { get; init; }
+        public string ExtraInfo { get; init; }
+        public int Length => Value.Length + (ExtraInfo?.Length ?? 0);
+    }
+
+    internal class SuggestionList : List<SuggestionItem>
+    {
+        public List<Renderable> Renderables = new List<Renderable>();
+
+        public int TotalRenderSize => Renderables.Sum(c => c.Length);
+    }
+
+
+    internal class SuggestionContainer
+    {
+        public List<SuggestionList> SuggestionList { get; } = new List<SuggestionList>();
+
+        public SuggestionCursor Cursor { get; }
+
+        public int MaxRenderablesPerRow = 5;
+        public SuggestionContainer(SuggestionRecord[] suggestions)
+        {
+            int index = 0;
+            SuggestionList.Add(new SuggestionList());
+            void AddTab()
+            {
+                SuggestionList[index].Renderables.Add(new Renderable { Value = "     " });
+            }
+
+            for (int i = 0; i < suggestions.Length; i++)
+            {
+                AddTab();
+                var sug = suggestions[i];
+                if (SuggestionList[index].TotalRenderSize + sug.Length > Console.BufferWidth || SuggestionList[index].Count >= MaxRenderablesPerRow)
+                {
+                    SuggestionList.Add(new SuggestionList());
+                    index++;
+                    AddTab();
+                }
+                var suggestionItem = new SuggestionItem(sug.Value);
+                SuggestionList[index].Add(suggestionItem);
+                SuggestionList[index].Renderables.Add(suggestionItem);
+            }
+
+            Cursor = new SuggestionCursor(this.SuggestionList);
+        }
+
+        public Action GenerateRenderCallback()
+        {
+            return new Action(() =>
+            {
+                Console.WriteLine();
+                SuggestionList[Cursor.Row][Cursor.Column].HasFocus = true;
+
+                for (int i = 0; i < SuggestionList.Count(); i++)
+                {
+                    for (int j = 0; j < SuggestionList[i].Renderables.Count(); j++)
+                    {
+                        SuggestionList[i].Renderables[j].Render();
+                    }
+                    if (i + 1 != SuggestionList.Count())
+                        Console.WriteLine();
+                }
+            });
+        }
+
+        public string Value => SuggestionList[Cursor.Row][Cursor.Column].Value;
+    }
+
+
     internal class SuggestionRenderer
     {
-        public SuggestionItem[,] suggestionItems;
         private SuggestionCursor cursor;
+        private SuggestionContainer suggestionContainer;
 
-        public void Init()
+        public void Init(SuggestionRecord[] suggestions)
         {
             HasFocus = true;
-            cursor = new SuggestionCursor(1, 3);
-            suggestionItems = new SuggestionItem[2, 4]
-            {
-                { GetSuggestion, GetSuggestion, GetSuggestion2, GetSuggestion },
-                { GetSuggestion, GetSuggestion2, GetSuggestion, GetSuggestion }
-            };
+            suggestionContainer = new SuggestionContainer(suggestions);
+            cursor = suggestionContainer.Cursor;
+
             cursor.OnCursorExit += (sender, args) =>
             {
                 HasFocus = false;
@@ -114,27 +188,13 @@ namespace Gint.SyntaxHighlighting
         private void SuggestionAccepted()
         {
             HasFocus = false;
-            var suggestionValue = suggestionItems[cursor.Row, cursor.Column].Value;
+            var suggestionValue = suggestionContainer.Value;
             OnLostFocus?.Invoke(this, LostFocusEventArgs.Accepted(suggestionValue));
         }
 
-        public void Render()
+        public Action GenerateRenderCallback()
         {
-            Console.WriteLine();
-            var tab = "     ";
-            suggestionItems[cursor.Row, cursor.Column].HasFocus = true;
-
-            for (int i = 0; i < suggestionItems.GetLength(0); i++)
-            {
-                Console.Write(tab);
-
-                for (int j = 0; j < suggestionItems.GetLength(1); j++)
-                {
-                    suggestionItems[i, j].Render();
-                    Console.Write(tab);
-                }
-                Console.WriteLine();
-            }
+            return suggestionContainer.GenerateRenderCallback();
         }
 
         private void DownArrowKeyPressed()
@@ -156,21 +216,16 @@ namespace Gint.SyntaxHighlighting
         {
             cursor.MoveUp();
         }
-
-        private SuggestionItem GetSuggestion2 => new SuggestionItem("test2", "test2");
-        private SuggestionItem GetSuggestion => new SuggestionItem("test", "test");
     }
 
     internal class SuggestionCursor
     {
-        public SuggestionCursor(int height, int width)
-        {
-            MaxRow = height;
-            MaxColumn = width;
-        }
+        private readonly List<SuggestionList> suggestions;
 
-        public int MaxColumn { get; }
-        public int MaxRow { get; }
+        public SuggestionCursor(List<SuggestionList> suggestions)
+        {
+            this.suggestions = suggestions;
+        }
 
         public int Column { get; private set; }
         public int Row { get; private set; }
@@ -187,9 +242,13 @@ namespace Gint.SyntaxHighlighting
             Row--;
         }
 
+        private int ColumnMax => suggestions[Row].Count - 1;
+        private int RowMax => suggestions.Count - 1;
+
         public void MoveDown()
         {
-            Row = Math.Min(Row + 1, MaxRow);
+            Row = Math.Min(Row + 1, RowMax);
+            Column = Math.Min(Column, ColumnMax);
         }
 
         public void MoveLeft()
@@ -199,8 +258,10 @@ namespace Gint.SyntaxHighlighting
 
         public void MoveRight()
         {
-            Column = Math.Min(Column + 1, MaxColumn);
+            Column = Math.Min(Column + 1, ColumnMax);
         }
+
+
 
     }
 }
