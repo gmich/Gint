@@ -82,8 +82,10 @@ namespace Gint.SyntaxHighlighting
             if (string.IsNullOrEmpty(command))
             {
                 renderCallback = Noop;
+                RenderSuggestions();
                 if (DisplayDiagnostics)
                     RenderDiagnosticsFrame();
+
                 return;
             }
 

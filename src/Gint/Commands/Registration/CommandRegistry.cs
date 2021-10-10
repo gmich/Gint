@@ -35,16 +35,16 @@ namespace Gint
                 this.registry = registry;
             }
 
-            public AddOptionsBuilder AddOption(int priority, string argument, string longArgument, bool allowMultiple, HelpCallback helpCallback, ExecutionBlock callback)
+            public AddOptionsBuilder AddOption(int priority, string argument, string longArgument, bool allowMultiple, HelpCallback helpCallback, ExecutionBlock callback, SuggestionsCallback suggestions = null)
             {
-                var option = new Option(priority, argument, longArgument, allowMultiple, callback, helpCallback);
+                var option = new Option(priority, argument, longArgument, allowMultiple, callback, helpCallback, suggestions);
                 options.Add(option);
                 var optionsArray = options.ToArray();
                 registry.ThrowIfDuplicate(commandName, optionsArray);
                 registry.Collection[commandName].Options = optionsArray;
                 return this;
             }
-            public AddOptionsBuilder AddVariableOption(int priority, string argument, string longArgument, bool allowMultiple, HelpCallback helpCallback, ExecutionBlock callback)
+            public AddOptionsBuilder AddVariableOption(int priority, string argument, string longArgument, bool allowMultiple, HelpCallback helpCallback, ExecutionBlock callback, SuggestionsCallback suggestions = null)
             {
                 var option = new VariableOption(priority, argument, longArgument, allowMultiple, callback, helpCallback);
                 options.Add(option);
@@ -55,15 +55,15 @@ namespace Gint
             }
 
         }
-        public AddOptionsBuilder AddCommand(string commandName, HelpCallback helpCallback, ExecutionBlock callback)
+        public AddOptionsBuilder AddCommand(string commandName, HelpCallback helpCallback, ExecutionBlock callback, SuggestionsCallback suggestions = null)
         {
-            Add(new Command(commandName, helpCallback, callback));
+            Add(new Command(commandName, helpCallback, callback, suggestions));
             return new AddOptionsBuilder(commandName, this);
         }
 
-        public AddOptionsBuilder AddVariableCommand(string commandName, bool required, HelpCallback helpCallback, ExecutionBlock callback)
+        public AddOptionsBuilder AddVariableCommand(string commandName, bool required, HelpCallback helpCallback, ExecutionBlock callback, SuggestionsCallback suggestions = null)
         {
-            Add(new CommandWithVariable(commandName, required, helpCallback, callback));
+            Add(new CommandWithVariable(commandName, required, helpCallback, callback, suggestions));
             return new AddOptionsBuilder(commandName, this);
         }
 
@@ -81,7 +81,7 @@ namespace Gint
         internal void ThrowIfDuplicate(string commandName, Option[] options)
         {
             var argumentDuplicates = options.GroupBy(c => c.Argument).FirstOrDefault(g => g.Count() > 1);
-            if(argumentDuplicates!=null)
+            if (argumentDuplicates != null)
                 throw new CommandRegistrationException($"Duplicate option <{argumentDuplicates.Key}> in command <{commandName}>");
 
             var longArgumentDuplicates = options.GroupBy(c => c.LongArgument).FirstOrDefault(g => g.Count() > 1);
@@ -147,29 +147,48 @@ namespace Gint
 
                     return new HelpCallback((i) => callback.Invoke(definition, new object[] { i }));
                 }
+                SuggestionsCallback GetSuggestionsCallback(string name)
+                {
+                    if (string.IsNullOrEmpty(name)) 
+                        return CallbackUtilities.EmptySuggestions;
+
+                    var callback = methods.Where(c => c.Name == name).FirstOrDefault();
+                    if (callback == null)
+                        throw new CommandDiscoveryException($"ICommandDefinition {definition.GetType().FullName} has no help method {name} defined");
+
+                    var parameters = callback.GetParameters().ToList();
+                    if (parameters.Count != 1)
+                        throw new CommandDiscoveryException($"ICommandDefinition {definition.GetType().FullName} method {callback.Name} has wrong number of parameters. See SuggestionsCallback delegate");
+                    if (parameters[0].ParameterType != typeof(String))
+                        throw new CommandDiscoveryException($"ICommandDefinition {definition.GetType().FullName} method {callback.Name} parameter should of type String. See SuggestionsCallback delegate");
+                    if (callback.ReturnType != typeof(IEnumerable<Suggestion>))
+                        throw new CommandDiscoveryException($"ICommandDefinition {definition.GetType().FullName} method {callback.Name} return type should be of type IEnumerable<Suggestion>. See SuggestionsCallback delegate.");
+
+                    return new SuggestionsCallback((i) => (IEnumerable<Suggestion>)callback.Invoke(definition, new object[] { i }));
+                }
 
                 var cmdAttr = m.GetCustomAttribute(typeof(CommandAttribute));
                 if (cmdAttr is CommandAttribute attr)
                 {
-                    command = new Command(attr.CommandName, GetHelpCallback(attr.HelpCallbackMethodName), GetExecutionBlock());
+                    command = new Command(attr.CommandName, GetHelpCallback(attr.HelpCallbackMethodName), GetExecutionBlock(), GetSuggestionsCallback(attr.SuggestionsCallback));
                     continue;
                 }
                 var cmdwvAttr = m.GetCustomAttribute(typeof(CommandWithVariableAttribute));
                 if (cmdwvAttr is CommandWithVariableAttribute cattr)
                 {
-                    command = new CommandWithVariable(cattr.CommandName, cattr.Required, GetHelpCallback(cattr.HelpCallbackMethodName), GetExecutionBlock());
+                    command = new CommandWithVariable(cattr.CommandName, cattr.Required, GetHelpCallback(cattr.HelpCallbackMethodName), GetExecutionBlock(), GetSuggestionsCallback(cattr.SuggestionsCallback));
                     continue;
                 }
                 var optAttr = m.GetCustomAttribute(typeof(OptionAttribute));
                 if (optAttr is OptionAttribute oatrr)
                 {
-                    options.Add(new Option(oatrr.Priority, oatrr.Argument, oatrr.LongArgument, oatrr.AllowMultiple, GetExecutionBlock(), GetHelpCallback(oatrr.HelpCallbackMethodName)));
+                    options.Add(new Option(oatrr.Priority, oatrr.Argument, oatrr.LongArgument, oatrr.AllowMultiple, GetExecutionBlock(), GetHelpCallback(oatrr.HelpCallbackMethodName), GetSuggestionsCallback(oatrr.SuggestionsCallback)));
                     continue;
                 }
                 var voptAttr = m.GetCustomAttribute(typeof(VariableOptionAttribute));
                 if (voptAttr is VariableOptionAttribute voattr)
                 {
-                    options.Add(new VariableOption(voattr.Priority, voattr.Argument, voattr.LongArgument, voattr.AllowMultiple, GetExecutionBlock(), GetHelpCallback(voattr.HelpCallbackMethodName)));
+                    options.Add(new VariableOption(voattr.Priority, voattr.Argument, voattr.LongArgument, voattr.AllowMultiple, GetExecutionBlock(), GetHelpCallback(voattr.HelpCallbackMethodName), GetSuggestionsCallback(voattr.SuggestionsCallback)));
                     continue;
                 }
             }

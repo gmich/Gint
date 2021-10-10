@@ -1,6 +1,7 @@
-﻿namespace Gint.SyntaxHighlighting
-{
+﻿using System.Linq;
 
+namespace Gint.SyntaxHighlighting
+{
     internal abstract class BoundNodeTraverser
     {
         public void Traverse(BoundNode rootNode)
@@ -56,7 +57,7 @@
         private void EvaluateCommandWithVariable(BoundCommandWithVariable node)
         {
             CommandWithVariable(node);
-            foreach (var opt in node.BoundOptions)
+            foreach (var opt in node.BoundOptions.Reverse())
             {
                 EvaluateNode(opt);
             }
@@ -66,7 +67,7 @@
         private void EvaluateCommand(BoundCommand node)
         {
             Command(node);
-            foreach (var opt in node.BoundOptions)
+            foreach (var opt in node.BoundOptions.Reverse())
             {
                 EvaluateNode(opt);
             }

@@ -33,7 +33,9 @@ namespace Gint.SyntaxHighlighting
 
         public bool IsLastCharacterWhitespace()
         {
-            return char.IsWhiteSpace(Value[Value.Length - 1]);
+            if (string.IsNullOrEmpty(Value)) return true;
+
+            return char.IsWhiteSpace(Value[^1]);
         }
 
         public void Replace(string newCommand)
