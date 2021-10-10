@@ -11,6 +11,7 @@ namespace Gint.SyntaxHighlighting
         private readonly Prompt prompt;
         private readonly CommandRenderer renderer;
         private readonly CommandHistory history;
+        private readonly ConsoleInputOptions options;
 
         private VirtualCursor virtualCursor;
         private ConsoleVirtualBufferHandler consoleVirtualBuffer;
@@ -24,17 +25,13 @@ namespace Gint.SyntaxHighlighting
 
         public bool AcceptInput { get; set; } = true;
 
-        public ConsoleInputManager(CommandRegistry registry = null)
+        public ConsoleInputManager(ConsoleInputOptions options)
         {
-            prompt = new Prompt("cli> ");
+            this.options = options;
+            prompt = new Prompt(options.Prompt);
             consoleInputInterceptor = new ConsoleInputInterceptor();
-            renderer = new CommandRenderer()
-            {
-                DisplayErrorCells = false,
-                DisplayDiagnostics = true,
-                Registry = registry ?? CommandRegistry.Empty
-            };
-            history = new CommandHistory(limit: 20);
+            renderer = new CommandRenderer(options);
+            history = new CommandHistory(options.CommandHistoryRepository);
             Reset();
 
             OnCommandReady += (sender, args) =>
@@ -84,7 +81,9 @@ namespace Gint.SyntaxHighlighting
 
         private void SetupSuggestions()
         {
-            renderer.Suggestions.OnLostFocus += (sender, args) =>
+            if (!options.SuggestionsEnabled) return;
+
+            renderer.SuggestionEngine.InputHandler.OnLostFocus += (sender, args) =>
             {
                 AcceptInput = false;
                 if (args.SuggestionAccepted)
@@ -98,11 +97,12 @@ namespace Gint.SyntaxHighlighting
                 }
                 else
                     commandText.Refresh();
+
                 virtualCursor.Forward(GetTotalSize());
                 AcceptInput = true;
             };
 
-            renderer.Suggestions.OnChange += (sender, args) =>
+            renderer.SuggestionEngine.InputHandler.OnChange += (sender, args) =>
             {
                 Rerender();
             };
@@ -195,7 +195,8 @@ namespace Gint.SyntaxHighlighting
 
         private void TabKeyPressed()
         {
-            renderer.DisplaySuggestions();
+            if(options.SuggestionsEnabled)
+                renderer.DisplaySuggestions();
         }
 
         private void UpArrowKeyPressed()

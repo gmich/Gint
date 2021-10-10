@@ -11,7 +11,12 @@ namespace Gint.SyntaxHighlighting
                 options: CommandRuntimeOptions.DefaultConsole
               );
 
-            var inputManager = new ConsoleInputManager(runtime.CommandRegistry);
+            var inputManager = new ConsoleInputManager(new ConsoleInputOptions
+            {
+                CommandHistoryRepository = new PokemonFileHistoryRepository(),
+                Registry = runtime.CommandRegistry
+            });
+
             inputManager.OnCommandReady += async (sender, cmd) =>
             {
                 inputManager.AcceptInput = false;

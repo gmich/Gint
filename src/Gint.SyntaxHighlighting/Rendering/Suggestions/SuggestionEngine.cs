@@ -6,27 +6,22 @@ using System.Threading.Tasks;
 
 namespace Gint.SyntaxHighlighting
 {
-    internal static class SuggestionModelCallbackExtensions
-    {
-        public static SuggestionModelCallback ToKeywordSuggestions(this SuggestionsCallback callback)
-        {
-            return var => callback(var).Select(c => new SuggestionModel(c.DisplayValue, c.Value, SuggestionType.Keyword));
-        }
-        public static IEnumerable<SuggestionModel> EmptySuggestions(string var) => Enumerable.Empty<SuggestionModel>();
-
-
-        public static SuggestionModelCallback With(this SuggestionModelCallback callback, SuggestionModelCallback callbackup2)
-        {
-            return (var) => callback(var).Concat(callbackup2(var));
-        }
-
-    }
-
     internal delegate IEnumerable<SuggestionModel> SuggestionModelCallback(string variable);
 
-    internal class SuggestionsEngine
+    internal class SuggestionEngine
     {
-        public static void DisplaySuggestions(string command, SuggestionRenderer renderer, CommandExpressionTree expressionTree, BoundNode boundNode, CommandRegistry registry)
+        private readonly ConsoleInputOptions options;
+        private readonly CommandRegistry registry;
+        internal SuggestionInputHandler InputHandler { get; }
+
+        public SuggestionEngine(ConsoleInputOptions options)
+        {
+            this.options = options;
+            this.registry = options.Registry;
+            InputHandler = new SuggestionInputHandler();
+        }
+
+        public void Run(string command, CommandExpressionTree expressionTree, BoundNode boundNode)
         {
             SuggestionModelCallback suggestionsCallback = SuggestionModelCallbackExtensions.EmptySuggestions;
             string variable = null;
@@ -56,15 +51,17 @@ namespace Gint.SyntaxHighlighting
             {
                 suggestionsCallback= SuggestAutocompleteCommands(registry, null);
             }
-            Render(renderer, suggestionsCallback, variable);
+            InternalRun(suggestionsCallback, variable);
         }
 
-        private static void Render(SuggestionRenderer renderer, SuggestionModelCallback suggestionsCallback, string variable)
+        public Action GenerateRenderCallback() => InputHandler.GenerateRenderCallback();
+
+        private void InternalRun(SuggestionModelCallback suggestionsCallback, string variable)
         {
             var suggestions = suggestionsCallback(variable).ToArray();
             if (suggestions.Length > 0)
             {
-                renderer.Init(suggestions);
+                InputHandler.Handle(new SuggestionRenderer(suggestions, options.MaxSuggestionsPerRow));
             }
         }
 
@@ -106,8 +103,6 @@ namespace Gint.SyntaxHighlighting
 
             return suggestionsCallback;
         }
-
-
 
         private static void IterateStackForBoundCommands(Stack<BoundNode> nodeStack, Action<BoundCommand> onBoundCommandFound, Action<BoundCommandWithVariable> onBoundCommandWithVariableFound)
         {

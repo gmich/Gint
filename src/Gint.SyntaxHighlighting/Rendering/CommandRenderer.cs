@@ -11,6 +11,8 @@ namespace Gint.SyntaxHighlighting
 
     internal class CommandRenderer
     {
+        private readonly ConsoleInputOptions options;
+
         private IEnumerable<int> errorCells;
         private string textProcessed;
         private string textRendered;
@@ -18,17 +20,20 @@ namespace Gint.SyntaxHighlighting
         private Action renderCallback;
         private BoundNode boundNode;
         private CommandExpressionTree expressionTree;
+        public SuggestionEngine SuggestionEngine { get; }
 
-        public CommandRenderer()
+        public CommandRenderer(ConsoleInputOptions options)
         {
+            this.options = options;
+            Registry = options.Registry;
             cellColorer = PlainCellColorer;
-            Suggestions = new SuggestionRenderer();
+            SuggestionEngine = new SuggestionEngine(options);
+            DisplayErrorCells = options.DisplayErrorCells;
+            DisplayDiagnostics = options.DisplayDiagnostics;
             Reset();
         }
 
-        public SuggestionRenderer Suggestions { get; }
-
-        public CommandRegistry Registry { get; init; }
+        public CommandRegistry Registry { get; }
 
         private void Noop() { }
 
@@ -118,15 +123,15 @@ namespace Gint.SyntaxHighlighting
 
         public void RenderSuggestions()
         {
-            if (Suggestions.HasFocus)
+            if (SuggestionEngine.InputHandler.HasFocus)
             {
-                renderCallback += Suggestions.GenerateRenderCallback();
+                renderCallback += SuggestionEngine.GenerateRenderCallback();
             }
         }
 
         public void DisplaySuggestions()
         {
-            SuggestionsEngine.DisplaySuggestions(textProcessed, Suggestions, expressionTree, boundNode, Registry);
+            SuggestionEngine.Run(textProcessed, expressionTree, boundNode);
         }
 
         private void RenderDiagnosticsFrame()
