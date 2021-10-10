@@ -97,7 +97,7 @@ namespace Gint.SyntaxHighlighting
                         commandText.AddSuffix(" " + args.Value);
                 }
                 else
-                    commandText.Replace(commandText.Value);
+                    commandText.Refresh();
                 virtualCursor.Forward(GetTotalSize());
                 AcceptInput = true;
             };

@@ -38,6 +38,11 @@ namespace Gint.SyntaxHighlighting
             return char.IsWhiteSpace(Value[^1]);
         }
 
+        public void Refresh()
+        {
+            RaiseOnChangeEvent(Value);
+        }
+
         public void Replace(string newCommand)
         {
             var previous = Value;
