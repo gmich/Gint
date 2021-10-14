@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Gint.Core\Gint.Core.csproj" />
     <ProjectReference Include="..\..\src\Gint.Markup\Gint.Markup.csproj" />
-    <ProjectReference Include="..\..\src\Gint\Gint.csproj" />
   </ItemGroup>
 
 </Project>

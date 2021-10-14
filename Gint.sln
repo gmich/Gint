@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31205.134
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gint", "src\Gint\Gint.csproj", "{7B1C29D3-125B-4007-9BE9-A9280314A6ED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gint.Core", "src\Gint.Core\Gint.Core.csproj", "{7B1C29D3-125B-4007-9BE9-A9280314A6ED}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gint.Commands.Sample", "samples\Gint.Commands.Sample\Gint.Commands.Sample.csproj", "{55E7A87D-C1B7-4DE4-BFEB-CFA118F81A0C}"
 EndProject
@@ -21,7 +21,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gint.Markup.Sample", "sampl
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{2531F7D8-E791-4706-8699-F1F33C8D571D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gint.SyntaxHighlighting", "src\Gint.SyntaxHighlighting\Gint.SyntaxHighlighting.csproj", "{A4EE5830-053E-4580-B5B0-2C8C83B60C99}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gint.Terminal", "src\Gint.Terminal\Gint.Terminal.csproj", "{A4EE5830-053E-4580-B5B0-2C8C83B60C99}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
