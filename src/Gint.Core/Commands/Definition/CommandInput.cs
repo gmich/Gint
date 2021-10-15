@@ -13,8 +13,11 @@
         public int ExecutionId { get; }
         public string Variable { get; }
         public string[] Options { get; }
+        public bool HasVariable => !string.IsNullOrEmpty(Variable);
+
         public CommandScope Scope { get; }
 
         public static ICommandInput Empty { get; } = new CommandInput(0, string.Empty, System.Array.Empty<string>(), new CommandScope(null, null));
+
     }
 }

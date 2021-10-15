@@ -108,7 +108,7 @@ namespace Gint.Terminal
         }
 
 
-        public void WaitInput()
+        public void WaitForInput()
         {
             if (!AcceptInput) return;
 

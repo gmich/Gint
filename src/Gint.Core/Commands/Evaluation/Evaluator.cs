@@ -81,8 +81,11 @@ namespace Gint
                 var lastPipeline = evaluator.GetLastPipeline();
                 var stream = lastPipeline.Pipe.Read().Buffer;
                 var parsedStream = stream?.ToUTF8String() ?? string.Empty;
-                evaluator.commandExecutionContext.Info.WriteRaw(parsedStream).WriteLine();
-                evaluator.commandExecutionContext.Info.Flush();
+                if (parsedStream != string.Empty)
+                {
+                    evaluator.commandExecutionContext.Info.WriteRaw(parsedStream).WriteLine();
+                    evaluator.commandExecutionContext.Info.Flush();
+                }
                 if (evaluator.evaluationChain.Error)
                 {
                     evaluator.PrintError(command);

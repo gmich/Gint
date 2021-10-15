@@ -5,4 +5,9 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Gint.Core\Gint.Core.csproj" />
+    <ProjectReference Include="..\..\src\Gint.Terminal\Gint.Terminal.csproj" />
+  </ItemGroup>
+
 </Project>

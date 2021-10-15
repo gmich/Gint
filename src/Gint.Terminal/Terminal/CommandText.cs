@@ -57,8 +57,14 @@ namespace Gint.Terminal
             RaiseOnChangeEvent(previous);
         }
 
+        private bool FilterCharacter(char c)
+        {
+            return (c == '\0');
+        }
+
         public void InsertCharacter(char c)
         {
+            if (FilterCharacter(c)) return;
             var previous = Value;
             Value = $"{string.Concat(Value.Take(virtualCursor.Index))}{c}{string.Concat(Value.Skip(virtualCursor.Index))}";
             RaiseOnChangeEvent(previous);

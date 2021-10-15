@@ -38,12 +38,26 @@ namespace Gint.Terminal
 
         public void MoveLeft()
         {
+            var before = Column;
             Column = Math.Max(Column - 1, 0);
+
+            if (before == Column && Row > 0)
+            {
+                Row--;
+                Column = ColumnMax;
+            }
         }
 
         public void MoveRight()
         {
+            var before = Column;
             Column = Math.Min(Column + 1, ColumnMax);
+
+            if (before == Column && Row < RowMax)
+            {
+                Row++;
+                Column = 0;
+            }
         }
 
 

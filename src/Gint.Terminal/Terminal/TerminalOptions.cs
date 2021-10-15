@@ -6,7 +6,7 @@
         public bool DisplayErrorCells { get; init; } = false;
         public bool DisplayDiagnostics { get; init; } = true;
 
-        public int MaxSuggestionsPerRow { get; init; } = 6;
+        public int MaxSuggestionsPerRow { get; init; } = 5;
 
         public string Prompt { get; init; } = " » ";
 

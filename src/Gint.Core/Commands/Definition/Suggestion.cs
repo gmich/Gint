@@ -8,7 +8,7 @@
             DisplayValue = displayValue;
         }
 
-        public string Value { get; }
-        public string DisplayValue { get; }
+        public string Value { get; init; }
+        public string DisplayValue { get; init; }
     }
 }
