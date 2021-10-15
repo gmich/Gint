@@ -16,7 +16,7 @@ namespace Gint.Builtin
 
             registry.Add(
                   new CommandWithVariable("help", required: false, HelpHelp, Help, HelpSuggestions),
-                  new VariableOption(1, "-d", "--detail", true, Detail, DetailHelp)
+                  new Option(1, "-d", "--detail", true, Detail, DetailHelp)
               );
         }
 

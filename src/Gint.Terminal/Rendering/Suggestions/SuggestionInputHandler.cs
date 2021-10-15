@@ -15,7 +15,7 @@ namespace Gint.Terminal
             HasFocus = true;
             this.renderer = renderer;
             selector = renderer.Cursor;
-
+                
             selector.OnCursorExit += (sender, args) =>
             {
                 HasFocus = false;
@@ -25,12 +25,19 @@ namespace Gint.Terminal
             HandleInput();
         }
 
+     
         private void HandleInput()
         {
             Console.CursorVisible = false;
             while (HasFocus)
             {
+                var beforeReadKeyBufferWidth = Console.BufferWidth;
                 var key = Console.ReadKey(intercept: true);
+                if (beforeReadKeyBufferWidth != Console.BufferWidth)
+                {
+                    LostFocus();
+                    return;
+                }
 
                 switch (key.Key)
                 {
@@ -51,13 +58,18 @@ namespace Gint.Terminal
                         RightArrowPressed();
                         break;
                     default:
-                        HasFocus = false;
-                        OnLostFocus?.Invoke(this, LostFocusEventArgs.Denied);
+                        LostFocus();
                         return;
                 }
                 if (HasFocus)
                     OnChange?.Invoke(this, EventArgs.Empty);
             }
+        }
+
+        private void LostFocus()
+        {
+            HasFocus = false;
+            OnLostFocus?.Invoke(this, LostFocusEventArgs.Denied);
         }
 
         private void SuggestionAccepted()

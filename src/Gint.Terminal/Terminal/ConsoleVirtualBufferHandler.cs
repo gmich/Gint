@@ -15,7 +15,6 @@ namespace Gint.Terminal
 
         public int InputCursorTopOnLastRenderCell { get; private set; }
 
-
         public ConsoleVirtualBufferHandler(IReadonlyVirtualCursor virtualCursor,CommandText commandText)
         {
             this.virtualCursor = virtualCursor;

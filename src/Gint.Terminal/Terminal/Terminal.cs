@@ -24,7 +24,6 @@ namespace Gint.Terminal
         private bool requiresReset = true;
 
         public bool AcceptInput { get; set; } = true;
-
         public Terminal(TerminalOptions options)
         {
             this.options = options;
@@ -196,7 +195,7 @@ namespace Gint.Terminal
         private void TabKeyPressed()
         {
             if(options.SuggestionsEnabled)
-                renderer.DisplaySuggestions();
+                renderer.DisplaySuggestions(commandText.Value);
         }
 
         private void UpArrowKeyPressed()

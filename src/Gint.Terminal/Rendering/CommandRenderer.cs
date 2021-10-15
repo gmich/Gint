@@ -96,18 +96,10 @@ namespace Gint.Terminal
 
             Reset();
 
-            expressionTree = CommandExpressionTree.Parse(command);
+            CompileCommand(command);
 
             if (DisplayErrorCells)
                 SetErrorCells(expressionTree.Diagnostics);
-
-            var binder = new CommandBinder(expressionTree.Root, Registry);
-            try
-            {
-                boundNode = binder.Bind();
-            }
-            catch { }
-            expressionTree.Diagnostics.AddRange(binder.Diagnostics);
 
             var expressionRenderitems = ExpressionRenderItemTraverser.GetRenderItems(expressionTree.Root);
             var highlightedRenderItems = SyntaxHighlighterLexer.Tokenize(command).Select(c => new HighlighterRenderItem(c));
@@ -121,6 +113,18 @@ namespace Gint.Terminal
             RenderDiagnostics(expressionTree.Diagnostics, command);
         }
 
+        private void CompileCommand(string command)
+        {
+            expressionTree = CommandExpressionTree.Parse(command);
+            var binder = new CommandBinder(expressionTree.Root, Registry);
+            try
+            {
+                boundNode = binder.Bind();
+            }
+            catch { }
+            expressionTree.Diagnostics.AddRange(binder.Diagnostics);
+        }
+
         public void RenderSuggestions()
         {
             if (SuggestionEngine.InputHandler.HasFocus)
@@ -129,9 +133,12 @@ namespace Gint.Terminal
             }
         }
 
-        public void DisplaySuggestions()
+        public void DisplaySuggestions(string command)
         {
-            SuggestionEngine.Run(textProcessed, expressionTree, boundNode);
+            if(command != textProcessed)
+                CompileCommand(command);
+
+            SuggestionEngine.Run(command, expressionTree, boundNode);
         }
 
         private void RenderDiagnosticsFrame()

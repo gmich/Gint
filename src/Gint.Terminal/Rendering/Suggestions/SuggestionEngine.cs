@@ -127,7 +127,7 @@ namespace Gint.Terminal
             SuggestionModelCallback alternative = SuggestionModelCallbackExtensions.EmptySuggestions;
             var cmd = node.Command.CommandName;
 
-            if (registry.Collection.ContainsKey(cmd))
+            if (cmd != null && registry.Collection.ContainsKey(cmd))
             {
                 var options = registry
                     .Collection

@@ -6,11 +6,21 @@ namespace Gint.Terminal
 {
     internal class SuggestionRenderer
     {
+        private readonly SuggestionModel[] suggestions;
+        private readonly int maxSuggestionsPerRow;
+
         public List<SuggestionCollection> SuggestionList { get; } = new List<SuggestionCollection>();
 
-        public SuggestionSelector Cursor { get; }
+        public SuggestionSelector Cursor { get; private set; }
 
         public SuggestionRenderer(SuggestionModel[] suggestions, int maxSuggestionsPerRow)
+        {
+            this.suggestions = suggestions;
+            this.maxSuggestionsPerRow = maxSuggestionsPerRow;
+            Reset();
+        }
+
+        public void Reset()
         {
             int index = 0;
             SuggestionList.Add(new SuggestionCollection());
