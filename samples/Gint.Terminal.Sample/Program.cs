@@ -12,8 +12,7 @@ namespace Gint.Terminal.Sample
             );
 
             runtime.RegisterCommands();
-
-            AddMiddlewares(runtime);
+            //AddMiddlewares(runtime);
 
             var terminal = new Terminal(new TerminalOptions
             {

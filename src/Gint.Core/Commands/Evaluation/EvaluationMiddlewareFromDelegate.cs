@@ -5,14 +5,14 @@ namespace Gint
 {
     internal class EvaluationMiddlewareFromDelegate : IEvaluationMiddleware
     {
-        private readonly Func<CommandExecutionContext, Func<Task<ICommandOutput>>, Task<ICommandOutput>> middlewareDelegate;
+        private readonly Func<CommandExecutionContext, Func<Task<CommandOutput>>, Task<CommandOutput>> middlewareDelegate;
 
-        public EvaluationMiddlewareFromDelegate(Func<CommandExecutionContext, Func<Task<ICommandOutput>>, Task<ICommandOutput>> middlewareDelegate)
+        public EvaluationMiddlewareFromDelegate(Func<CommandExecutionContext, Func<Task<CommandOutput>>, Task<CommandOutput>> middlewareDelegate)
         {
             this.middlewareDelegate = middlewareDelegate;
         }
 
-        public Task<ICommandOutput> Intercept(CommandExecutionContext commandExecutionContext, Func<Task<ICommandOutput>> next)
+        public Task<CommandOutput> Intercept(CommandExecutionContext commandExecutionContext, Func<Task<CommandOutput>> next)
         {
             return middlewareDelegate(commandExecutionContext, next);
         }

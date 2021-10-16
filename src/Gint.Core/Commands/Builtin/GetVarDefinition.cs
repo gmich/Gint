@@ -10,7 +10,7 @@ namespace Gint.Builtin
             registry.AddVariableCommand("getvar", required: true, Help, GetVar);
         }
 
-        public Task<ICommandOutput> GetVar(CommandExecutionContext ctx, Func<Task> next)
+        public Task<CommandOutput> GetVar(CommandExecutionContext ctx)
         {
             if (ctx.GlobalScope.ContainsKey(ctx.ExecutingCommand.Variable))
             {

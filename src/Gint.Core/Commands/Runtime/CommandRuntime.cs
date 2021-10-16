@@ -42,7 +42,7 @@ namespace Gint
         {
             CommandRegistry
             .AddCommand("showtrees", o => o.Write("Toggles showing of bind and parse trees."),
-                (ctx, next) =>
+                (ctx) =>
                 {
                     Options.LogBindTree = !Options.LogBindTree;
                     Options.LogParseTree = !Options.LogParseTree;
@@ -106,8 +106,7 @@ namespace Gint
                 Options.RuntimeInfo.Write(prefix)
                     .WithForegroundColor().Red().Write(error)
                     .WriteLine(suffix.ToString())
-                    .WriteLine(diagnostic.Message)
-                    .WriteLine();
+                    .WriteLine(diagnostic.Message);
 
                 Options.RuntimeInfo.Flush();
             }

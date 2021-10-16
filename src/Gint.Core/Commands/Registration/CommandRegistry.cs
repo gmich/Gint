@@ -118,16 +118,14 @@ namespace Gint
                 ExecutionBlock GetExecutionBlock()
                 {
                     var parameters = m.GetParameters().ToList();
-                    if (parameters.Count != 2)
+                    if (parameters.Count != 1)
                         throw new CommandDiscoveryException($"ICommandDefinition {definition.GetType().FullName} method {m.Name} has wrong number of parameters. See ExecutionBlock delegate");
                     if (parameters[0].ParameterType != typeof(CommandExecutionContext))
                         throw new CommandDiscoveryException($"ICommandDefinition {definition.GetType().FullName} method {m.Name} second parameter should be of type CommandExecutionContext. See ExecutionBlock delegate");
-                    if (parameters[1].ParameterType != typeof(Func<Task>))
-                        throw new CommandDiscoveryException($"ICommandDefinition {definition.GetType().FullName} method {m.Name} third parameter should be of type Func<Task>. See ExecutionBlock delegate");
-                    if (m.ReturnType != typeof(Task<ICommandOutput>))
+                    if (m.ReturnType != typeof(Task<CommandOutput>))
                         throw new CommandDiscoveryException($"ICommandDefinition {definition.GetType().FullName} method {m.Name} return type should be of type Task<ICommandOutput>. See ExecutionBlock delegate.");
 
-                    return new ExecutionBlock((c, n) => (Task<ICommandOutput>)m.Invoke(definition, new object[] { c, n }));
+                    return new ExecutionBlock((c) => (Task<CommandOutput>)m.Invoke(definition, new object[] { c }));
                 }
                 HelpCallback GetHelpCallback(string name)
                 {

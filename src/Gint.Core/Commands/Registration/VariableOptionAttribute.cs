@@ -5,7 +5,7 @@ namespace Gint
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
     public class VariableOptionAttribute : Attribute
     {
-        public VariableOptionAttribute(int priority, string argument, bool allowMultiple, string longArgument, string helpCallbackMethodName, string suggestionsCallback = null)
+        public VariableOptionAttribute(int priority, string argument,  string longArgument, bool allowMultiple, string helpCallbackMethodName, string suggestionsCallback = null)
         {
             Priority = priority;
             Argument = argument;

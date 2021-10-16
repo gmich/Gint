@@ -10,7 +10,7 @@ namespace Gint.Terminal.Sample
         {
             runtime.CommandRegistry
                 .AddCommand("cpu", o => o.Write("CPU utilities"),
-                    (ctx, next) =>
+                    (ctx) =>
                     {
                         if (ctx.ExecutingCommand.Options.Contains("-c"))
                         {
@@ -21,7 +21,7 @@ namespace Gint.Terminal.Sample
                         return CommandOutput.SuccessfulTask;
                     })
                 .AddOption(1, "-c", "--count", false, o => o.Write("Machine cpu count"),
-                    (ctx, next) =>
+                    (ctx) =>
                     {
                         return CommandOutput.SuccessfulTask;
                     });

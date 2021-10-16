@@ -25,7 +25,7 @@ namespace Gint.Builtin
             return registry.Collection.Select(c => new Suggestion(c.Key, c.Key));
         }
 
-        private Task<ICommandOutput> Help(CommandExecutionContext ctx, Func<Task> next)
+        private Task<CommandOutput> Help(CommandExecutionContext ctx)
         {
             var writer = new Out();
             var printDetailed = ctx.ExecutingCommand.Options.Contains("-d");
@@ -91,7 +91,7 @@ namespace Gint.Builtin
             @out.Write("Help on command usage and examples.");
         }
 
-        private Task<ICommandOutput> Detail(CommandExecutionContext ctx, Func<Task> next)
+        private Task<CommandOutput> Detail(CommandExecutionContext ctx)
         {
             return CommandOutput.SuccessfulTask;
         }

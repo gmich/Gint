@@ -8,10 +8,11 @@ namespace Gint
 {
     public class CommandExecutionContext
     {
-        internal CommandExecutionContext(ExecutingCommand cmd, CommandScope scope, GlobalExecutionContext ctx)
+        internal CommandExecutionContext(ExecutingCommand cmd, CommandScope scope, GlobalExecutionContext ctx, Func<Task> next)
         {
             ExecutingCommand = cmd;
             Scope = scope;
+            Next = next;
             Info = ctx.Info;
             Error = ctx.Error;
             CancellationToken = ctx.CancellationToken;
@@ -23,6 +24,7 @@ namespace Gint
         public Out Info { get; }
         public Out Error { get; }
 
+        public Func<Task> Next { get; }
         public Dictionary<string, object> GlobalScope { get; }
         public CancellationTokenSource CancellationToken { get; }
     }

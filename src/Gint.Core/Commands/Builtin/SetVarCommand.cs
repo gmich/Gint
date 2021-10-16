@@ -10,7 +10,7 @@ namespace Gint.Builtin
             registry.AddVariableCommand("setvar", required: true, Help, SetVar);
         }
 
-        public Task<ICommandOutput> SetVar(CommandExecutionContext ctx, Func<Task> next)
+        public Task<CommandOutput> SetVar(CommandExecutionContext ctx)
         {
             if (!ctx.GlobalScope.ContainsKey(ctx.ExecutingCommand.Variable))
             {

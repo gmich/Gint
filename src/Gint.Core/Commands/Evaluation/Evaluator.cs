@@ -151,7 +151,7 @@ namespace Gint
 
         private CommandExecutionContext GetExecutionContext(ExecutingCommand commandInfo, CommandScope scope)
         {
-            return new CommandExecutionContext(commandInfo, scope, globalExecutionContext);
+            return new CommandExecutionContext(commandInfo, scope, globalExecutionContext, Next);
         }
 
         private void AddEvaluationChain(ExecutionBlock block, CommandExecutionContext ctx, TextSpan span)
@@ -163,11 +163,11 @@ namespace Gint
             }, span);
         }
 
-        private Func<Task<ICommandOutput>> BuildExecutionBlockWithMiddlewares(int index, ExecutionBlock block, CommandExecutionContext ctx)
+        private Func<Task<CommandOutput>> BuildExecutionBlockWithMiddlewares(int index, ExecutionBlock block, CommandExecutionContext ctx)
         {
             if (index == middlewares.Length)
             {
-                return () => block.Invoke(ctx, Next);
+                return () => block.Invoke(ctx);
             }
             return () => middlewares[index].Intercept(ctx, BuildExecutionBlockWithMiddlewares(index + 1, block, ctx));
         }
@@ -228,7 +228,7 @@ namespace Gint
             return evaluationChain.EvaluateNext(captured);
         };
 
-        private void OnExecutionEnd(ICommandOutput output)
+        private void OnExecutionEnd(CommandOutput output)
         {
             if (globalExecutionContext.CancellationToken.IsCancellationRequested)
             {

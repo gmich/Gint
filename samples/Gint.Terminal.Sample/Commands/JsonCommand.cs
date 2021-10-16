@@ -11,7 +11,7 @@ namespace Gint.Terminal.Sample
     internal sealed class JsonCommand : IScanForAttributes
     {
         [CommandWithVariable("json", required: false, helpCallback: nameof(JsonHelp), suggestionsCallback: nameof(JsonSuggestions))]
-        public Task<ICommandOutput> Json(CommandExecutionContext ctx, Func<Task> next)
+        public Task<CommandOutput> Json(CommandExecutionContext ctx)
         {
             var inputVar = ctx.ExecutingCommand.HasVariable ? ctx.ExecutingCommand.Variable : ctx.Scope.ReadInputAsString();
             if (!string.IsNullOrEmpty(inputVar))
@@ -66,7 +66,7 @@ namespace Gint.Terminal.Sample
         }
 
         [Option(1, "-p", "--pretty", false, nameof(PrettyHelp))]
-        private Task<ICommandOutput> Prettify(CommandExecutionContext ctx, Func<Task> next)
+        private Task<CommandOutput> Prettify(CommandExecutionContext ctx)
         {
             return CommandOutput.SuccessfulTask;
         }
