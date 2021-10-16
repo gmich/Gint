@@ -62,7 +62,7 @@ namespace Gint.Terminal.Sample
 
         public static void JsonHelp(Out o)
         {
-            o.Write("Json utilities.");
+            o.WithForegroundColor().Cyan().Write("Json utilities.");
         }
 
         [Option(1, "-p", "--pretty", false, nameof(PrettyHelp))]

@@ -35,6 +35,11 @@ namespace Gint
                 this.registry = registry;
             }
 
+            public AddOptionsBuilder AddOption(string argument, string longArgument, HelpCallback helpCallback, ExecutionBlock callback, SuggestionsCallback suggestions = null, int? priority = null, bool allowMultiple = false)
+            {
+                return AddOption(priority ?? options.Count + 1, argument, longArgument, allowMultiple, helpCallback, callback, suggestions);
+            }
+
             public AddOptionsBuilder AddOption(int priority, string argument, string longArgument, bool allowMultiple, HelpCallback helpCallback, ExecutionBlock callback, SuggestionsCallback suggestions = null)
             {
                 var option = new Option(priority, argument, longArgument, allowMultiple, callback, helpCallback, suggestions);
@@ -44,6 +49,12 @@ namespace Gint
                 registry.Collection[commandName].Options = optionsArray;
                 return this;
             }
+
+            public AddOptionsBuilder AddVariableOption(string argument, string longArgument, HelpCallback helpCallback, ExecutionBlock callback, SuggestionsCallback suggestions = null, int? priority = null, bool allowMultiple = false)
+            {
+                return AddVariableOption(priority ?? options.Count + 1, argument, longArgument, allowMultiple, helpCallback, callback, suggestions);
+            }
+
             public AddOptionsBuilder AddVariableOption(int priority, string argument, string longArgument, bool allowMultiple, HelpCallback helpCallback, ExecutionBlock callback, SuggestionsCallback suggestions = null)
             {
                 var option = new VariableOption(priority, argument, longArgument, allowMultiple, callback, helpCallback);
@@ -145,7 +156,7 @@ namespace Gint
                 }
                 SuggestionsCallback GetSuggestionsCallback(string name)
                 {
-                    if (string.IsNullOrEmpty(name)) 
+                    if (string.IsNullOrEmpty(name))
                         return CallbackUtilities.EmptySuggestions;
 
                     var callback = methods.Where(c => c.Name == name).FirstOrDefault();

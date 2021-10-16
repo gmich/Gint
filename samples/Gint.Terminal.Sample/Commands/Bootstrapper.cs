@@ -20,7 +20,7 @@ namespace Gint.Terminal.Sample
                             ctx.Scope.WriteString($"CPU utilities{Environment.NewLine}");
                         return CommandOutput.SuccessfulTask;
                     })
-                .AddOption(1, "-c", "--count", false, o => o.Write("Machine cpu count"),
+                .AddOption("-c", "--count", o => o.Write("Machine cpu count"),
                     (ctx) =>
                     {
                         return CommandOutput.SuccessfulTask;
