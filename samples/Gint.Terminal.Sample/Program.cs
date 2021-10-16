@@ -23,7 +23,6 @@ namespace Gint.Terminal.Sample
             })
             .BindRuntime(runtime);
 
-            terminal.Options.Theme.Whitespace = new ThemeColor(background: ConsoleColor.DarkBlue);
             while (true)
             {
                 terminal.WaitForInput();
