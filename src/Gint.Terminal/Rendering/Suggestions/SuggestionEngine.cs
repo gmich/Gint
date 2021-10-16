@@ -61,7 +61,7 @@ namespace Gint.Terminal
             var suggestions = suggestionsCallback(variable).ToArray();
             if (suggestions.Length > 0)
             {
-                InputHandler.Handle(new SuggestionRenderer(suggestions, options.MaxSuggestionsPerRow));
+                InputHandler.Handle(new SuggestionRenderer(suggestions, options.MaxSuggestionsPerRow, options.Theme));
             }
         }
 
@@ -158,17 +158,23 @@ namespace Gint.Terminal
         {
             var node = (BoundCommandWithVariable)lastNode;
             variable = node.Variable;
-            var command = (CommandWithVariable)node.Command;
-            var suggestions = node.Command.Suggestions;
 
-
-            var suggestionsCallback = string.IsNullOrEmpty(variable) ? suggestions.ToKeywordSuggestions() : suggestions.ToAutoCompleteSuggestions();
-            if (command.Required)
+            if (node.Command is CommandWithVariable command)
             {
-                return suggestionsCallback;
-            }
+                var suggestions = node.Command.Suggestions;
 
-            return suggestionsCallback.With(SuggestCommandOptions(registry, node));
+                var suggestionsCallback = string.IsNullOrEmpty(variable) ? suggestions.ToKeywordSuggestions() : suggestions.ToAutoCompleteSuggestions();
+                if (command.Required)
+                {
+                    return suggestionsCallback;
+                }
+
+                return suggestionsCallback.With(SuggestCommandOptions(registry, node));
+            }
+            else
+            {
+                return SuggestionModelCallbackExtensions.EmptySuggestions;
+            }
         }
 
         private static SuggestionModelCallback CommandSuggestion(CommandRegistry registry, BoundNode lastNode)

@@ -4,17 +4,21 @@ namespace Gint.Terminal
 {
     internal class Prompt
     {
-        public Prompt(string text)
+        private readonly TerminalTheme theme;
+
+        public Prompt(string text, TerminalTheme theme)
         {
             Text = text;
+            this.theme = theme;
         }
 
         public string Text { get; }
+
         public int Length => Text.Length;
 
         public void Print()
         {
-            Console.ForegroundColor = ConsoleColor.DarkGreen;
+            theme.Prompt.Apply();
             Console.Write(Text);
             Console.ResetColor();
         }

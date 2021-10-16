@@ -23,6 +23,7 @@ namespace Gint.Terminal.Sample
             })
             .BindRuntime(runtime);
 
+            terminal.Options.Theme.Whitespace = new ThemeColor(background: ConsoleColor.DarkBlue);
             while (true)
             {
                 terminal.WaitForInput();
@@ -34,8 +35,7 @@ namespace Gint.Terminal.Sample
             runtime.Options.WithMiddleware(async (ctx, next) =>
             {
                 ctx.Info
-                .WithForegroundColor()
-                .DarkYellow()
+                .WithForegroundColor().DarkYellow()
                 .WriteLine($"[{ctx.ExecutingCommand.ExecutionId}]Executing: {ctx.ExecutingCommand.ExecutionSpan}")
                 .Flush();
 
@@ -45,8 +45,7 @@ namespace Gint.Terminal.Sample
                 ctx.Info.WriteRaw(input);
 
                 ctx.Info
-                .WithForegroundColor()
-                .DarkYellow()
+                .WithForegroundColor().DarkYellow()
                 .WriteLine($"[{ctx.ExecutingCommand.ExecutionId}]Executed: {ctx.ExecutingCommand.ExecutionSpan}")
                 .Flush();
 

@@ -8,15 +8,17 @@ namespace Gint.Terminal
     {
         private readonly SuggestionModel[] suggestions;
         private readonly int maxSuggestionsPerRow;
+        private readonly TerminalTheme theme;
 
         public List<SuggestionCollection> SuggestionList { get; } = new List<SuggestionCollection>();
 
         public SuggestionSelector Cursor { get; private set; }
 
-        public SuggestionRenderer(SuggestionModel[] suggestions, int maxSuggestionsPerRow)
+        public SuggestionRenderer(SuggestionModel[] suggestions, int maxSuggestionsPerRow, TerminalTheme theme)
         {
             this.suggestions = suggestions;
             this.maxSuggestionsPerRow = maxSuggestionsPerRow;
+            this.theme = theme;
             Reset();
         }
 
@@ -39,7 +41,7 @@ namespace Gint.Terminal
                     index++;
                     AddTab();
                 }
-                var suggestionItem = new SuggestionRenderItem(sug);
+                var suggestionItem = new SuggestionRenderItem(sug, theme);
                 SuggestionList[index].Add(suggestionItem);
                 SuggestionList[index].Renderables.Add(suggestionItem);
             }

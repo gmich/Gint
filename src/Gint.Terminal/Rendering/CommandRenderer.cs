@@ -16,7 +16,7 @@ namespace Gint.Terminal
         private IEnumerable<int> errorCells;
         private string textProcessed;
         private string textRendered;
-        private Action<ConsoleColor> cellColorer;
+        private Action<ThemeColor> cellColorer;
         private Action renderCallback;
         private BoundNode boundNode;
         private CommandExpressionTree expressionTree;
@@ -26,7 +26,7 @@ namespace Gint.Terminal
         {
             this.options = options;
             Registry = options.Registry;
-            cellColorer = PlainCellColorer;
+            cellColorer = CellColorer;
             SuggestionEngine = new SuggestionEngine(options);
             DisplayErrorCells = options.DisplayErrorCells;
             DisplayDiagnostics = options.DisplayDiagnostics;
@@ -63,23 +63,27 @@ namespace Gint.Terminal
             set
             {
                 _displayErrorCells = value;
-                cellColorer = _displayErrorCells ? ErrorAwareCellColorer : PlainCellColorer;
+                cellColorer = _displayErrorCells ? ErrorAwareCellColorer : CellColorer;
             }
         }
 
         public bool DisplayDiagnostics { get; set; } = false;
 
-        private void ErrorAwareCellColorer(ConsoleColor color)
+        private void ErrorAwareCellColorer(ThemeColor color)
         {
             if (errorCells.Contains(textRendered.Length))
-                Console.ForegroundColor = ConsoleColor.Red;
+            {
+                options.Theme.ErrorCell.Apply();
+            }
             else
-                Console.ForegroundColor = color;
+            {
+                color.Apply();
+            }
         }
 
-        private void PlainCellColorer(ConsoleColor color)
+        private void CellColorer(ThemeColor color)
         {
-            Console.ForegroundColor = color;
+            color.Apply();
         }
 
         private void RenderInternal(string command)
@@ -122,6 +126,7 @@ namespace Gint.Terminal
                 boundNode = binder.Bind();
             }
             catch { }
+
             expressionTree.Diagnostics.AddRange(binder.Diagnostics);
         }
 
@@ -147,7 +152,7 @@ namespace Gint.Terminal
             {
                 Console.WriteLine();
                 Console.WriteLine();
-                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                cellColorer(options.Theme.DiagnosticsFrame);
                 var diagnosticsText = "--Diagnostics";
                 Console.Write(diagnosticsText);
                 Console.WriteLine(new string('—', Console.BufferWidth - diagnosticsText.Length));
@@ -180,7 +185,7 @@ namespace Gint.Terminal
                     var suffix = text[diagnostic.Location.End..];
                     Console.Write("    ");
                     Console.Write(prefix);
-                    Console.ForegroundColor = ConsoleColor.Red;
+                    options.Theme.ErrorCell.Apply();
                     Console.Write(error);
                     Console.ResetColor();
                     Console.WriteLine(suffix);
@@ -201,11 +206,14 @@ namespace Gint.Terminal
                         Console.ResetColor();
                         Console.Write(" ");
                     }
-                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    options.Theme.DiagnosticsCode.Apply();
                     Console.Write(diagnostic.ErrorCode);
                     Console.ResetColor();
+                    options.Theme.DiagnosticsMessage.Apply();
                     Console.Write(" ");
-                    Console.WriteLine(diagnostic.Message);
+                    Console.Write(diagnostic.Message);
+                    Console.ResetColor();
+                    Console.WriteLine();
                     Console.WriteLine();
                 }
             };
@@ -232,25 +240,25 @@ namespace Gint.Terminal
             switch (kind)
             {
                 case CommandTokenKind.CommandExpression:
-                    RenderText(text, ConsoleColor.Green);
+                    RenderText(text, options.Theme.Command);
                     break;
                 case CommandTokenKind.CommandWithVariableExpression:
-                    RenderText(text, ConsoleColor.Green);
+                    RenderText(text, options.Theme.CommandWithVariable);
                     break;
                 case CommandTokenKind.Keyword:
                     RenderKeyword(text);
                     break;
                 case CommandTokenKind.OptionExpression:
-                    RenderText(text, ConsoleColor.Yellow);
+                    RenderText(text, options.Theme.Option);
                     break;
                 case CommandTokenKind.VariableOptionExpression:
-                    RenderText(text, ConsoleColor.Yellow);
+                    RenderText(text, options.Theme.OptionWithVariable);
                     break;
                 case CommandTokenKind.PipeExpression:
-                    RenderText(text, ConsoleColor.Magenta);
+                    RenderText(text, options.Theme.Pipe);
                     break;
                 case CommandTokenKind.PipedCommandExpression:
-                    RenderText(text, ConsoleColor.Magenta);
+                    RenderText(text, options.Theme.Pipe);
                     break;
             }
         }
@@ -262,9 +270,9 @@ namespace Gint.Terminal
             for (int i = 0; i < text.Length; i++)
             {
                 if (isFirstOrLastCharacter(i) && (text[i] == '\'' || text[i] == '\"'))
-                    RenderText(text[i].ToString(), ConsoleColor.Magenta);
+                    RenderText(text[i].ToString(), options.Theme.Quotes);
                 else
-                    RenderText(text[i].ToString(), ConsoleColor.White);
+                    RenderText(text[i].ToString(), options.Theme.Keyword);
             }
         }
 
@@ -279,17 +287,17 @@ namespace Gint.Terminal
             {
                 if (textProcessed.Length > token.Span.Start) return;
 
-                RenderText(token.Text, ConsoleColor.White);
+                RenderText(token.Text, options.Theme.Whitespace);
             }
         }
 
-        private void RenderText(string text, ConsoleColor color)
+        private void RenderText(string text, ThemeColor color)
         {
             textProcessed += text;
             renderCallback += () => RenderCell(text, color);
         }
 
-        private void RenderCell(string text, ConsoleColor color)
+        private void RenderCell(string text, ThemeColor color)
         {
             for (int i = 0; i < text.Length; i++)
             {

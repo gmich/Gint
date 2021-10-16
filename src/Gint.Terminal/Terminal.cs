@@ -24,11 +24,12 @@ namespace Gint.Terminal
         private bool requiresReset = true;
 
         public bool AcceptInput { get; set; } = true;
+        public TerminalOptions Options => options;
 
         public Terminal(TerminalOptions options)
         {
             this.options = options;
-            prompt = new Prompt(options.Prompt);
+            prompt = new Prompt(options.Prompt, options.Theme);
             consoleInputInterceptor = new ConsoleInputInterceptor();
             renderer = new CommandRenderer(options);
             history = new CommandHistory(options.CommandHistoryRepository);

@@ -4,10 +4,13 @@ namespace Gint.Terminal
 {
     internal class SuggestionRenderItem : Renderable
     {
-        public SuggestionRenderItem(SuggestionModel suggestion)
+        private readonly TerminalTheme theme;
+     
+        public SuggestionRenderItem(SuggestionModel suggestion, TerminalTheme theme)
         {
             RenderValue = suggestion.RenderValue;
             Suggestion = suggestion;
+            this.theme = theme;
         }
 
         public bool HasFocus { get; set; }
@@ -17,8 +20,11 @@ namespace Gint.Terminal
         {
             if (HasFocus)
             {
-                Console.ForegroundColor = ConsoleColor.Black;
-                Console.BackgroundColor = ConsoleColor.White;
+                theme.SuggestionFocus.Apply();
+            }
+            else
+            {
+                theme.Suggestion.Apply();
             }
             Console.Write(RenderValue);
             Console.ResetColor();
