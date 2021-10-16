@@ -19,7 +19,7 @@ namespace Gint.Terminal.Sample
             {
                 CommandHistoryRepository = new PokemonFileHistoryRepository(),
                 Registry = runtime.CommandRegistry,
-                MaxSuggestionsPerRow = 5
+                MaxSuggestionsPerRow = 5,
             })
             .BindRuntime(runtime);
 

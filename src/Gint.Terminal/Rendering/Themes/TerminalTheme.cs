@@ -24,23 +24,23 @@ namespace Gint.Terminal
 
         public static TerminalTheme Default => new TerminalTheme
         {
-            Prompt = new ThemeColor(ConsoleColor.DarkGreen),
-            Command = new ThemeColor(ConsoleColor.Green),
-            CommandWithVariable =  new ThemeColor(ConsoleColor.Green),
-            Option = new ThemeColor(ConsoleColor.Yellow),
-            OptionWithVariable = new ThemeColor(ConsoleColor.Yellow),
-            Keyword = new ThemeColor(ConsoleColor.White),
-            Whitespace = new ThemeColor(ConsoleColor.White),
-            Quotes = new ThemeColor(ConsoleColor.Magenta),
-            Pipe = new ThemeColor(ConsoleColor.Magenta),
+            Prompt = new ThemeColor(foreground: ConsoleColor.DarkGreen),
+            Command = new ThemeColor(foreground: ConsoleColor.Green),
+            CommandWithVariable = new ThemeColor(foreground: ConsoleColor.Green),
+            Option = new ThemeColor(foreground: ConsoleColor.Yellow),
+            OptionWithVariable = new ThemeColor(foreground: ConsoleColor.Yellow),
+            Keyword = new ThemeColor(foreground: ConsoleColor.White),
+            Whitespace = new ThemeColor(foreground: ConsoleColor.White),
+            Quotes = new ThemeColor(foreground: ConsoleColor.Magenta),
+            Pipe = new ThemeColor(foreground: ConsoleColor.Magenta),
 
-            ErrorCell = new ThemeColor(ConsoleColor.Red),
-            DiagnosticsFrame = new ThemeColor(ConsoleColor.DarkYellow),
-            DiagnosticsCode = new ThemeColor(ConsoleColor.Cyan),
-            DiagnosticsMessage = new ThemeColor(ConsoleColor.DarkGray),
+            ErrorCell = new ThemeColor(foreground: ConsoleColor.Red),
+            DiagnosticsFrame = new ThemeColor(foreground: ConsoleColor.DarkYellow),
+            DiagnosticsCode = new ThemeColor(foreground: ConsoleColor.Cyan),
+            DiagnosticsMessage = new ThemeColor(foreground: ConsoleColor.DarkGray),
 
-            Suggestion = new ThemeColor(ConsoleColor.Gray),
-            SuggestionFocus = new ThemeColor(ConsoleColor.Black, ConsoleColor.White),
+            Suggestion = new ThemeColor(foreground: ConsoleColor.Gray),
+            SuggestionFocus = new ThemeColor(foreground: ConsoleColor.Black, background: ConsoleColor.White),
         };
     }
 
