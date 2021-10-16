@@ -10,17 +10,17 @@ namespace Gint.Builtin
             registry.AddVariableCommand("setvar", required: true, Help, SetVar);
         }
 
-        public Task<ICommandOutput> SetVar(ICommandInput input, CommandExecutionContext ctx, Func<Task> next)
+        public Task<ICommandOutput> SetVar(CommandExecutionContext ctx, Func<Task> next)
         {
-            if (!ctx.GlobalScope.ContainsKey(input.Variable))
+            if (!ctx.GlobalScope.ContainsKey(ctx.ExecutingCommand.Variable))
             {
-                ctx.GlobalScope.Add(input.Variable, input.Scope.ReadInputAsString());
+                ctx.GlobalScope.Add(ctx.ExecutingCommand.Variable, ctx.Scope.ReadInputAsString());
                 return CommandOutput.SuccessfulTask;
 
             }
             else
             {
-                ctx.Error.Write($"Variable {input.Variable} is already set.");
+                ctx.Error.Write($"Variable {ctx.ExecutingCommand.Variable} is already set.");
                 return CommandOutput.ErrorTask;
             }
         }

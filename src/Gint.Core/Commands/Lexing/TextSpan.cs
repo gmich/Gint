@@ -17,5 +17,7 @@
             var length = end - start;
             return new TextSpan(start, length);
         }
+
+        public string GetText(string text) => text.Substring(Start, Length);
     }
 }

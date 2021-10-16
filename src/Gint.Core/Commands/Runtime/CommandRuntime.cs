@@ -32,7 +32,7 @@ namespace Gint
                 {
                     if (Options.AbortOnCancelKeyPress)
                     {
-                        args.CommandExecutionContext.CancellationToken.Cancel();
+                        args.GlobalExecutionContext.CancellationToken.Cancel();
                     }
                 };
             };
@@ -42,7 +42,7 @@ namespace Gint
         {
             CommandRegistry
             .AddCommand("showtrees", o => o.Write("Toggles showing of bind and parse trees."),
-                (input, ctx, next) =>
+                (ctx, next) =>
                 {
                     Options.LogBindTree = !Options.LogBindTree;
                     Options.LogParseTree = !Options.LogParseTree;
@@ -88,9 +88,9 @@ namespace Gint
                         Options.RuntimeInfo.WriteLine();
                         Options.RuntimeInfo.Flush();
                     }
-                    var ctx = Options.CommandExecutionContextFactory();
+                    var ctx = new GlobalExecutionContext(Options.InfoOut, Options.ErrorOut);
                     OnCommandExecuting?.Invoke(this, new CommandExecutionEventArgs(ctx));
-                    await Evaluator.Evaluate(boundNode, command, ctx, Options.EntryPipe,Options.PipeFactory);
+                    await Evaluator.Evaluate(boundNode, command, ctx, Options.EntryPipe,Options.PipeFactory, Options.Middlewares);
                     OnCommandExecuted?.Invoke(this, new CommandExecutionEventArgs(ctx));
                 }
             }

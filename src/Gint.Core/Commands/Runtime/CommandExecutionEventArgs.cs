@@ -4,11 +4,11 @@ namespace Gint
 {
     public class CommandExecutionEventArgs : EventArgs
     {
-        public CommandExecutionContext CommandExecutionContext { get; }
+        public GlobalExecutionContext GlobalExecutionContext { get; }
 
-        public CommandExecutionEventArgs(CommandExecutionContext commandExecutionContext)
+        public CommandExecutionEventArgs(GlobalExecutionContext commandExecutionContext)
         {
-            CommandExecutionContext = commandExecutionContext;
+            GlobalExecutionContext = commandExecutionContext;
         }
     }
 }

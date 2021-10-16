@@ -136,9 +136,11 @@ namespace Gint.Pipes
 
                 Buffer.BlockCopy(buffer, ReadCursor, readBuffer, 0, bytesToRead);
 
-                bytesConsumed += bytesToRead;
-
-                if (advanceCursor) AdvanceReadCursor(bytesToRead);
+                if (advanceCursor)
+                {
+                    bytesConsumed += bytesToRead;
+                    AdvanceReadCursor(bytesToRead);
+                }
 
                 pipeOperationState.EndRead();
 
@@ -164,9 +166,11 @@ namespace Gint.Pipes
                 var bytesPointer = Marshal.UnsafeAddrOfPinnedArrayElement(readBuffer, 0);
                 Buffer.MemoryCopy(bufferPointer.ToPointer(), bytesPointer.ToPointer(), readBuffer.Length, readBuffer.Length);
 
-                bytesConsumed += bytesToRead;
-
-                if (advanceCursor) AdvanceReadCursor(bytesToRead);
+                if (advanceCursor)
+                {
+                    bytesConsumed += bytesToRead;
+                    AdvanceReadCursor(bytesToRead);
+                }
 
                 pipeOperationState.EndRead();
 

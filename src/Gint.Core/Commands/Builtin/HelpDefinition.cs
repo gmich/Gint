@@ -28,24 +28,24 @@ namespace Gint.Builtin
             return registry.Collection.Select(c => new Suggestion(c.Key, c.Key));
         }
 
-        private Task<ICommandOutput> Help(ICommandInput input, CommandExecutionContext ctx, Func<Task> next)
+        private Task<ICommandOutput> Help(CommandExecutionContext ctx, Func<Task> next)
         {
             var writer = new Out();
-            var printDetailed = input.Options.Contains("-d");
+            var printDetailed = ctx.ExecutingCommand.Options.Contains("-d");
 
             // if there's a variable, show help for that command only
-            if (!string.IsNullOrEmpty(input.Variable))
+            if (!string.IsNullOrEmpty(ctx.ExecutingCommand.Variable))
             {
-                if (registry.Collection.ContainsKey(input.Variable))
+                if (registry.Collection.ContainsKey(ctx.ExecutingCommand.Variable))
                 {
-                    var entry = registry.Collection[input.Variable];
+                    var entry = registry.Collection[ctx.ExecutingCommand.Variable];
                     PrintCommand(writer, ctx, entry);
                     if (printDetailed)
                         PrintCommandOptions(writer, ctx, entry, printDetailed);
                 }
                 else
                 {
-                    ctx.Error.WriteLine($"Command <{input.Variable}> does not exist in the registry.");
+                    ctx.Error.WriteLine($"Command <{ctx.ExecutingCommand.Variable}> does not exist in the registry.");
                     return CommandOutput.ErrorTask;
                 }
             }
@@ -63,7 +63,7 @@ namespace Gint.Builtin
                         writer.WriteLine();
                 }
             }
-            input.Scope.WriteString(writer.Buffer);
+            ctx.Scope.WriteString(writer.Buffer);
             return CommandOutput.SuccessfulTask;
         }
 
@@ -94,7 +94,7 @@ namespace Gint.Builtin
             @out.Write("Help on command usage and examples.");
         }
 
-        private Task<ICommandOutput> Detail(ICommandInput input, CommandExecutionContext ctx, Func<Task> next)
+        private Task<ICommandOutput> Detail(CommandExecutionContext ctx, Func<Task> next)
         {
             return CommandOutput.SuccessfulTask;
         }

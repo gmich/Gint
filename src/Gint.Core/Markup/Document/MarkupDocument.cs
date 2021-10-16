@@ -154,6 +154,26 @@ namespace Gint
             return this;
         }
 
+        public MarkupDocument Flush()
+        {
+            if (this is Out o)
+                o.Flush();
+            return this;
+        }
+
+        internal bool GetAutoflushFlag()
+        {
+            if (this is Out o)
+                return o.AutoFlush;
+            return false;
+        }
+
+        internal void SetAutoflush(bool b)
+        {
+            if (this is Out o)
+                o.AutoFlush = b;
+        }
+
         public string Buffer => buffer.ToString();
 
         public override string ToString() => Buffer;

@@ -11,9 +11,9 @@ namespace Gint.Terminal.Sample
     internal sealed class JsonCommand : IScanForAttributes
     {
         [CommandWithVariable("json", required: false, helpCallback: nameof(JsonHelp), suggestionsCallback: nameof(JsonSuggestions))]
-        public Task<ICommandOutput> Json(ICommandInput input, CommandExecutionContext ctx, Func<Task> next)
+        public Task<ICommandOutput> Json(CommandExecutionContext ctx, Func<Task> next)
         {
-            var inputVar = input.HasVariable ? input.Variable : input.Scope.ReadInputAsString();
+            var inputVar = ctx.ExecutingCommand.HasVariable ? ctx.ExecutingCommand.Variable : ctx.Scope.ReadInputAsString();
             if (!string.IsNullOrEmpty(inputVar))
             {
                 var jsonToParse = inputVar;
@@ -22,7 +22,7 @@ namespace Gint.Terminal.Sample
                     using (JsonDocument doc = JsonDocument.Parse(jsonToParse))
                     {
                         ctx.Info.WriteLine("Valid json");
-                        if (input.Options.Contains("-p"))
+                        if (ctx.ExecutingCommand.Options.Contains("-p"))
                         {
                             var pretty = JsonSerializer.Serialize(doc, new JsonSerializerOptions { WriteIndented = true });
                             ctx.Info.WriteLine(pretty);
@@ -56,7 +56,7 @@ namespace Gint.Terminal.Sample
 
             return new[]
             {
-               new Suggestion("\'{ \"name\":\"kokos\" , \"age\":18 }\'", "random_json")
+               new Suggestion(value: "\'{ \"name\":\"kokos\" , \"age\":18 }\'", displayValue: "random_json")
             };
         }
 
@@ -66,7 +66,7 @@ namespace Gint.Terminal.Sample
         }
 
         [Option(1, "-p", "--pretty", false, nameof(PrettyHelp))]
-        private Task<ICommandOutput> Prettify(ICommandInput input, CommandExecutionContext ctx, Func<Task> next)
+        private Task<ICommandOutput> Prettify(CommandExecutionContext ctx, Func<Task> next)
         {
             return CommandOutput.SuccessfulTask;
         }

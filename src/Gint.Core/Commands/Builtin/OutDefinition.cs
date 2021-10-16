@@ -8,9 +8,9 @@ namespace Gint.Builtin
         {
             registry
                 .AddVariableCommand("out", required: true, helpCallback: o => o.Write("Prints to stream out"),
-                    (input, ctx, next) =>
+                    (ctx, next) =>
                     {
-                        input.Scope.PipeWriter.Write(input.Variable.ToUTF8EncodedByteArray());
+                        ctx.Scope.PipeWriter.Write(ctx.ExecutingCommand.Variable.ToUTF8EncodedByteArray());
                         return CommandOutput.SuccessfulTask;
                     });
         }

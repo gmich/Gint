@@ -15,9 +15,9 @@ namespace Gint
         public IPipeReader PipeReader { get; }
         public Dictionary<string, object> Metadata { get; } = new Dictionary<string, object>();
 
-        public string ReadInputAsString()
+        public string ReadInputAsString(bool advanceCursor = true)
         {
-            var res = PipeReader.Read();
+            var res = PipeReader.Read(advanceCursor);
             return res.Buffer.ToUTF8String();
         }
 

@@ -30,7 +30,6 @@ namespace Gint
     {
         public List<MarkupWriter> OutputWriters { get; }
 
-
         public Out()
         {
             OutputWriters = new List<MarkupWriter>();

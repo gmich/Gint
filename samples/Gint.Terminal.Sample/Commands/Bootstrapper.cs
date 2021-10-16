@@ -10,18 +10,18 @@ namespace Gint.Terminal.Sample
         {
             runtime.CommandRegistry
                 .AddCommand("cpu", o => o.Write("CPU utilities"),
-                    (input, ctx, next) =>
+                    (ctx, next) =>
                     {
-                        if (input.Options.Contains("-c"))
+                        if (ctx.ExecutingCommand.Options.Contains("-c"))
                         {
-                            input.Scope.WriteString($"CPU count: {Environment.ProcessorCount}");
+                            ctx.Scope.WriteString($"CPU count: {Environment.ProcessorCount}");
                         }
                         else
-                            input.Scope.WriteString("CPU utilities");
+                            ctx.Scope.WriteString("CPU utilities");
                         return CommandOutput.SuccessfulTask;
                     })
                 .AddOption(1, "-c", "--count", false, o => o.Write("Machine cpu count"),
-                    (input, ctx, next) =>
+                    (ctx, next) =>
                     {
                         return CommandOutput.SuccessfulTask;
                     });

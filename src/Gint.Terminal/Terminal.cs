@@ -24,6 +24,7 @@ namespace Gint.Terminal
         private bool requiresReset = true;
 
         public bool AcceptInput { get; set; } = true;
+
         public Terminal(TerminalOptions options)
         {
             this.options = options;
@@ -39,6 +40,18 @@ namespace Gint.Terminal
             };
 
             SetupSuggestions();
+        }
+
+        public Terminal BindRuntime(CommandRuntime runtime)
+        {
+            OnCommandReady += async (sender, cmd) =>
+            {
+                AcceptInput = false;
+                Console.WriteLine();
+                await runtime.Run(cmd);
+                AcceptInput = true;
+            };
+            return this;
         }
 
         private void CreateActors()

@@ -10,9 +10,9 @@ namespace Gint.Sample
     internal sealed class JsonCommand : IScanForAttributes
     {
         [Command("json", helpCallback: nameof(JsonHelp))]
-        public Task<ICommandOutput> Json(ICommandInput input, CommandExecutionContext ctx, Func<Task> next)
+        public Task<ICommandOutput> Json(CommandExecutionContext ctx, Func<Task> next)
         {
-            var inputStream = input.Scope.ReadInputAsString();
+            var inputStream = ctx.Scope.ReadInputAsString();
             if (!string.IsNullOrEmpty(inputStream))
             {
                 var jsonToParse = inputStream;
@@ -21,7 +21,7 @@ namespace Gint.Sample
                     using (JsonDocument doc = JsonDocument.Parse(jsonToParse))
                     {
                         ctx.Info.WriteLine("Valid json");
-                        if (input.Options.Contains("-p"))
+                        if (ctx.ExecutingCommand.Options.Contains("-p"))
                         {
                             var pretty = JsonSerializer.Serialize(doc, new JsonSerializerOptions { WriteIndented = true });
                             ctx.Info.WriteLine(pretty);
@@ -55,7 +55,7 @@ namespace Gint.Sample
         }
 
         [Option(1, "-p", "--pretty", false, nameof(PrettyHelp))]
-        private Task<ICommandOutput> Prettify(ICommandInput input, CommandExecutionContext ctx, Func<Task> next)
+        private Task<ICommandOutput> Prettify(CommandExecutionContext ctx, Func<Task> next)
         {
             return CommandOutput.SuccessfulTask;
         }

@@ -10,31 +10,26 @@ using Gint.Pipes;
 namespace Gint
 {
 
-    internal class Pipeline
-    {
-        public CommandScope PreviousScope { get; init; }
-        public IPipe PreviousPipe { get; init; }
-        public CommandScope Scope { get; init; }
-        public IPipe Pipe { get; init; }
-    }
-
     internal class Evaluator
     {
         private readonly EvaluationChain evaluationChain = new EvaluationChain();
         private readonly Stack<Pipeline> pipelines = new Stack<Pipeline>();
-
-        private CommandExecutionContext commandExecutionContext;
+        private readonly string command;
+        private GlobalExecutionContext globalExecutionContext;
         private readonly Func<IPipe> entryPipe;
         private readonly Func<IPipe> pipeFactory;
+        private readonly IEvaluationMiddleware[] middlewares;
         private int executionId = 1;
         private int GetExecutionId => executionId++;
         private string[] boundOptionsCache = Array.Empty<string>();
 
-        private Evaluator(CommandExecutionContext commandExecutionContext, Func<IPipe> entryPipe, Func<IPipe> pipeFactory)
+        private Evaluator(string command, GlobalExecutionContext globalExecutionContext, Func<IPipe> entryPipe, Func<IPipe> pipeFactory, IEnumerable<IEvaluationMiddleware> middlewares)
         {
-            this.commandExecutionContext = commandExecutionContext;
+            this.command = command;
+            this.globalExecutionContext = globalExecutionContext;
             this.entryPipe = entryPipe;
             this.pipeFactory = pipeFactory;
+            this.middlewares = middlewares.ToArray();
             SeedFirstPipeline();
         }
 
@@ -59,9 +54,9 @@ namespace Gint
         }
 
 
-        public static async Task Evaluate(BoundNode root, string command, CommandExecutionContext commandExecutionContext, Func<IPipe> entryPipe, Func<IPipe> pipeFactory)
+        public static async Task Evaluate(BoundNode root, string command, GlobalExecutionContext globalExecutionContext, Func<IPipe> entryPipe, Func<IPipe> pipeFactory, IEnumerable<IEvaluationMiddleware> middlewares)
         {
-            var evaluator = new Evaluator(commandExecutionContext, entryPipe, pipeFactory);
+            var evaluator = new Evaluator(command, globalExecutionContext, entryPipe, pipeFactory, middlewares);
             evaluator.EvaluateNode(root);
 
             try
@@ -70,10 +65,10 @@ namespace Gint
             }
             catch (Exception ex)
             {
-                evaluator.commandExecutionContext.Info.Flush();
-                evaluator.commandExecutionContext.Error.Flush();
-                evaluator.commandExecutionContext.Error.WriteLine(ex.ToString());
-                evaluator.commandExecutionContext.Error.Flush();
+                evaluator.globalExecutionContext.Info.Flush();
+                evaluator.globalExecutionContext.Error.Flush();
+                evaluator.globalExecutionContext.Error.WriteLine(ex.ToString());
+                evaluator.globalExecutionContext.Error.Flush();
                 evaluator.evaluationChain.Error = true;
             }
             finally
@@ -81,8 +76,8 @@ namespace Gint
                 var lastPipeline = evaluator.GetLastPipeline();
                 var stream = lastPipeline.Pipe.Read().Buffer;
                 var parsedStream = stream?.ToUTF8String() ?? string.Empty;
-                evaluator.commandExecutionContext.Info.WriteRaw(parsedStream).WriteLine();
-                evaluator.commandExecutionContext.Info.Flush();
+                evaluator.globalExecutionContext.Info.WriteRaw(parsedStream).WriteLine();
+                evaluator.globalExecutionContext.Info.Flush();
                 if (evaluator.evaluationChain.Error)
                 {
                     evaluator.PrintError(command);
@@ -97,7 +92,7 @@ namespace Gint
             var prefix = command.Substring(0, errorSpan.Start);
             var suffix = command[errorSpan.End..];
 
-            commandExecutionContext.Error
+            globalExecutionContext.Error
                 .Write("error: ")
                 .Write(prefix)
                 .WithForegroundColor().Red()
@@ -105,7 +100,7 @@ namespace Gint
                 .Write(suffix)
                 .WriteLine();
 
-            commandExecutionContext.Error.Flush();
+            globalExecutionContext.Error.Flush();
         }
 
         private void EvaluateNode(BoundNode node)
@@ -154,26 +149,48 @@ namespace Gint
             pipelines.Push(pipeline);
         }
 
+        private CommandExecutionContext GetExecutionContext(ExecutingCommand commandInfo, CommandScope scope)
+        {
+            return new CommandExecutionContext(commandInfo, scope, globalExecutionContext);
+        }
+
+        private void AddEvaluationChain(ExecutionBlock block, CommandExecutionContext ctx, TextSpan span)
+        {
+            evaluationChain.Add(() =>
+            {
+                return BuildExecutionBlockWithMiddlewares(0, block, ctx).Invoke()
+                .ContinueWith(c => OnExecutionEnd(c.Result), TaskContinuationOptions.AttachedToParent);
+            }, span);
+        }
+
+        private Func<Task<ICommandOutput>> BuildExecutionBlockWithMiddlewares(int index, ExecutionBlock block, CommandExecutionContext ctx)
+        {
+            if (index == middlewares.Length)
+            {
+                return () => block.Invoke(ctx, Next);
+            }
+            return () => middlewares[index].Intercept(ctx, BuildExecutionBlockWithMiddlewares(index + 1, block, ctx));
+        }
+
         private void EvaluateVariableOption(BoundVariableOption boundVariableOption)
         {
             var capturedBoundOptions = BoundOptionsCopy;
             var scope = GetLastPipeline().Scope;
-            evaluationChain.Add(() =>
-            {
-                return boundVariableOption.VariableOption.Callback.Invoke(new CommandInput(GetExecutionId, boundVariableOption.Variable, capturedBoundOptions, scope), commandExecutionContext, Next)
-                .ContinueWith(c => OnExecutionEnd(c.Result), TaskContinuationOptions.AttachedToParent);
-            }, boundVariableOption.TextSpanWithVariable);
+            var span = boundVariableOption.TextSpanWithVariable;
+            var ctx = GetExecutionContext(new ExecutingCommand(GetExecutionId, command, boundVariableOption.Variable, capturedBoundOptions, span), scope);
+
+            AddEvaluationChain(boundVariableOption.VariableOption.Callback, ctx, span);
         }
+
 
         private void EvaluateOption(BoundOption boundOption)
         {
             var capturedBoundOptions = BoundOptionsCopy;
             var scope = GetLastPipeline().Scope;
-            evaluationChain.Add(() =>
-            {
-                return boundOption.Option.Callback.Invoke(new CommandInput(GetExecutionId, string.Empty, capturedBoundOptions, scope), commandExecutionContext, Next)
-                .ContinueWith(c => OnExecutionEnd(c.Result), TaskContinuationOptions.AttachedToParent);
-            }, boundOption.TextSpan);
+            var span = boundOption.TextSpan;
+            var ctx = GetExecutionContext(new ExecutingCommand(GetExecutionId, command, string.Empty, capturedBoundOptions, span), scope);
+
+            AddEvaluationChain(boundOption.Option.Callback, ctx, span);
         }
 
         private void EvaluateCommand(BoundCommand boundCommand)
@@ -197,11 +214,9 @@ namespace Gint
                 EvaluateNode(opt);
             }
 
-            evaluationChain.Add(() =>
-            {
-                return boundCommand.Command.Callback.Invoke(new CommandInput(GetExecutionId, variable, capturedBoundOptions, newScope), commandExecutionContext, Next)
-                .ContinueWith(c => OnExecutionEnd(c.Result), TaskContinuationOptions.AttachedToParent);
-            }, span);
+            var ctx = GetExecutionContext(new ExecutingCommand(GetExecutionId, command, variable, capturedBoundOptions, span), newScope);
+
+            AddEvaluationChain(boundCommand.Command.Callback, ctx, span);
         }
 
 
@@ -215,13 +230,13 @@ namespace Gint
 
         private void OnExecutionEnd(ICommandOutput output)
         {
-            if (commandExecutionContext.CancellationToken.IsCancellationRequested)
+            if (globalExecutionContext.CancellationToken.IsCancellationRequested)
             {
                 evaluationChain.Error = true;
             }
 
-            commandExecutionContext.Info.Flush();
-            commandExecutionContext.Error.Flush();
+            globalExecutionContext.Info.Flush();
+            globalExecutionContext.Error.Flush();
             if (output.CommandState == CommandState.Error)
                 evaluationChain.Error = true;
             Next();

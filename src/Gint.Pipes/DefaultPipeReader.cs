@@ -14,7 +14,7 @@ namespace Gint.Pipes
 
         public PipeReadResult Read(bool advanceCursor = true)
         {
-            return pipe.Read();
+            return pipe.Read(advanceCursor);
         }
 
         public PipeReadResult Read(int offset, int count)

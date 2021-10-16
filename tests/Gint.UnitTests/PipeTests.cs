@@ -61,18 +61,18 @@ namespace Gint.Tests
         {
             var pipe = GetPipe();
 
-            void WriteAndRead(string text)
+            void WriteAndRead(string texttoWrite, string shouldbe)
             {
-                pipe.Write(text.ToUTF8EncodedByteArray());
+                pipe.Write(texttoWrite.ToUTF8EncodedByteArray());
 
                 var bytesRead = pipe.Read(advanceCursor: false);
                 var readResult = bytesRead.Buffer.ToUTF8String();
 
-                Assert.Equal(text, readResult);
+                Assert.Equal(shouldbe, readResult);
             }
 
-            WriteAndRead(first);
-            WriteAndRead(second);
+            WriteAndRead(first, first);
+            WriteAndRead(second, first + second);
         }
 
         [Theory]
@@ -101,18 +101,18 @@ namespace Gint.Tests
         {
             var pipe = GetPipe(new PipeOptions { PreferredBufferSegmentSize = 16 });
 
-            void WriteAndRead(string text)
+            void WriteAndRead(string textToWrite, string shouldbe)
             {
-                pipe.Write(text.ToUTF8EncodedByteArray());
+                pipe.Write(textToWrite.ToUTF8EncodedByteArray());
 
                 var bytesRead = pipe.Read(advanceCursor: false);
                 var readResult = bytesRead.Buffer.ToUTF8String();
 
-                Assert.Equal(text, readResult);
+                Assert.Equal(shouldbe, readResult);
             }
 
-            WriteAndRead(first);
-            WriteAndRead(second);
+            WriteAndRead(first, first);
+            WriteAndRead(second, first + second);
         }
 
         [Theory]
