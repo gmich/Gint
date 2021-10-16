@@ -27,7 +27,7 @@ namespace Gint
 
         public List<IEvaluationMiddleware> Middlewares { get; } = new List<IEvaluationMiddleware>();
 
-        public void WithMiddleware(Func<CommandExecutionContext, Func<Task<ICommandOutput>>, Task<ICommandOutput>> middlewareDelegate)
+        public void AddMiddleware(Func<CommandExecutionContext, Func<Task<ICommandOutput>>, Task<ICommandOutput>> middlewareDelegate)
         {
             Middlewares.Add(new EvaluationMiddlewareFromDelegate(middlewareDelegate));
         }

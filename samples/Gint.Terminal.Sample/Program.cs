@@ -31,7 +31,7 @@ namespace Gint.Terminal.Sample
 
         private static void AddMiddlewares(CommandRuntime runtime)
         {
-            runtime.Options.WithMiddleware(async (ctx, next) =>
+            runtime.Options.AddMiddleware(async (ctx, next) =>
             {
                 ctx.Info
                 .WithForegroundColor().DarkYellow()
