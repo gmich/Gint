@@ -69,8 +69,7 @@ namespace Gint.Terminal
         {
             var node = (BoundVariableOption)lastNode;
             variable = node.Variable;
-            //var suggestionsCallback = node.VariableOption.Suggestions.ToKeywordSuggestions();
-            SuggestionModelCallback suggestionsCallback = SuggestionModelCallbackExtensions.EmptySuggestions;
+            SuggestionModelCallback suggestionsCallback = node.VariableOption.Suggestions.ToAutoCompleteSuggestions();
 
             IterateStackForBoundCommands(nodeStack,
             onBoundCommandFound: c =>
@@ -160,8 +159,10 @@ namespace Gint.Terminal
             var node = (BoundCommandWithVariable)lastNode;
             variable = node.Variable;
             var command = (CommandWithVariable)node.Command;
+            var suggestions = node.Command.Suggestions;
 
-            var suggestionsCallback = node.Command.Suggestions.ToKeywordSuggestions();
+
+            var suggestionsCallback = string.IsNullOrEmpty(variable) ? suggestions.ToKeywordSuggestions() : suggestions.ToAutoCompleteSuggestions();
             if (command.Required)
             {
                 return suggestionsCallback;

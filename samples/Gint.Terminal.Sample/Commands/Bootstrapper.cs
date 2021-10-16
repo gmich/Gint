@@ -14,10 +14,10 @@ namespace Gint.Terminal.Sample
                     {
                         if (ctx.ExecutingCommand.Options.Contains("-c"))
                         {
-                            ctx.Scope.WriteString($"CPU count: {Environment.ProcessorCount}");
+                            ctx.Scope.WriteString($"CPU count: {Environment.ProcessorCount}{Environment.NewLine}");
                         }
                         else
-                            ctx.Scope.WriteString("CPU utilities");
+                            ctx.Scope.WriteString($"CPU utilities{Environment.NewLine}");
                         return CommandOutput.SuccessfulTask;
                     })
                 .AddOption(1, "-c", "--count", false, o => o.Write("Machine cpu count"),
