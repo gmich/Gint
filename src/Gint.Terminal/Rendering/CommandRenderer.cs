@@ -257,9 +257,11 @@ namespace Gint.Terminal
 
         private void RenderKeyword(string text)
         {
+            bool isFirstOrLastCharacter(int index) => index == 0 || index == text.Length - 1;
+
             for (int i = 0; i < text.Length; i++)
             {
-                if (text[i] == '\'' || text[i] == '\"')
+                if (isFirstOrLastCharacter(i) && (text[i] == '\'' || text[i] == '\"'))
                     RenderText(text[i].ToString(), ConsoleColor.Magenta);
                 else
                     RenderText(text[i].ToString(), ConsoleColor.White);

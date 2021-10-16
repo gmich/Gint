@@ -22,9 +22,6 @@ namespace Gint.Builtin
 
         private IEnumerable<Suggestion> HelpSuggestions(string variable)
         {
-            //if (!string.IsNullOrEmpty(variable))
-            //    return Enumerable.Empty<Suggestion>();
-
             return registry.Collection.Select(c => new Suggestion(c.Key, c.Key));
         }
 
