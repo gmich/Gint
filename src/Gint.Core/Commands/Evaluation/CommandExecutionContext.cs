@@ -24,6 +24,7 @@ namespace Gint
         public Out Info { get; }
         public Out Error { get; }
 
+        public MarkupDocument Formatter => new MarkupDocument();
         public Func<Task> Next { get; }
         public Dictionary<string, object> GlobalScope { get; }
         public CancellationTokenSource CancellationToken { get; }

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Gint.Terminal
 {
-    public class Terminal
+    public class CommandTerminal
     {
         private readonly ConsoleInputInterceptor consoleInputInterceptor;
         private readonly Prompt prompt;
@@ -26,9 +26,11 @@ namespace Gint.Terminal
         public bool AcceptInput { get; set; } = true;
         public TerminalOptions Options => options;
 
-        public Terminal(TerminalOptions options)
+        public CommandTerminal(CommandRuntime runtime, TerminalOptions options)
         {
+            options.Registry = runtime.CommandRegistry;
             this.options = options;
+
             prompt = new Prompt(options.Prompt, options.Theme);
             consoleInputInterceptor = new ConsoleInputInterceptor();
             renderer = new CommandRenderer(options);
@@ -39,11 +41,13 @@ namespace Gint.Terminal
             {
                 history.Record(args);
             };
+            BindRuntime(runtime);
 
             SetupSuggestions();
         }
+        public CommandTerminal(CommandRuntime runtime) : this(runtime, TerminalOptions.Default){}
 
-        public Terminal BindRuntime(CommandRuntime runtime)
+        private CommandTerminal BindRuntime(CommandRuntime runtime)
         {
             OnCommandReady += async (sender, cmd) =>
             {

@@ -24,6 +24,10 @@ namespace Gint
             AddShowTreesCommand();
         }
 
+        public CommandRuntime() : this(CommandRegistry.Empty, CommandRuntimeOptions.DefaultConsole)
+        {
+        }
+
         private void SetCancelKeyPressToAbort()
         {
             OnCommandExecuting += (sender, args) =>
@@ -90,7 +94,7 @@ namespace Gint
                     }
                     var ctx = new GlobalExecutionContext(Options.InfoOut, Options.ErrorOut);
                     OnCommandExecuting?.Invoke(this, new CommandExecutionEventArgs(ctx));
-                    await Evaluator.Evaluate(boundNode, command, ctx, Options.EntryPipe,Options.PipeFactory, Options.Middlewares);
+                    await Evaluator.Evaluate(boundNode, command, ctx, Options.EntryPipe, Options.PipeFactory, Options.Middlewares);
                     OnCommandExecuted?.Invoke(this, new CommandExecutionEventArgs(ctx));
                 }
             }

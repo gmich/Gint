@@ -57,7 +57,7 @@ namespace Gint
 
             public AddOptionsBuilder AddVariableOption(int priority, string argument, string longArgument, bool allowMultiple, HelpCallback helpCallback, ExecutionBlock callback, SuggestionsCallback suggestions = null)
             {
-                var option = new VariableOption(priority, argument, longArgument, allowMultiple, callback, helpCallback);
+                var option = new VariableOption(priority, argument, longArgument, allowMultiple, callback, helpCallback, suggestions);
                 options.Add(option);
                 var optionsArray = options.ToArray();
                 registry.ThrowIfDuplicate(commandName, optionsArray);

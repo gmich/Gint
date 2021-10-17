@@ -14,13 +14,11 @@ namespace Gint.Terminal.Sample
             runtime.RegisterCommands();
             //AddMiddlewares(runtime);
 
-            var terminal = new Terminal(new TerminalOptions
+            var terminal = new CommandTerminal(runtime, new TerminalOptions
             {
                 CommandHistoryRepository = new PokemonFileHistoryRepository(),
-                Registry = runtime.CommandRegistry,
                 MaxSuggestionsPerRow = 5,
-            })
-            .BindRuntime(runtime);
+            });
 
             while (true)
             {

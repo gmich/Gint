@@ -10,7 +10,7 @@
         public TerminalTheme Theme { get; init; } = TerminalTheme.Default;
 
         public ICommandHistoryRepository CommandHistoryRepository { get; init; } = new NoopHistoryRepository();
-        public CommandRegistry Registry { get; init; } = CommandRegistry.Empty;
+        internal CommandRegistry Registry { get; set; }
 
 
         public static TerminalOptions Default => new TerminalOptions();
