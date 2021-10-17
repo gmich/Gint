@@ -15,7 +15,7 @@ namespace Gint.Terminal.Sample
         private static WebClient client = new WebClient();
 
         [CommandWithVariable("http", required: false, helpCallback: nameof(HttpHelp))]
-        public Task<CommandOutput> Http(CommandExecutionContext ctx)
+        public Task<CommandResult> Http(CommandExecutionContext ctx)
         {
             var inputVar = ctx.ExecutingCommand.HasVariable ? ctx.ExecutingCommand.Variable : ctx.Scope.ReadInputAsString();
             if (!string.IsNullOrEmpty(inputVar))
@@ -26,7 +26,7 @@ namespace Gint.Terminal.Sample
                     {
                         var res = client.DownloadString(uri);
                         ctx.Scope.WriteString(res);
-                        return CommandOutput.SuccessfulTask;
+                        return CommandResult.SuccessfulTask;
                     }
                     catch (Exception ex)
                     {
@@ -42,7 +42,7 @@ namespace Gint.Terminal.Sample
             {
                 ctx.Error.WithForegroundColor().Red().WriteLine($"No URI provided");
             }
-            return CommandOutput.ErrorTask;
+            return CommandResult.ErrorTask;
         }
 
         public static void HttpHelp(Out o)
@@ -65,10 +65,10 @@ namespace Gint.Terminal.Sample
         };
 
         [VariableOption(1, "-m", "--method", false, nameof(MethodHelp), nameof(MethodSuggestions))]
-        private static Task<CommandOutput> Method(CommandExecutionContext ctx)
+        private static Task<CommandResult> Method(CommandExecutionContext ctx)
         {
             ctx.Scope.Add("--method", ctx.ExecutingCommand.Variable);
-            return CommandOutput.SuccessfulTask;
+            return CommandResult.SuccessfulTask;
         }
      
         public static void MethodHelp(Out o)

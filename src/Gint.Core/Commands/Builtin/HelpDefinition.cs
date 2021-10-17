@@ -25,7 +25,7 @@ namespace Gint.Builtin
             return registry.Collection.Select(c => new Suggestion(c.Key, c.Key));
         }
 
-        private Task<CommandOutput> Help(CommandExecutionContext ctx)
+        private Task<CommandResult> Help(CommandExecutionContext ctx)
         {
             var writer = new Out();
             var printDetailed = ctx.ExecutingCommand.Options.Contains("-d");
@@ -43,7 +43,7 @@ namespace Gint.Builtin
                 else
                 {
                     ctx.Error.WriteLine($"Command <{ctx.ExecutingCommand.Variable}> does not exist in the registry.");
-                    return CommandOutput.ErrorTask;
+                    return CommandResult.ErrorTask;
                 }
             }
             else
@@ -61,7 +61,7 @@ namespace Gint.Builtin
                 }
             }
             ctx.Scope.WriteString(writer.Buffer);
-            return CommandOutput.SuccessfulTask;
+            return CommandResult.SuccessfulTask;
         }
 
         private static void PrintCommand(Out writer, CommandExecutionContext ctx, CommandEntry cmd)
@@ -91,9 +91,9 @@ namespace Gint.Builtin
             @out.Write("Help on command usage and examples.");
         }
 
-        private Task<CommandOutput> Detail(CommandExecutionContext ctx)
+        private Task<CommandResult> Detail(CommandExecutionContext ctx)
         {
-            return CommandOutput.SuccessfulTask;
+            return CommandResult.SuccessfulTask;
         }
 
         private void DetailHelp(Out @out)

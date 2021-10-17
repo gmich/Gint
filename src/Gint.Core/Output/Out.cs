@@ -87,7 +87,7 @@ namespace Gint
             }
         }
 
-        public void Flush()
+        public new void Flush()
         {
             if (Buffer == string.Empty) return;
 

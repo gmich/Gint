@@ -163,7 +163,7 @@ namespace Gint
             }, span);
         }
 
-        private Func<Task<CommandOutput>> BuildExecutionBlockWithMiddlewares(int index, ExecutionBlock block, CommandExecutionContext ctx)
+        private Func<Task<CommandResult>> BuildExecutionBlockWithMiddlewares(int index, ExecutionBlock block, CommandExecutionContext ctx)
         {
             if (index == middlewares.Length)
             {
@@ -228,7 +228,7 @@ namespace Gint
             return evaluationChain.EvaluateNext(captured);
         };
 
-        private void OnExecutionEnd(CommandOutput output)
+        private void OnExecutionEnd(CommandResult output)
         {
             if (globalExecutionContext.CancellationToken.IsCancellationRequested)
             {

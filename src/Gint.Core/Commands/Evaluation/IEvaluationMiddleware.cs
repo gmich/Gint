@@ -5,6 +5,6 @@ namespace Gint
 {
     public interface IEvaluationMiddleware
     {
-        Task<CommandOutput> Intercept(CommandExecutionContext commandExecutionContext, Func<Task<CommandOutput>> next);
+        Task<CommandResult> Intercept(CommandExecutionContext commandExecutionContext, Func<Task<CommandResult>> next);
     }
 }

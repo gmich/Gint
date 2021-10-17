@@ -8,7 +8,7 @@ namespace Gint
 {
 
 
-    public delegate Task<CommandOutput> ExecutionBlock(CommandExecutionContext executionContext);
+    public delegate Task<CommandResult> ExecutionBlock(CommandExecutionContext executionContext);
 
     public delegate void HelpCallback(Out @out);
 
@@ -17,7 +17,7 @@ namespace Gint
 
     public static class CallbackUtilities
     {
-        public static Task<CommandOutput> NoopExecutionBlock(CommandExecutionContext executionContext) => CommandOutput.SuccessfulTask;
+        public static Task<CommandResult> NoopExecutionBlock(CommandExecutionContext executionContext) => CommandResult.SuccessfulTask;
 
         public static void NoopHelp(Out @out) {}
 

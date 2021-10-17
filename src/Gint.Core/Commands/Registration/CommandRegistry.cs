@@ -133,10 +133,10 @@ namespace Gint
                         throw new CommandDiscoveryException($"ICommandDefinition {definition.GetType().FullName} method {m.Name} has wrong number of parameters. See ExecutionBlock delegate");
                     if (parameters[0].ParameterType != typeof(CommandExecutionContext))
                         throw new CommandDiscoveryException($"ICommandDefinition {definition.GetType().FullName} method {m.Name} second parameter should be of type CommandExecutionContext. See ExecutionBlock delegate");
-                    if (m.ReturnType != typeof(Task<CommandOutput>))
+                    if (m.ReturnType != typeof(Task<CommandResult>))
                         throw new CommandDiscoveryException($"ICommandDefinition {definition.GetType().FullName} method {m.Name} return type should be of type Task<ICommandOutput>. See ExecutionBlock delegate.");
 
-                    return new ExecutionBlock((c) => (Task<CommandOutput>)m.Invoke(definition, new object[] { c }));
+                    return new ExecutionBlock((c) => (Task<CommandResult>)m.Invoke(definition, new object[] { c }));
                 }
                 HelpCallback GetHelpCallback(string name)
                 {

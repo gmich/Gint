@@ -21,12 +21,12 @@ namespace Gint.Commands.Sample
                         }
                         else
                             ctx.Scope.WriteString("CPU utilities");
-                        return CommandOutput.SuccessfulTask;
+                        return CommandResult.SuccessfulTask;
                     })
                 .AddOption(1, "-c", "--count", false, o => o.Write("Machine cpu count"),
                     (ctx) =>
                     {
-                        return CommandOutput.SuccessfulTask;
+                        return CommandResult.SuccessfulTask;
                     });
 
 

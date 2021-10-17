@@ -11,7 +11,7 @@ namespace Gint.Terminal.Sample
     internal sealed class JsonCommand : IScanForAttributes
     {
         [CommandWithVariable("json", required: false, helpCallback: nameof(JsonHelp), suggestionsCallback: nameof(JsonSuggestions))]
-        public Task<CommandOutput> Json(CommandExecutionContext ctx)
+        public Task<CommandResult> Json(CommandExecutionContext ctx)
         {
             var inputVar = ctx.ExecutingCommand.HasVariable ? ctx.ExecutingCommand.Variable : ctx.Scope.ReadInputAsString();
             if (!string.IsNullOrEmpty(inputVar))
@@ -38,16 +38,16 @@ namespace Gint.Terminal.Sample
                         .Write($"JSON: {jsonToParse}")
                         .WriteLine();
                     ctx.Error.Write(ex.Message);
-                    return CommandOutput.ErrorTask;
+                    return CommandResult.ErrorTask;
                 }
             }
             else
             {
                 ctx.Error.WriteLine("No json in outstream");
-                return CommandOutput.ErrorTask;
+                return CommandResult.ErrorTask;
             }
 
-            return CommandOutput.SuccessfulTask;
+            return CommandResult.SuccessfulTask;
         }
 
         public static IEnumerable<Suggestion> JsonSuggestions(string variable)
@@ -66,9 +66,9 @@ namespace Gint.Terminal.Sample
         }
 
         [Option(1, "-p", "--pretty", false, nameof(PrettyHelp))]
-        private Task<CommandOutput> Prettify(CommandExecutionContext ctx)
+        private Task<CommandResult> Prettify(CommandExecutionContext ctx)
         {
-            return CommandOutput.SuccessfulTask;
+            return CommandResult.SuccessfulTask;
         }
 
         private static void PrettyHelp(Out @out)

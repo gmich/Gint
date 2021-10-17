@@ -11,7 +11,7 @@ namespace Gint.Builtin
                     (ctx) =>
                     {
                         ctx.Scope.PipeWriter.Write(ctx.ExecutingCommand.Variable.ToUTF8EncodedByteArray());
-                        return CommandOutput.SuccessfulTask;
+                        return CommandResult.SuccessfulTask;
                     });
         }
     }

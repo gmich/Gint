@@ -23,7 +23,7 @@ namespace Gint.Quickstart
 
                     ctx.Scope.WriteString(txt);
 
-                    return CommandOutput.SuccessfulTask;
+                    return CommandResult.SuccessfulTask;
                 })
                 .AddVariableOption(
                     argument: "-n",
@@ -32,7 +32,7 @@ namespace Gint.Quickstart
                     callback: ctx =>
                     {
                         ctx.Scope.Add("--name", ctx.ExecutingCommand.Variable);
-                        return CommandOutput.SuccessfulTask;
+                        return CommandResult.SuccessfulTask;
                     },
                     suggestions: v => new Suggestion[] { "Teresa", "Devin", "Michael", "Maria", "George" });
 

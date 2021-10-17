@@ -10,7 +10,7 @@ namespace Gint.Sample
     internal sealed class JsonCommand : IScanForAttributes
     {
         [Command("json", helpCallback: nameof(JsonHelp))]
-        public Task<CommandOutput> Json(CommandExecutionContext ctx)
+        public Task<CommandResult> Json(CommandExecutionContext ctx)
         {
             var inputStream = ctx.Scope.ReadInputAsString();
             if (!string.IsNullOrEmpty(inputStream))
@@ -37,16 +37,16 @@ namespace Gint.Sample
                         .Write($"JSON: {jsonToParse}")
                         .WriteLine();
                     ctx.Error.Write(ex.Message);
-                    return CommandOutput.ErrorTask;
+                    return CommandResult.ErrorTask;
                 }
             }
             else
             {
                 ctx.Error.Write("No json in outstream");
-                return CommandOutput.ErrorTask;
+                return CommandResult.ErrorTask;
             }
 
-            return CommandOutput.SuccessfulTask;
+            return CommandResult.SuccessfulTask;
         }
 
         public static void JsonHelp(Out o)
@@ -55,9 +55,9 @@ namespace Gint.Sample
         }
 
         [Option(1, "-p", "--pretty", false, nameof(PrettyHelp))]
-        private Task<CommandOutput> Prettify(CommandExecutionContext ctx)
+        private Task<CommandResult> Prettify(CommandExecutionContext ctx)
         {
-            return CommandOutput.SuccessfulTask;
+            return CommandResult.SuccessfulTask;
         }
 
         private static void PrettyHelp(Out @out)

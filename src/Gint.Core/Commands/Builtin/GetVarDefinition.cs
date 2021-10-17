@@ -10,17 +10,17 @@ namespace Gint.Builtin
             registry.AddVariableCommand("getvar", required: true, Help, GetVar);
         }
 
-        public Task<CommandOutput> GetVar(CommandExecutionContext ctx)
+        public Task<CommandResult> GetVar(CommandExecutionContext ctx)
         {
             if (ctx.GlobalScope.ContainsKey(ctx.ExecutingCommand.Variable))
             {
                 ctx.Scope.WriteString((string)ctx.GlobalScope[ctx.ExecutingCommand.Variable]);
-                return CommandOutput.SuccessfulTask;
+                return CommandResult.SuccessfulTask;
             }
             else
             {
                 ctx.Error.Write($"Variable {ctx.ExecutingCommand.Variable} is not set.");
-                return CommandOutput.ErrorTask;
+                return CommandResult.ErrorTask;
             }
         }
 

@@ -57,7 +57,7 @@ namespace Gint
                     else
                         ctx.Info.WithForegroundColor().Red().Write("x");
 
-                    return CommandOutput.SuccessfulTask;
+                    return CommandResult.SuccessfulTask;
                 });
         }
 

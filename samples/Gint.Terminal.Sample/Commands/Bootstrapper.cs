@@ -18,12 +18,12 @@ namespace Gint.Terminal.Sample
                         }
                         else
                             ctx.Scope.WriteString($"CPU utilities{Environment.NewLine}");
-                        return CommandOutput.SuccessfulTask;
+                        return CommandResult.SuccessfulTask;
                     })
                 .AddOption("-c", "--count", o => o.Write("Machine cpu count"),
                     (ctx) =>
                     {
-                        return CommandOutput.SuccessfulTask;
+                        return CommandResult.SuccessfulTask;
                     });
 
 
