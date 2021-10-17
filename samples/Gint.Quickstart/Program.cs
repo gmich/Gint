@@ -14,7 +14,7 @@ namespace Gint.Quickstart
                 helpCallback: o => o.WithForegroundColor().Cyan().Write("help!"),
                 callback: ctx =>
                 {
-                    var name = ctx.Scope.GetOrDefault("--name", "Gint");
+                    var name = ctx.Scope.GetValueOrDefault(key: "--name", @default: "Gint");
 
                     var txt = ctx.Formatter
                     .WithBackgroundColor().White()
@@ -34,8 +34,7 @@ namespace Gint.Quickstart
                         ctx.Scope.Add("--name", ctx.ExecutingCommand.Variable);
                         return CommandOutput.SuccessfulTask;
                     },
-                    suggestions: v => new Suggestion[] { "Teresa", "Devin", "Michael", "Maria", "George" },
-                    allowMultiple: false);
+                    suggestions: v => new Suggestion[] { "Teresa", "Devin", "Michael", "Maria", "George" });
 
             var terminal = new CommandTerminal(runtime);
 

@@ -42,13 +42,13 @@ namespace Gint
             return (T)Metadata[key];
         }
 
-        public T GetOrDefault<T>(string key, T def)
+        public T GetValueOrDefault<T>(string key, T @default)
         {
             if (Metadata.ContainsKey(key))
             {
                 return Get<T>(key);
             }
-            return def;
+            return @default;
         }
 
         public bool TryGet<T>(string key, out T value)
