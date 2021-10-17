@@ -39,8 +39,7 @@ A powerful and configurable command line interpreter.
                         ctx.Scope.Add("--name", ctx.ExecutingCommand.Variable);
                         return CommandOutput.SuccessfulTask;
                     },
-                    suggestions: v => new Suggestion[] { "Teresa", "Devin", "Michael", "Maria", "George" },
-                    allowMultiple: false);
+                    suggestions: v => new Suggestion[] { "Teresa", "Devin", "Michael", "Maria", "George" });
 
             var terminal = new CommandTerminal(runtime);
 
