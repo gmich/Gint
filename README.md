@@ -19,7 +19,7 @@ A powerful and configurable command line interpreter.
                 helpCallback: o => o.WithForegroundColor().Cyan().Write("help!"),
                 callback: ctx =>
                 {
-                    var name = ctx.Scope.GetOrDefault("--name", "Gint");
+                    var name = ctx.Scope.GetValueOrDefault(key: "--name", @default: "Gint");
 
                     var txt = ctx.Formatter
                     .WithBackgroundColor().White()
