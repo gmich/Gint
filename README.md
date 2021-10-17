@@ -28,7 +28,7 @@ A powerful and configurable command line interpreter.
 
                     ctx.Scope.WriteString(txt);
 
-                    return CommandOutput.SuccessfulTask;
+                    return CommandResult.SuccessfulTask;
                 })
                 .AddVariableOption(
                     argument: "-n",
@@ -37,7 +37,7 @@ A powerful and configurable command line interpreter.
                     callback: ctx =>
                     {
                         ctx.Scope.Add("--name", ctx.ExecutingCommand.Variable);
-                        return CommandOutput.SuccessfulTask;
+                        return CommandResult.SuccessfulTask;
                     },
                     suggestions: v => new Suggestion[] { "Teresa", "Devin", "Michael", "Maria", "George" });
 
