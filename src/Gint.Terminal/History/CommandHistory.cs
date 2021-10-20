@@ -39,7 +39,7 @@ namespace Gint.Terminal
                 command = entries[lastLookup];
                 return true;
             }
-            command = default;
+            command = string.Empty;
             return false;
         }
 
@@ -50,6 +50,10 @@ namespace Gint.Terminal
                 lastLookup++;
                 command = entries[lastLookup];
                 return true;
+            }
+            if (entries.Count == lastLookup + 1)
+            {
+                lastLookup++;
             }
             command = string.Empty;
             return true;
