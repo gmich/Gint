@@ -2,7 +2,7 @@
 
 ![.Net5 Build](https://github.com/gmich/gint/actions/workflows/dotnet.yml/badge.svg) 
 
-A powerful and configurable command line interpreter.
+A powerful and configurable command line interpreter for .NET with no dependencies.
 
 
 ## Quickstart
