@@ -30,7 +30,11 @@ namespace Gint.Markup.Sample
                         },
                         new Row
                         {
-                            Columns = new[] { new Column { Content = "content21.." }, new Column { Content = "header22.." }, new Column { Content = "header23.." } }
+                            Columns = new[] { new Column { Content = "content11" }, new Column { Content = "content12.xxxx." }, new Column { Content = "content13.xx." } }
+                        },
+                         new Row
+                        {
+                            Columns = new[] { new Column { Content = "content21.." , TotalColumnsWidth = 2 }, new Column { Content = "header23.." } }
                         },
                     }
                 }
@@ -45,6 +49,7 @@ namespace Gint.Markup.Sample
         public Table Table { get; }
         public TableRenderOptions TableRenderOptions { get; }
         public TextWriter writer;
+
         public TableRenderer(Table table, TextWriter writer)
         {
             Table = table;
@@ -55,48 +60,62 @@ namespace Gint.Markup.Sample
         public void Render()
         {
             RenderHeaderTopFrameSection(isFirst: true);
-            for (int i = 1; i < TableRenderOptions.TotalColumns; i++)
+            for (int i = 1; i < TableRenderOptions.TotalColumns - 1; i++)
             {
                 RenderHeaderTopFrameSection();
             }
+            RenderHeaderTopFrameSection(isLast: true);
             RenderHeaderFrameStart();
             for (int i = 0; i < Table.Header.Row.Columns.Length; i++)
             {
                 Column column = Table.Header.Row.Columns[i];
-                RenderHeaderColumn(column.Content, column.Alignment);
+                RenderHeaderColumn(column);
 
                 if (i < Table.Header.Row.Columns.Length - 1)
                     RenderHeaderColumnDivider();
             }
             RenderHeaderFrameEnd();
-        
+
             RenderHeaderBottomFrameSection(isFirst: true);
-            for (int i = 1; i < TableRenderOptions.TotalColumns; i++)
+            for (int i = 1; i < TableRenderOptions.TotalColumns - 1; i++)
             {
                 RenderHeaderBottomFrameSection();
             }
+            RenderHeaderBottomFrameSection(isLast: true);
             ChangeLine();
 
-            foreach (var row in Table.Content.Rows)
+            for (int j = 0; j < Table.Content.Rows.Length; j++)
             {
+                Row row = Table.Content.Rows[j];
                 RenderContentFrameStart();
                 for (int i = 0; i < row.Columns.Length; i++)
                 {
                     Column column = row.Columns[i];
-                    RenderContentColumn(column.Content, column.Alignment);
+                    RenderContentColumn(column);
 
                     if (i < row.Columns.Length - 1)
                         RenderContentColumnDivider();
                 }
                 RenderContentFrameEnd();
-            
-                RenderContentBottomFrameSection(isFirst: true);
-                for (int i = 1; i < TableRenderOptions.TotalColumns; i++)
+
+                if (j < Table.Content.Rows.Length - 1)
                 {
-                    RenderContentBottomFrameSection();
+                    RenderContentBottomFrameSection(isFirst: true);
+                    for (int i = 1; i < TableRenderOptions.TotalColumns - 1; i++)
+                    {
+                        RenderContentBottomFrameSection();
+                    }
+                    RenderContentBottomFrameSection(isLast: true);
+                    ChangeLine();
                 }
-                ChangeLine();
             }
+            RenderContentBottomBoxSection(isFirst: true);
+            for (int i = 0; i < Table.Content.Rows.Length - 2; i++)
+            {
+                Row row = Table.Content.Rows[i];
+                RenderContentBottomBoxSection();
+            }
+            RenderContentBottomBoxSection(isLast: true);
         }
 
 
@@ -105,74 +124,76 @@ namespace Gint.Markup.Sample
             writer.WriteLine();
         }
 
-        #region Header
+        #region Header  
 
-        public void RenderHeaderTopFrameSection(bool isFirst = false)
+        public void RenderHeaderTopFrameSection(bool isFirst = false, bool isLast = false)
         {
             if (isFirst)
-                writer.Write(' ');
-            writer.Write(new string(' ', TableRenderOptions.TotalWidthWithoutMargin));
-            writer.Write(' ');
+                writer.Write('┌');
+            writer.Write(new string('─', TableRenderOptions.TotalWidthWithoutMargin));
+            if (isLast)
+                writer.Write('┐');
+            else
+                writer.Write('─');
         }
 
-        public void RenderHeaderBottomFrameSection(bool isFirst = false)
+        public void RenderHeaderBottomFrameSection(bool isFirst = false, bool isLast = false)
         {
             if (isFirst)
-                writer.Write('+');
-            writer.Write(new string('-', TableRenderOptions.TotalWidthWithoutMargin));
-            writer.Write('+');
+                writer.Write('└');
+            writer.Write(new string('─', TableRenderOptions.TotalWidthWithoutMargin));
+            if (isLast)
+                writer.Write('┘');
+            else
+                writer.Write('─');
         }
 
         public void RenderHeaderColumnDivider()
         {
-            writer.Write('|');
-        }
-
-        public void RenderHeaderColumnEnd()
-        {
-            writer.Write('|');
+            writer.Write('│');
         }
 
         public void RenderHeaderFrameStart()
         {
             ChangeLine();
-            writer.Write('|');
+            writer.Write('│');
         }
 
         public void RenderHeaderFrameEnd()
         {
-            writer.Write('|');
+            writer.Write('│');
             ChangeLine();
         }
 
-        public void RenderHeaderColumn(string content, Alignment alignment)
+        public void RenderHeaderColumn(Column column)
         {
-            //Alignment.Center
-            var offset = (TableRenderOptions.CellSize - content.Length) / 2;
-
-            writer.Write(new string(' ', TableRenderOptions.PaddingLeft + offset));
-            writer.Write(content);
-            var space = TableRenderOptions.CellSize - content.Length - offset;
-            if (space > 0)
-                writer.Write(new string(' ', space));
-            writer.Write(new string(' ', TableRenderOptions.PaddingRight));
+            RenderColumn(column, column.Alignment == Alignment.Default ? TableRenderOptions.DefaultContentAlignment : column.Alignment);
         }
 
         #endregion
 
         #region Content
 
-        public void RenderContentBottomFrameSection(bool isFirst = false)
+        public void RenderContentBottomFrameSection(bool isFirst = false, bool isLast = false)
         {
             if (isFirst)
-                writer.Write('+');
-            writer.Write(new string('-', TableRenderOptions.TotalWidthWithoutMargin));
-            writer.Write('+');
+                writer.Write('│');
+            writer.Write(new string('─', TableRenderOptions.TotalWidthWithoutMargin));
+            if (isLast)
+                writer.Write('│');
+            else
+                writer.Write('─');
         }
 
-        public void RenderContentColumnEnd()
+        public void RenderContentBottomBoxSection(bool isFirst = false, bool isLast = false)
         {
-            writer.Write('|');
+            if (isFirst)
+                writer.Write('└');
+            writer.Write(new string('─', TableRenderOptions.TotalWidthWithoutMargin));
+            if (isLast)
+                writer.Write('┘');
+            else
+                writer.Write('─');
         }
 
         public void RenderContentFrameStart()
@@ -191,15 +212,77 @@ namespace Gint.Markup.Sample
             writer.Write('|');
         }
 
-        public void RenderContentColumn(string content, Alignment alignment)
+        public void RenderContentColumn(Column column)
         {
-            //Alignment.Start
+            RenderColumn(column, column.Alignment == Alignment.Default ? TableRenderOptions.DefaultContentAlignment : column.Alignment);
+        }
+
+        private void RenderColumn(Column column, Alignment alignment)
+        {
+            switch (alignment)
+            {
+                case Alignment.Start:
+                    RenderStart(column);
+                    break;
+                case Alignment.Center:
+                    RenderCenter(column);
+                    break;
+                case Alignment.End:
+                    RenderEnd(column);
+                    break;
+            }
+
+        }
+
+        private void RenderStart(Column column)
+        {
             writer.Write(new string(' ', TableRenderOptions.PaddingLeft));
-            writer.Write(content);
-            var space = TableRenderOptions.CellSize - content.Length;
+            writer.Write(column.Content);
+            var space = (column.TotalColumnsWidth * TableRenderOptions.CellSize) - column.Content.Length;
+            if (space > 0)
+                writer.Write(new string(' ', space));
+            writer.Write(new string(' ', TableRenderOptions.PaddingRight * column.TotalColumnsWidth));
+
+            if (column.TotalColumnsWidth > 1)
+            {
+                writer.Write(new string(' ', (column.TotalColumnsWidth - 1) * TableRenderOptions.ColumnDividerWidth));
+                writer.Write(new string(' ', (column.TotalColumnsWidth - 1) * TableRenderOptions.PaddingLeft));
+            }
+        }
+
+        private void RenderEnd(Column column)
+        {
+            var totalWidth = TableRenderOptions.CellSize * column.TotalColumnsWidth
+                + ((column.TotalColumnsWidth - 1) * TableRenderOptions.ColumnDividerWidth)
+                + ((column.TotalColumnsWidth) * TableRenderOptions.PaddingLeft)
+                + ((column.TotalColumnsWidth - 1) * TableRenderOptions.PaddingRight);
+
+            var offset = totalWidth - column.Content.Length;
+            if (offset > 0)
+            {
+                writer.Write(new string(' ', offset));
+            }
+
+            writer.Write(column.Content);
+            writer.Write(new string(' ', TableRenderOptions.PaddingRight));
+        }
+
+        private void RenderCenter(Column column)
+        {
+            var totalWidth = TableRenderOptions.CellSize * column.TotalColumnsWidth
+                + ((column.TotalColumnsWidth - 1) * TableRenderOptions.ColumnDividerWidth)
+                + ((column.TotalColumnsWidth - 1) * TableRenderOptions.PaddingLeft)
+                + ((column.TotalColumnsWidth - 1) * TableRenderOptions.PaddingRight);
+
+            double offset = (totalWidth - column.Content.Length) / 2;
+
+            writer.Write(new string(' ', TableRenderOptions.PaddingLeft + (int)Math.Ceiling(offset)));
+            writer.Write(column.Content);
+            var space = totalWidth - column.Content.Length - (int)Math.Floor(offset);
             if (space > 0)
                 writer.Write(new string(' ', space));
             writer.Write(new string(' ', TableRenderOptions.PaddingRight));
+
         }
 
         #endregion
@@ -208,7 +291,7 @@ namespace Gint.Markup.Sample
     }
     public enum Alignment
     {
-        Inherit,
+        Default,
         Start,
         Center,
         End
@@ -216,13 +299,12 @@ namespace Gint.Markup.Sample
 
     public class Table
     {
-        public Alignment Alignment { get; set; } = Alignment.Center;
         public Header Header { get; init; }
         public Content Content { get; init; }
 
         public IEnumerable<Column> IterateColumns => Header.Row.Columns.Concat(Content.Rows.SelectMany(c => c.Columns));
 
-        internal int LargestCellSize => IterateColumns.Max(c => c.Content.Length);
+        internal int LargestCellSize => IterateColumns.Max(c => c.Content.Length / c.TotalColumnsWidth);
 
         public bool Validate(bool beForgiving)
         {
@@ -232,56 +314,27 @@ namespace Gint.Markup.Sample
 
     public class Content
     {
-        public Alignment Alignment { get; set; } = Alignment.Inherit;
+        public Alignment Alignment { get; set; } = Alignment.Default;
         public Row[] Rows { get; init; }
     }
 
     public class Header
     {
-        public Alignment Alignment { get; set; } = Alignment.Inherit;
+        public Alignment Alignment { get; set; } = Alignment.Default;
         public Row Row { get; init; }
     }
 
     public class Row
     {
-        public Alignment Alignment { get; init; } = Alignment.Inherit;
+        public Alignment Alignment { get; init; } = Alignment.Default;
         public Column[] Columns { get; init; }
     }
 
     public class Column
     {
+        public int TotalColumnsWidth { get; init; } = 1;
         public string Content { get; init; }
-        public Alignment Alignment { get; init; } = Alignment.Inherit;
+        public Alignment Alignment { get; init; } = Alignment.Default;
     }
 
-    public class TableOptions
-    {
-        public int TotalColumns { get; set; }
-    }
-
-    public class TableRenderOptions
-    {
-        public int CellSize { get; }
-        public int PaddingLeft { get; }
-        public int PaddingRight { get; }
-        public int TotalWidthWithoutMargin { get; }
-        public int TotalColumns { get; }
-
-        public int MarginLeft { get; } = 1;
-        public int MarginRight { get; } = 1;
-
-        public TableRenderOptions(int cellSize, int totalColumns, int paddingLeft = 2, int paddingRight = 2)
-        {
-            CellSize = cellSize;
-            TotalColumns = totalColumns;
-            PaddingLeft = paddingLeft;
-            PaddingRight = paddingRight;
-            TotalWidthWithoutMargin = cellSize + paddingLeft + paddingRight;
-        }
-    }
-
-    public enum TableRenderStyle
-    {
-        Default
-    }
 }
