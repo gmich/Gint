@@ -206,7 +206,7 @@ namespace Gint.Markup.Sample
                 foreach (var column in Table.Content.Rows[0].Columns)
                 {
                     nextColumnConnections.Add(previous + column.Rendered.Length);
-                    previous = column.Rendered.Length + renderOptions.ColumnDividerWidth;
+                    previous += (column.Rendered.Length + renderOptions.ColumnDividerWidth);
                 }
             }
 
@@ -214,12 +214,17 @@ namespace Gint.Markup.Sample
             var columnsLength = Table.Header.Row.Columns.Length;
             for (int i = 0; i < Table.Header.Row.Columns.Length; i++)
             {
-                int segmentSize = Table.Header.Row.Columns[i].Rendered.Length;
-                Write(new string(inside.HeaderRowDivider, segmentSize), TableSection.HeaderRowDivider);
+                var column = Table.Header.Row.Columns[i];
+                int segmentSize = column.Rendered.Length;
+                Write(new string(column.SkipRowDivider ? ' ' : inside.HeaderRowDivider, segmentSize), TableSection.HeaderRowDivider);
 
                 if (i + 1 == columnsLength) break;
 
-                if (nextColumnConnections.Contains(previousConnectionCell + segmentSize))
+                if (Table.Header.Row.Columns[i + 1].SkipRowDivider)
+                    Write(TableConnector.HeaderRight);
+                else if (Table.Header.Row.Columns[i].SkipRowDivider)
+                    Write(TableConnector.HeaderLeft);
+                else if (nextColumnConnections.Contains(previousConnectionCell + segmentSize))
                     Write(TableConnector.HeaderCross);
                 else
                     Write(TableConnector.HeaderBottom);
@@ -254,7 +259,7 @@ namespace Gint.Markup.Sample
                 foreach (var column in Table.Content.Rows[currentColumn + 1].Columns)
                 {
                     nextColumnConnections.Add(previous + column.Rendered.Length);
-                    previous = column.Rendered.Length + renderOptions.ColumnDividerWidth;
+                    previous += (column.Rendered.Length + renderOptions.ColumnDividerWidth);
                 }
             }
 
@@ -262,12 +267,17 @@ namespace Gint.Markup.Sample
             var columnsLength = Table.Content.Rows[currentColumn].Columns.Length;
             for (int i = 0; i < columnsLength; i++)
             {
-                int segmentSize = Table.Content.Rows[currentColumn].Columns[i].Rendered.Length;
-                Write(new string(inside.ContentRowDivider, segmentSize), TableSection.ContentRowDivider);
+                var column = Table.Content.Rows[currentColumn].Columns[i];
+                int segmentSize = column.Rendered.Length;
 
+                Write(new string(column.SkipRowDivider ? ' ' : inside.ContentRowDivider, segmentSize), TableSection.ContentRowDivider);
                 if (i + 1 == columnsLength) break;
 
-                if (nextColumnConnections.Contains(previousConnectionCell + segmentSize))
+                if (Table.Content.Rows[currentColumn].Columns[i + 1].SkipRowDivider)
+                    Write(TableConnector.ContentRight);
+                else if (Table.Content.Rows[currentColumn].Columns[i].SkipRowDivider)
+                    Write(TableConnector.ContentLeft);
+                else if (nextColumnConnections.Contains(previousConnectionCell + segmentSize))
                     Write(TableConnector.ContentCross);
                 else
                     Write(TableConnector.ContentBottom);

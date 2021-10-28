@@ -15,7 +15,7 @@ namespace Gint.Markup.Sample
                 {
                     Row = new Row
                     {
-                        Columns = new[] { new Column { Content = "header1" }, new Column { Content = "header2.." }, new Column { Content = "header3.." } }
+                        Columns = new[] { new Column { Content = "header1", SpansOverColumns = 2 }, new Column { Content = "header2..", SkipRowDivider=true }, new Column { Content = "header3.." } }
                     }
                 },
                 Content = new Content
@@ -24,15 +24,19 @@ namespace Gint.Markup.Sample
                     {
                         new Row
                         {
-                            Columns = new[] { new Column { Content = "content11" }, new Column { Content = "content12.xxxx." }, new Column { Content = "content13.xx." } }
+                            Columns = new[] { new Column { Content = "content11" }, new Column { Content = "content12.xxxx." }, new Column { Content = "content13.xx." }, new Column { SkipRowDivider=true } }
                         },
                         new Row
                         {
-                            Columns = new[] { new Column { Content = "content11" }, new Column { Content = "content12.xxxx." }, new Column { Content = "content13.xx." } }
+                            Columns = new[] { new Column { Content = "content11" }, new Column {  }, new Column {  }, new Column {} }
+                        },
+                        new Row
+                        {
+                            Columns = new[] { new Column { Content = "content11" }, new Column { Content = "content12.xxxx." }, new Column { Content = "content13.xx." }, new Column {  } }
                         },
                          new Row
                         {
-                            Columns = new[] { new Column { Content = "content21.." , SpansOverColumns = 2 }, new Column { Content = "header23.." } }
+                            Columns = new[] { new Column { Content = "content21.." , SpansOverColumns = 2 }, new Column { Content = "header23.." }, new Column {  } }
                         },
                     }
                 }
@@ -72,9 +76,10 @@ namespace Gint.Markup.Sample
     public class Column
     {
         public int SpansOverColumns { get; init; } = 1;
-        public string Content { get; init; }
+        public string Content { get; init; } = string.Empty;
         public Alignment Alignment { get; init; } = Alignment.Default;
         internal string Rendered { get; set; }
+        public bool SkipRowDivider { get; set; }
     }
 
 }

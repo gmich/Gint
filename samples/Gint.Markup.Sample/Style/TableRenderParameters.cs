@@ -14,7 +14,7 @@ namespace Gint.Markup.Sample
 
         public TableRenderParameters(Table table, TableRenderPreferences preferences)
         {
-            TotalColumns = table.Header.Row.Columns.Count();
+            TotalColumns = table.Header.Row.Columns.Sum(c => c.SpansOverColumns);
             PaddingLeft = preferences.ColumnPaddingLeft;
             PaddingRight = preferences.ColumnPaddingRight;
             CellSize = preferences.TryFitToScreen ? GetCellSizeFitToScreen() : GetLargestColumnSize(table);
