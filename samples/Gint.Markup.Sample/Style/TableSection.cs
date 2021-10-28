@@ -24,17 +24,16 @@
 
     public enum TableConnector
     {
-        HeaderCross,
-        HeaderTop,
-        HeaderLeft,
-        HeaderRight,
-        HeaderBottom,
-
-        ContentCross,
-        ContentTop,
-        ContentLeft,
-        ContentRight,
-        ContentBottom,
+        Cross,
+        Top,
+        Left,
+        Right,
+        Bottom,
+        Straight,
+        BottomLeft,
+        BottomRight,
+        TopLeft,
+        TopRight,
     }
 
 }

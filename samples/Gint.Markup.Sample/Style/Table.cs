@@ -15,7 +15,7 @@ namespace Gint.Markup.Sample
                 {
                     Row = new Row
                     {
-                        Columns = new[] { new Column { Content = "header1", SpansOverColumns = 2 }, new Column { Content = "header2..", SkipRowDivider=true }, new Column { Content = "header3.." } }
+                        Columns = new[] { new Column { Content = "header1", SpansOverColumns = 2 }, new Column { Content = "header2..", SkipRowDivider = true }, new Column { Content = "header3.." } }
                     }
                 },
                 Content = new Content
@@ -24,19 +24,23 @@ namespace Gint.Markup.Sample
                     {
                         new Row
                         {
-                            Columns = new[] { new Column { Content = "content11" }, new Column { Content = "content12.xxxx." }, new Column { Content = "content13.xx." }, new Column { SkipRowDivider=true } }
+                            Columns = new[] { new Column { Content = "content11" ,SpansOverColumns  = 2},  new Column { Content = "content13.xx." }, new Column { SkipRowDivider=true } }
                         },
                         new Row
                         {
-                            Columns = new[] { new Column { Content = "content11" }, new Column {  }, new Column {  }, new Column {} }
+                            Columns = new[] { new Column { Content = "content11" }, new Column { SkipRowDivider=true }, new Column {  }, new Column {} }
                         },
                         new Row
                         {
-                            Columns = new[] { new Column { Content = "content11" }, new Column { Content = "content12.xxxx." }, new Column { Content = "content13.xx." }, new Column {  } }
+                            Columns = new[] { new Column { Content = "content11" ,SkipRowDivider=true}, new Column { Content = "content12.xxxx." }, new Column { Content = "content13.xx." }, new Column {  } }
                         },
                          new Row
                         {
                             Columns = new[] { new Column { Content = "content21.." , SpansOverColumns = 2 }, new Column { Content = "header23.." }, new Column {  } }
+                        },
+                        new Row
+                        {
+                            Columns = new[] { new Column { Content = "content21.." , SpansOverColumns = 3 }, new Column { Content = "header23..", SkipRowDivider = true } }
                         },
                     }
                 }

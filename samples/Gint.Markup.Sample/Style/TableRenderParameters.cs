@@ -65,20 +65,38 @@ namespace Gint.Markup.Sample
 
     public class TableConnectorPart
     {
-        public char GetConnector(TableConnector connector)
+        public char GetHeaderConnector(TableConnector connector)
         {
             return connector switch
             {
-                TableConnector.HeaderCross => '┼',
-                TableConnector.HeaderTop => '┬',
-                TableConnector.HeaderLeft => '├',
-                TableConnector.HeaderRight => '┤',
-                TableConnector.HeaderBottom => '┴',
-                TableConnector.ContentCross => '┼',
-                TableConnector.ContentTop => '┬',
-                TableConnector.ContentLeft => '├',
-                TableConnector.ContentRight => '┤',
-                TableConnector.ContentBottom => '┴',
+                TableConnector.Straight => '─',
+                TableConnector.Cross => '┼',
+                TableConnector.Top => '┬',
+                TableConnector.Left => '├',
+                TableConnector.Right => '┤',
+                TableConnector.Bottom => '┴',
+                TableConnector.BottomLeft => '└',
+                TableConnector.BottomRight => '┘',
+                TableConnector.TopLeft => '┌',
+                TableConnector.TopRight => '┘',
+                _ => throw new System.NotImplementedException(),
+            };
+        }
+
+        public char GetContentConnector(TableConnector connector)
+        {
+            return connector switch
+            {
+                TableConnector.Straight => '─',
+                TableConnector.Cross => '┼',
+                TableConnector.Top => '┬',
+                TableConnector.Left => '├',
+                TableConnector.Right => '┤',
+                TableConnector.Bottom => '┴',
+                TableConnector.BottomLeft => '└',
+                TableConnector.BottomRight => '┘',
+                TableConnector.TopLeft => '┌',
+                TableConnector.TopRight => '┘',
                 _ => throw new System.NotImplementedException(),
             };
         }

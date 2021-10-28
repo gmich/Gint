@@ -4,7 +4,7 @@
     {
         public Alignment DefaultHeaderAlignment { get; } = Alignment.Center;
         public Alignment DefaultContentAlignment { get; } = Alignment.Center;
-        public bool TryFitToScreen { get; } = false;
+        public bool TryFitToScreen { get; } = true;
         public int ColumnPaddingLeft { get; } = 3;
         public int ColumnPaddingRight { get; } = 3;
         public TableStyle TableStyle { get; } = new TableStyle();
