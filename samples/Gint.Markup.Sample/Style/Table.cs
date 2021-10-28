@@ -74,6 +74,7 @@ namespace Gint.Markup.Sample
         public int SpansOverColumns { get; init; } = 1;
         public string Content { get; init; }
         public Alignment Alignment { get; init; } = Alignment.Default;
+        internal string Rendered { get; set; }
     }
 
 }

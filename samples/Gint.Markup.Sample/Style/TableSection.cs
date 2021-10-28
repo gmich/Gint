@@ -19,9 +19,22 @@
 
         ContentColumn,
         ContentColumnDivider,
-        ContentRowDividerSegment,
-        ContentConnector,
-        HeaderConnector,
+        ContentRowDivider,
+    }
+
+    public enum TableConnector
+    {
+        HeaderCross,
+        HeaderTop,
+        HeaderLeft,
+        HeaderRight,
+        HeaderBottom,
+
+        ContentCross,
+        ContentTop,
+        ContentLeft,
+        ContentRight,
+        ContentBottom,
     }
 
 }

@@ -37,7 +37,8 @@ namespace Gint.Markup.Sample
     public class TableStyle
     {
         public TableBorder TableBorder { get; } = new TableBorder();
-        public TableInside TableInsight { get; } = new TableInside();
+        public TablePart TablePart { get; } = new TablePart();
+        public TableConnectorPart Connector { get; } = new TableConnectorPart();
     }
 
     public class TableBorder
@@ -54,14 +55,33 @@ namespace Gint.Markup.Sample
         public char BottomRight { get; } = '┘';
     }
 
-    public class TableInside
+    public class TablePart
     {
         public char HeaderColumnDivider { get; } = '│';
         public char HeaderRowDivider { get; } = '─';
-        public char HeaderConnector { get; } = '─';
         public char ContentColumnDivider { get; } = '│';
         public char ContentRowDivider { get; } = '─';
-        public char ContentConnector { get; } = '─'; //'┼';
     }
 
+    public class TableConnectorPart
+    {
+        public char GetConnector(TableConnector connector)
+        {
+            return connector switch
+            {
+                TableConnector.HeaderCross => '┼',
+                TableConnector.HeaderTop => '┬',
+                TableConnector.HeaderLeft => '├',
+                TableConnector.HeaderRight => '┤',
+                TableConnector.HeaderBottom => '┴',
+                TableConnector.ContentCross => '┼',
+                TableConnector.ContentTop => '┬',
+                TableConnector.ContentLeft => '├',
+                TableConnector.ContentRight => '┤',
+                TableConnector.ContentBottom => '┴',
+                _ => throw new System.NotImplementedException(),
+            };
+        }
+
+    }
 }
