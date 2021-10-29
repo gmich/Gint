@@ -6,79 +6,52 @@ using System.Text;
 
 namespace Gint.Markup.Sample
 {
-    public interface ITableRenderVisitor
-    {
-        void PreWrite(string text, TableSection section);
-        void PostWrite(string text, TableSection section);
-    }
-
-    public class TestTableRenderVisitor : ITableRenderVisitor
-    {
-        public void PostWrite(string text, TableSection section)
-        {
-            Console.ResetColor();
-        }
-
-        public void PreWrite(string text, TableSection section)
-        {
-            if (section == TableSection.HeaderColumn)
-            {
-                Console.ForegroundColor = ConsoleColor.Cyan;
-            }
-            else if (section == TableSection.ContentColumn)
-            {
-                Console.ForegroundColor = ConsoleColor.DarkCyan;
-            }
-            else
-            {
-                //Console.ForegroundColor = ConsoleColor.White;
-            }
-        }
-    }
-
-    public class TableRenderer
+    internal class TableRenderer
     {
         private readonly TableRenderPreferences tablePreferences;
-        private readonly ITableRenderVisitor tableRenderVisitor;
-        private readonly TableBorder border;
-        private readonly TablePart inside;
-        private readonly TableConnectorPart connector;
-        private readonly TableRenderParameters renderOptions;
+        private readonly ITableRenderMiddleware tableRenderVisitor;
+        private readonly ITableBorderStyle border;
+        private readonly ITableDividerStyle divider;
+        private readonly ITableConnectorStyle connector;
+        private readonly TableRenderContext renderOptions;
 
         public Table Table { get; }
         public TextWriter Writer { get; }
 
-        public TableRenderer(Table table, TextWriter writer, TableRenderPreferences tablePreferences, ITableRenderVisitor tableRenderVisitor = null)
+        public TableRenderer(Table table, TextWriter writer, TableRenderPreferences tablePreferences)
         {
             this.tablePreferences = tablePreferences;
-            this.tableRenderVisitor = tableRenderVisitor ?? new TestTableRenderVisitor();
+            tableRenderVisitor = tablePreferences.TableRenderMiddleware;
             Table = table;
             Writer = writer;
-            inside = tablePreferences.TableStyle.TablePart;
+            divider = tablePreferences.TableStyle.TablePart;
             border = tablePreferences.TableStyle.TableBorder;
             connector = tablePreferences.TableStyle.Connector;
-            renderOptions = new TableRenderParameters(table, tablePreferences);
+            renderOptions = new TableRenderContext(table, tablePreferences);
         }
 
         public void Render()
         {
-            PreRenderColumns();
+            AnalyzeColumns();
 
             RenderBorderTop();
 
             ChangeLine();
 
-            RenderHeaderBorderLeft(column: null);
-            RenderHeaderColumns();
-            RenderHeaderBorderRight(column: null);
+            if (Table.Header != null)
+            {
+                RenderHeaderBorderLeft(column: null);
+                RenderHeaderColumns();
+                RenderHeaderBorderRight(column: null);
 
-            ChangeLine();
+                ChangeLine();
 
-            RenderHeaderBorderLeft(column: Table.Header.Row.Columns?.FirstOrDefault());
-            RenderHeaderRowDivider();
-            RenderHeaderBorderRight(column: Table.Header.Row.Columns?.LastOrDefault());
+                RenderHeaderBorderLeft(column: Table.Header.Row.Columns?.FirstOrDefault());
+                RenderHeaderRowDivider();
+                RenderHeaderBorderRight(column: Table.Header.Row.Columns?.LastOrDefault());
 
-            ChangeLine();
+                ChangeLine();
+            }
 
             for (int rowIndex = 0; rowIndex < Table.Content.Rows.Length; rowIndex++)
             {
@@ -102,13 +75,45 @@ namespace Gint.Markup.Sample
             ChangeLine();
         }
 
-        private void PreRenderColumns()
+        private void AnalyzeColumns()
         {
-            for (int i = 0; i < Table.Header.Row.Columns.Length; i++)
+            if (Table.Header != null)
             {
-                Column column = Table.Header.Row.Columns[i];
-                var rendered = RenderColumn(column, GetAlignment(column, tablePreferences.DefaultHeaderAlignment));
-                column.Rendered = rendered;
+                for (int i = 0; i < Table.Header.Row.Columns.Length; i++)
+                {
+                    Column column = Table.Header.Row.Columns[i];
+                    var rendered = RenderColumn(column, GetAlignment(column, tablePreferences.DefaultHeaderAlignment));
+                    column.Rendered = rendered;
+                }
+
+                var headerAnalyzedColumns = new List<AnalyzedColumn>();
+                foreach (var column in Table.Header.Row.Columns)
+                {
+                    for (int i = 0; i < column.SpansOverColumns; i++)
+                    {
+                        headerAnalyzedColumns.Add(new AnalyzedColumn(
+                            column: column,
+                            skipColumnDivider: (i + 1) < column.SpansOverColumns,
+                            totalCells: renderOptions.TotalWidthWithoutMargin));
+                    }
+                }
+                Table.Header.Row.AnalyzedColumns = headerAnalyzedColumns;
+            }
+
+            foreach (var row in Table.Content.Rows)
+            {
+                var contentAnalyzedColumns = new List<AnalyzedColumn>();
+                foreach (var column in row.Columns)
+                {
+                    for (int i = 0; i < column.SpansOverColumns; i++)
+                    {
+                        contentAnalyzedColumns.Add(new AnalyzedColumn(
+                            column: column,
+                            skipColumnDivider: (i + 1) < column.SpansOverColumns,
+                            totalCells: renderOptions.TotalWidthWithoutMargin));
+                    }
+                }
+                row.AnalyzedColumns = contentAnalyzedColumns;
             }
 
             for (int rowIndex = 0; rowIndex < Table.Content.Rows.Length; rowIndex++)
@@ -153,120 +158,94 @@ namespace Gint.Markup.Sample
             Writer.WriteLine();
         }
 
+        private void Write(char ch, TableSection section)
+        {
+            Write(ch.ToString(), section);
+        }
 
         private void Write(string text, TableSection section)
         {
-            tableRenderVisitor.PreWrite(text, section);
-            Writer.Write(text);
-            tableRenderVisitor.PostWrite(text, section);
+            var newText = tableRenderVisitor.PreWrite(text, section);
+            Writer.Write(newText);
+            tableRenderVisitor.PostWrite(newText, section);
         }
-
-        private void Write(TableConnector con, Func<TableConnector, char> tablePartGetter)
-        {
-            var text = tablePartGetter(con).ToString();
-            Writer.Write(text);
-        }
-
 
         #region Border
 
         public void RenderBorderTop()
         {
-            var flattenedColumns = new List<FlattenedColumn>();
-            foreach (var column in Table.Header.Row.Columns)
+            var analyzedColumns = Table.Header?.Row.AnalyzedColumns ?? Table.Content.Rows.First().AnalyzedColumns;
+            Write(border.Get(TableBorderPart.TopLeft), TableSection.BorderTop);
+            for (int i = 0; i < analyzedColumns.Count; i++)
             {
-                for (int i = 0; i < column.SpansOverColumns; i++)
-                {
-                    flattenedColumns.Add(new FlattenedColumn(
-                        column: column,
-                        skipColumnDivider: (i + 1) < column.SpansOverColumns,
-                        totalCells: renderOptions.TotalWidthWithoutMargin));
-                }
-            }
-
-            Write(border.TopLeft.ToString(), TableSection.BorderTopLeft);
-            for (int i = 0; i < flattenedColumns.Count; i++)
-            {
-                FlattenedColumn column = flattenedColumns[i];
-                Write(new string(border.Top, column.TotalCells), TableSection.BorderTop);
-                if(column.SkipColumnDivider)
-                    Write(border.Top.ToString(), TableSection.BorderTop);
-                else if ((i + 1) == flattenedColumns.Count)
+                AnalyzedColumn column = analyzedColumns[i];
+                Write(new string(border.Get(TableBorderPart.Top), column.TotalCells), TableSection.BorderTop);
+                if (column.SkipColumnDivider)
+                    Write(border.Get(TableBorderPart.Top), TableSection.BorderTop);
+                else if ((i + 1) == analyzedColumns.Count)
                     break;
                 else
-                    Write(TableConnector.Top, c=> connector.GetHeaderConnector(c));
+                    Write(connector.Get(TableConnectorPart.Top), TableSection.BorderTop);
             }
-            Write(border.TopRight.ToString(), TableSection.BorderTopRight);
+            Write(border.Get(TableBorderPart.TopRight), TableSection.BorderTop);
         }
 
         public void RenderHeaderBorderLeft(Column column)
         {
-            if (column == null)
-                Write(border.Left.ToString(), TableSection.BorderLeft);
-            else if (column.SkipRowDivider)
-                Write(border.Left.ToString(), TableSection.BorderLeft);
-            else
-                Write(TableConnector.Left, c => connector.GetHeaderConnector(c));
+            RenderBorderLeft(column);
         }
-
         public void RenderContentBorderLeft(Column column)
         {
+            RenderBorderLeft(column);
+        }
+
+        private void RenderBorderLeft(Column column)
+        {
             if (column == null)
-                Write(border.Left.ToString(), TableSection.BorderLeft);
+                Write(border.Get(TableBorderPart.Left), TableSection.BorderLeft);
             else if (column.SkipRowDivider)
-                Write(border.Left.ToString(), TableSection.BorderLeft);
+                Write(border.Get(TableBorderPart.Left), TableSection.BorderLeft);
             else
-                Write(TableConnector.Left, c => connector.GetContentConnector(c));
+                Write(connector.Get(TableConnectorPart.Left), TableSection.BorderLeft);
         }
 
         public void RenderHeaderBorderRight(Column column)
         {
-            if (column == null)
-                Write(border.Left.ToString(), TableSection.BorderLeft);
-            else if (column.SkipRowDivider)
-                Write(border.Left.ToString(), TableSection.BorderLeft);
-            else
-                Write(TableConnector.Right, c => connector.GetHeaderConnector(c));
+            RenderBorderRight(column);
         }
 
         public void RenderContentBorderRight(Column column)
         {
-            if (column == null)
-                Write(border.Right.ToString(), TableSection.BorderRight);
-            else if (column.SkipRowDivider)
-                Write(border.Right.ToString(), TableSection.BorderRight);
-            else
-                Write(TableConnector.Right, c => connector.GetContentConnector(c));
+            RenderBorderRight(column);
         }
 
+        private void RenderBorderRight(Column column)
+        {
+            if (column == null)
+                Write(border.Get(TableBorderPart.Right), TableSection.BorderRight);
+            else if (column.SkipRowDivider)
+                Write(border.Get(TableBorderPart.Right), TableSection.BorderRight);
+            else
+                Write(connector.Get(TableConnectorPart.Right), TableSection.BorderRight);
+        }
 
         public void RenderBorderBottom()
         {
-            var flattenedColumns = new List<FlattenedColumn>();
-            foreach (var column in Table.Content.Rows.Last().Columns)
-            {
-                for (int i = 0; i < column.SpansOverColumns; i++)
-                {
-                    flattenedColumns.Add(new FlattenedColumn(
-                        column: column,
-                        skipColumnDivider: (i + 1) < column.SpansOverColumns,
-                        totalCells: renderOptions.TotalWidthWithoutMargin));
-                }
-            }
+            var flattenedColumns = Table.Content.Rows.Last().AnalyzedColumns;
 
-            Write(border.BottomLeft.ToString(), TableSection.BorderBottomLeft);
+            Write(border.Get(TableBorderPart.BottomLeft), TableSection.BorderBottom);
             for (int i = 0; i < flattenedColumns.Count; i++)
             {
-                FlattenedColumn column = flattenedColumns[i];
-                Write(new string(border.Top, column.TotalCells), TableSection.BorderTop);
+                AnalyzedColumn column = flattenedColumns[i];
+                Write(new string(border.Get(TableBorderPart.Bottom), column.TotalCells), TableSection.BorderBottom);
                 if (column.SkipColumnDivider)
-                    Write(border.Bottom.ToString(), TableSection.BorderTop);
+                    Write(border.Get(TableBorderPart.Bottom), TableSection.BorderBottom);
                 else if ((i + 1) == flattenedColumns.Count)
                     break;
                 else
-                    Write(TableConnector.Bottom, c => connector.GetContentConnector(c));
+                    Write(connector.Get(TableConnectorPart.Bottom), TableSection.BorderBottom);
             }
-            Write(border.BottomRight.ToString(), TableSection.BorderBottomRight);
+            Write(border.Get(TableBorderPart.BottomRight), TableSection.BorderBottom);
 
         }
 
@@ -275,22 +254,7 @@ namespace Gint.Markup.Sample
 
         #region Header  
 
-        private struct FlattenedColumn
-        {
-            public FlattenedColumn(Column column, bool skipColumnDivider, int totalCells)
-            {
-                Column = column;
-                SkipColumnDivider = skipColumnDivider;
-                TotalCells = totalCells;
-            }
-
-            public Column Column { get; }
-            public bool SkipRowDivider => Column.SkipRowDivider;
-            public bool SkipColumnDivider { get; }
-            public int TotalCells { get; }
-        }
-
-        public void RenderRowDivider(Column[] currentColumns, Column[] nextColumns, char rowDivider, TableSection divider, Func<TableConnector, char> tablePartGetter)
+        public void RenderRowDivider(Row currentRow, Column[] nextColumns, char rowDivider, TableSection section)
         {
             var nextColumnConnections = new List<int>();
             int previous = 0;
@@ -301,47 +265,44 @@ namespace Gint.Markup.Sample
             }
 
             int previousConnectionCell = 0;
-            var flattenedColumns = new List<FlattenedColumn>();
-            foreach (var column in currentColumns)
-            {
-                for (int i = 0; i < column.SpansOverColumns; i++)
-                {
-                    flattenedColumns.Add(new FlattenedColumn(
-                        column: column,
-                        skipColumnDivider: (i + 1) < column.SpansOverColumns,
-                        totalCells: renderOptions.TotalWidthWithoutMargin));
-                }
-            }
+            var flattenedColumns = currentRow.AnalyzedColumns;
 
             var columnsLength = flattenedColumns.Count;
+            
+            void Connect(TableConnectorPart c)
+            {
+                Write(connector.Get(c), section);
+            }
 
             for (int i = 0; i < flattenedColumns.Count; i++)
             {
                 var flattenedColumn = flattenedColumns[i];
                 int segmentSize = flattenedColumn.TotalCells;
-                Write(new string(flattenedColumn.Column.SkipRowDivider ? ' ' : rowDivider, segmentSize), divider);
+                int currentCell = previousConnectionCell + segmentSize;
+
+                Write(new string(flattenedColumn.Column.SkipRowDivider ? ' ' : rowDivider, segmentSize), section);
 
                 if (i + 1 == columnsLength) break;
 
                 if (flattenedColumns[i + 1].SkipRowDivider)
-                    if (nextColumnConnections.Contains(previousConnectionCell + segmentSize))
-                        Write(TableConnector.Right, tablePartGetter);
+                    if (nextColumnConnections.Contains(currentCell))
+                        Connect(TableConnectorPart.Right);
                     else
-                        Write(TableConnector.BottomRight, tablePartGetter);
+                        Connect(TableConnectorPart.BottomRight);
                 else if (flattenedColumns[i].SkipRowDivider)
-                    if (nextColumnConnections.Contains(previousConnectionCell + segmentSize))
-                        Write(TableConnector.Left, tablePartGetter);
+                    if (nextColumnConnections.Contains(currentCell))
+                        Connect(TableConnectorPart.Left);
                     else
-                        Write(TableConnector.BottomLeft, tablePartGetter);
+                        Connect(TableConnectorPart.BottomLeft);
                 else if (flattenedColumn.SkipColumnDivider)
-                    if (nextColumnConnections.Contains(previousConnectionCell + segmentSize))
-                        Write(TableConnector.Top, tablePartGetter);
+                    if (nextColumnConnections.Contains(currentCell))
+                        Connect(TableConnectorPart.Top);
                     else
-                        Write(TableConnector.Straight, tablePartGetter);
-                else if (nextColumnConnections.Contains(previousConnectionCell + segmentSize))
-                    Write(TableConnector.Cross, tablePartGetter);
+                        Connect(TableConnectorPart.Straight);
+                else if (nextColumnConnections.Contains(currentCell))
+                    Connect(TableConnectorPart.Cross);
                 else
-                    Write(TableConnector.Bottom, tablePartGetter);
+                    Connect(TableConnectorPart.Bottom);
 
                 previousConnectionCell += (segmentSize + renderOptions.ColumnDividerWidth);
             }
@@ -350,17 +311,16 @@ namespace Gint.Markup.Sample
         public void RenderHeaderRowDivider()
         {
             RenderRowDivider(
-                currentColumns: Table.Header.Row.Columns,
+                currentRow: Table.Header.Row,
                 nextColumns: Table.Content.Rows.Length > 0 ? Table.Content.Rows[0].Columns : new Column[0],
-                rowDivider: inside.HeaderRowDivider,
-                divider: TableSection.HeaderRowDivider,
-                tablePartGetter: ch => connector.GetHeaderConnector(ch)
+                rowDivider: divider.Get(TableDividerPart.HeaderRow),
+                section: TableSection.HeaderRowDivider
                 );
         }
 
         public void RenderHeaderColumnDivider()
         {
-            Write(inside.HeaderColumnDivider.ToString(), TableSection.HeaderColumnDivider);
+            Write(divider.Get(TableDividerPart.HeaderColumn), TableSection.HeaderColumnDivider);
         }
 
         public void RenderHeaderColumn(Column column)
@@ -376,17 +336,15 @@ namespace Gint.Markup.Sample
         public void RenderContentRowDivider(int currentColumn)
         {
             RenderRowDivider(
-                currentColumns: Table.Content.Rows[currentColumn].Columns,
+                currentRow: Table.Content.Rows[currentColumn],
                 nextColumns: Table.Content.Rows.Length > currentColumn + 1 ? Table.Content.Rows[currentColumn + 1].Columns : new Column[0],
-                rowDivider: inside.ContentRowDivider,
-                divider: TableSection.ContentRowDivider,
-                tablePartGetter: ch => connector.GetContentConnector(ch)
-                );
+                rowDivider: divider.Get(TableDividerPart.ContentRow),
+                section: TableSection.ContentRowDivider);
         }
 
         private void RenderContentColumnDivider()
         {
-            Write(inside.ContentColumnDivider.ToString(), TableSection.ContentColumnDivider);
+            Write(divider.Get(TableDividerPart.ContentColumn), TableSection.ContentColumnDivider);
         }
 
         public void RenderContentColumn(Column column)
