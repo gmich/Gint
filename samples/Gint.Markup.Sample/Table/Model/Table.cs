@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -26,6 +27,7 @@ namespace Gint.Markup.Sample
 
     internal class Row
     {
+        public bool SkipDivider { get; set; } = false;
         public Alignment Alignment { get; init; } = Alignment.Default;
         public Column[] Columns { get; init; }
         public List<AnalyzedColumn> AnalyzedColumns { get; internal set; }
@@ -50,11 +52,22 @@ namespace Gint.Markup.Sample
 
     internal class Column
     {
-        public int SpansOverColumns { get; internal set; } = 1;
-        public string Content { get; init; } = string.Empty;
-        public Alignment Alignment { get; init; } = Alignment.Default;
+        internal int SpansOverColumns { get; set; } = 1;
+        internal string Content { get; init; } = string.Empty;
+        internal Alignment Alignment { get; init; } = Alignment.Default;
         internal string Rendered { get; set; }
-        public bool SkipRowDivider { get; set; }
+        internal bool SkipRowDivider { get; set; }
+        internal string RowDividerText { get; set; }
     }
 
+    internal class AnalyzedTable
+    {
+        public void AnalyzeRow(Row row)
+        {
+            foreach(var column in row.Columns)
+            {
+                var totalRows = column.Content.Split(Environment.NewLine);
+            }
+        }
+    }
 }

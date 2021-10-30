@@ -15,7 +15,7 @@ namespace Gint.Markup.Sample
                     .WithRowAlignment(Alignment.Start)
                 .AddColumn("content1")
                 .AddColumn("content2")
-                .AddColumn("content3")
+                .AddColumn($"content3")
                     .NewRow()
                     .WithoutRowDivider()
                     .WithRowAlignment(Alignment.Center)

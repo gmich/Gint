@@ -38,7 +38,7 @@ namespace Gint.Markup.Sample
             AnalyzeColumns();
 
             RenderBorderTop();
-
+            Table.Content.Rows[1].SkipDivider = true;
             ChangeLine();
 
             if (Table.Header != null)
@@ -49,10 +49,12 @@ namespace Gint.Markup.Sample
 
                 ChangeLine();
 
-                RenderHeaderBorderLeft(column: Table.Header.Row.Columns?.FirstOrDefault());
-                RenderHeaderRowDivider();
-                RenderHeaderBorderRight(column: Table.Header.Row.Columns?.LastOrDefault());
-
+                if (!Table.Header.Row.SkipDivider)
+                {
+                    RenderHeaderBorderLeft(column: Table.Header.Row.Columns?.FirstOrDefault());
+                    RenderHeaderRowDivider();
+                    RenderHeaderBorderRight(column: Table.Header.Row.Columns?.LastOrDefault());
+                }
                 ChangeLine();
             }
 
@@ -65,7 +67,7 @@ namespace Gint.Markup.Sample
                 ChangeLine();
 
                 //render all except bottom border
-                if (rowIndex < Table.Content.Rows.Length - 1)
+                if (rowIndex < Table.Content.Rows.Length - 1 && !Table.Content.Rows[rowIndex].SkipDivider)
                 {
                     RenderContentBorderLeft(column: Table.Content.Rows[rowIndex].Columns.FirstOrDefault());
                     RenderContentRowDivider(rowIndex);
