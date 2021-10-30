@@ -1,6 +1,6 @@
 ﻿namespace Gint.Markup.Sample
 {
-    public class ContinousTableDividerStyle : ITableDividerStyle
+    public class SquareTableDividerStyle : ITableDividerStyle
     {
         public char Get(TableDividerPart divider)
         {

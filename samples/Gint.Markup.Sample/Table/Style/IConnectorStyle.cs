@@ -1,6 +1,6 @@
 ﻿namespace Gint.Markup.Sample
 {
-    public interface ITableConnectorStyle
+    public interface IConnectorStyle
     {
         char Get(TableConnectorPart connector);
     }

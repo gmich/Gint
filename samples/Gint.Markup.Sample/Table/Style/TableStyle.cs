@@ -2,15 +2,17 @@
 {
     public class TableStyle
     {
-        public TableStyle(ITableBorderStyle tableBorder, ITableDividerStyle tablePart, ITableConnectorStyle connector)
+        public TableStyle(ITableBorderStyle tableBorder, ITableDividerStyle tablePart, IContentConnectorStyle contentConnector, IHeaderConnectorStyle headerConnector)
         {
             TableBorder = tableBorder;
             TablePart = tablePart;
-            Connector = connector;
+            ContentConnector = contentConnector;
+            HeaderConnector = headerConnector;
         }
 
         public ITableBorderStyle TableBorder { get; }
         public ITableDividerStyle TablePart { get; }
-        public ITableConnectorStyle Connector { get; }
+        public IContentConnectorStyle ContentConnector { get; }
+        public IHeaderConnectorStyle HeaderConnector { get; }
     }
 }

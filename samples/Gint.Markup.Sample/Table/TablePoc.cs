@@ -12,7 +12,7 @@ namespace Gint.Markup.Sample
                 {
                     Row = new Row
                     {
-                        Columns = new[] { new Column { Content = "header1", SpansOverColumns = 2 , Alignment = Alignment.Start }, new Column { Content = "header2..", SkipRowDivider = true }, new Column { Content = "header3.." } }
+                        Columns = new[] { new Column { Content = "header1", SpansOverColumns = 2, Alignment = Alignment.Center }, new Column { Content = "header2..", SkipRowDivider = true }, new Column { Content = "header3.." } }
                     }
                 },
                 Content = new Content
@@ -22,6 +22,14 @@ namespace Gint.Markup.Sample
                         new Row
                         {
                             Columns = new[] { new Column { Content = "content11" ,SpansOverColumns  = 2 },  new Column { Content = "content13.xx." }, new Column { SkipRowDivider=true } }
+                        },
+                        new Row
+                        {
+                            Columns = new[] { new Column { Content = "content11" ,SpansOverColumns  =4, SkipRowDivider = true} }
+                        },
+                        new Row
+                        {
+                            Columns = new[] { new Column { Content = "content11" ,SpansOverColumns  =4 } }
                         },
                         new Row
                         {
@@ -43,7 +51,7 @@ namespace Gint.Markup.Sample
                 }
             };
 
-            new TableRenderer(table, Console.Out, new TableRenderPreferences()).Render();
+            new TableRenderer(table, Console.Out, new TableRenderPreferences { TableRenderMiddleware = new ColorRenderMiddleware() }).Render();
         }
     }
 

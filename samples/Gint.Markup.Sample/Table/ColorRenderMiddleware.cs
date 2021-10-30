@@ -13,7 +13,8 @@ namespace Gint.Markup.Sample
         {
             if (section == TableSection.HeaderColumn)
             {
-                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                return text.ToUpper();
             }
             else if (section == TableSection.ContentColumn)
             {
@@ -21,7 +22,7 @@ namespace Gint.Markup.Sample
             }
             else
             {
-                Console.ForegroundColor = ConsoleColor.Red;
+                Console.ForegroundColor = ConsoleColor.DarkMagenta;
             }
             return text;
         }

@@ -12,7 +12,8 @@ namespace Gint.Markup.Sample
         private readonly ITableRenderMiddleware tableRenderVisitor;
         private readonly ITableBorderStyle border;
         private readonly ITableDividerStyle divider;
-        private readonly ITableConnectorStyle connector;
+        private readonly IContentConnectorStyle contentConnector;
+        private readonly IHeaderConnectorStyle headerConnector;
         private readonly TableRenderContext renderOptions;
 
         public Table Table { get; }
@@ -26,7 +27,8 @@ namespace Gint.Markup.Sample
             Writer = writer;
             divider = tablePreferences.TableStyle.TablePart;
             border = tablePreferences.TableStyle.TableBorder;
-            connector = tablePreferences.TableStyle.Connector;
+            contentConnector = tablePreferences.TableStyle.ContentConnector;
+            headerConnector = tablePreferences.TableStyle.HeaderConnector;
             renderOptions = new TableRenderContext(table, tablePreferences);
         }
 
@@ -82,7 +84,7 @@ namespace Gint.Markup.Sample
                 for (int i = 0; i < Table.Header.Row.Columns.Length; i++)
                 {
                     Column column = Table.Header.Row.Columns[i];
-                    var rendered = RenderColumn(column, GetAlignment(column, tablePreferences.DefaultHeaderAlignment));
+                    var rendered = RenderColumn(column, GetAlignment(column, Table.Header.Row.Alignment, tablePreferences.DefaultHeaderAlignment));
                     column.Rendered = rendered;
                 }
 
@@ -122,7 +124,7 @@ namespace Gint.Markup.Sample
                 for (int i = 0; i < row.Columns.Length; i++)
                 {
                     Column column = row.Columns[i];
-                    var rendered = RenderColumn(column, GetAlignment(column, tablePreferences.DefaultContentAlignment));
+                    var rendered = RenderColumn(column, GetAlignment(column, row.Alignment, tablePreferences.DefaultContentAlignment));
                     column.Rendered = rendered;
                 }
             }
@@ -185,48 +187,48 @@ namespace Gint.Markup.Sample
                 else if ((i + 1) == analyzedColumns.Count)
                     break;
                 else
-                    Write(connector.Get(TableConnectorPart.Top), TableSection.BorderTop);
+                    Write(headerConnector.Get(TableConnectorPart.Top), TableSection.BorderTop);
             }
             Write(border.Get(TableBorderPart.TopRight), TableSection.BorderTop);
         }
 
         public void RenderHeaderBorderLeft(Column column)
         {
-            RenderBorderLeft(column);
+            RenderBorderLeft(column, headerConnector);
         }
         public void RenderContentBorderLeft(Column column)
         {
-            RenderBorderLeft(column);
+            RenderBorderLeft(column, contentConnector);
         }
 
-        private void RenderBorderLeft(Column column)
+        private void RenderBorderLeft(Column column, IConnectorStyle style)
         {
             if (column == null)
                 Write(border.Get(TableBorderPart.Left), TableSection.BorderLeft);
             else if (column.SkipRowDivider)
                 Write(border.Get(TableBorderPart.Left), TableSection.BorderLeft);
             else
-                Write(connector.Get(TableConnectorPart.Left), TableSection.BorderLeft);
+                Write(contentConnector.Get(TableConnectorPart.Left), TableSection.BorderLeft);
         }
 
         public void RenderHeaderBorderRight(Column column)
         {
-            RenderBorderRight(column);
+            RenderBorderRight(column, headerConnector);
         }
 
         public void RenderContentBorderRight(Column column)
         {
-            RenderBorderRight(column);
+            RenderBorderRight(column, contentConnector);
         }
 
-        private void RenderBorderRight(Column column)
+        private void RenderBorderRight(Column column, IConnectorStyle style)
         {
             if (column == null)
                 Write(border.Get(TableBorderPart.Right), TableSection.BorderRight);
             else if (column.SkipRowDivider)
                 Write(border.Get(TableBorderPart.Right), TableSection.BorderRight);
             else
-                Write(connector.Get(TableConnectorPart.Right), TableSection.BorderRight);
+                Write(style.Get(TableConnectorPart.Right), TableSection.BorderRight);
         }
 
         public void RenderBorderBottom()
@@ -243,7 +245,7 @@ namespace Gint.Markup.Sample
                 else if ((i + 1) == flattenedColumns.Count)
                     break;
                 else
-                    Write(connector.Get(TableConnectorPart.Bottom), TableSection.BorderBottom);
+                    Write(contentConnector.Get(TableConnectorPart.Bottom), TableSection.BorderBottom);
             }
             Write(border.Get(TableBorderPart.BottomRight), TableSection.BorderBottom);
 
@@ -254,7 +256,7 @@ namespace Gint.Markup.Sample
 
         #region Header  
 
-        public void RenderRowDivider(Row currentRow, Column[] nextColumns, char rowDivider, TableSection section)
+        public void RenderRowDivider(Row currentRow, Column[] nextColumns, char rowDivider, TableSection section, IConnectorStyle style)
         {
             var nextColumnConnections = new List<int>();
             int previous = 0;
@@ -268,10 +270,10 @@ namespace Gint.Markup.Sample
             var flattenedColumns = currentRow.AnalyzedColumns;
 
             var columnsLength = flattenedColumns.Count;
-            
+
             void Connect(TableConnectorPart c)
             {
-                Write(connector.Get(c), section);
+                Write(style.Get(c), section);
             }
 
             for (int i = 0; i < flattenedColumns.Count; i++)
@@ -284,7 +286,9 @@ namespace Gint.Markup.Sample
 
                 if (i + 1 == columnsLength) break;
 
-                if (flattenedColumns[i + 1].SkipRowDivider)
+                if (flattenedColumns[i + 1].SkipRowDivider && flattenedColumns[i].SkipRowDivider)
+                    Connect(TableConnectorPart.Blank);
+                else if (flattenedColumns[i + 1].SkipRowDivider)
                     if (nextColumnConnections.Contains(currentCell))
                         Connect(TableConnectorPart.Right);
                     else
@@ -303,7 +307,6 @@ namespace Gint.Markup.Sample
                     Connect(TableConnectorPart.Cross);
                 else
                     Connect(TableConnectorPart.Bottom);
-
                 previousConnectionCell += (segmentSize + renderOptions.ColumnDividerWidth);
             }
         }
@@ -314,7 +317,8 @@ namespace Gint.Markup.Sample
                 currentRow: Table.Header.Row,
                 nextColumns: Table.Content.Rows.Length > 0 ? Table.Content.Rows[0].Columns : new Column[0],
                 rowDivider: divider.Get(TableDividerPart.HeaderRow),
-                section: TableSection.HeaderRowDivider
+                section: TableSection.HeaderRowDivider,
+                style: headerConnector
                 );
         }
 
@@ -339,7 +343,8 @@ namespace Gint.Markup.Sample
                 currentRow: Table.Content.Rows[currentColumn],
                 nextColumns: Table.Content.Rows.Length > currentColumn + 1 ? Table.Content.Rows[currentColumn + 1].Columns : new Column[0],
                 rowDivider: divider.Get(TableDividerPart.ContentRow),
-                section: TableSection.ContentRowDivider);
+                section: TableSection.ContentRowDivider,
+                style: contentConnector);
         }
 
         private void RenderContentColumnDivider()
@@ -357,9 +362,12 @@ namespace Gint.Markup.Sample
 
         #region Columns
 
-        private Alignment GetAlignment(Column column, Alignment @default)
+        private Alignment GetAlignment(Column column, Alignment rowDefault, Alignment globalDefault)
         {
-            var alignment = column.Alignment == Alignment.Default ? @default : column.Alignment;
+            var alignment = column.Alignment == Alignment.Default ? rowDefault : column.Alignment;
+
+            if (alignment == Alignment.Default)
+                alignment = globalDefault;
 
             //fallback to start
             if (alignment == Alignment.Default)

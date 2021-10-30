@@ -7,7 +7,7 @@
         public bool TryFitToScreen { get; set; } = true;
         public int ColumnPaddingLeft { get; set; } = 2;
         public int ColumnPaddingRight { get; set; } = 2;
-        public TableStyle TableStyle { get; set; } = new TableStyle(new ContinuousTableBorderStyle(), new ContinousTableDividerStyle(), new ContinuousTableConnectorStyle());
+        public TableStyle TableStyle { get; set; } = new TableStyle(new SquareTableBorderStyle(), new SquareTableDividerStyle(), new SquareContentConnectorStyle(), new SquareHeaderConnectorStyle());
         public ITableRenderMiddleware TableRenderMiddleware { get; set; } = new NoopRenderMiddleware();
     }
 

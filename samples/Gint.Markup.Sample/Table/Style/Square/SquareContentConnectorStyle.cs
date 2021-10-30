@@ -1,6 +1,6 @@
 ﻿namespace Gint.Markup.Sample
 {
-    public class ContinuousTableConnectorStyle : ITableConnectorStyle
+    public class SquareContentConnectorStyle : IContentConnectorStyle
     {
         public char Get(TableConnectorPart connector)
         {
@@ -15,10 +15,11 @@
                 TableConnectorPart.BottomLeft => '└',
                 TableConnectorPart.BottomRight => '┘',
                 TableConnectorPart.TopLeft => '┌',
-                TableConnectorPart.TopRight => '┘',
+                TableConnectorPart.TopRight => '┐',
+                TableConnectorPart.Blank => ' ',
                 _ => throw new System.ArgumentException($"Unknown connector style {connector}"),
             };
         }
-
     }
+
 }

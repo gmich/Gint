@@ -12,6 +12,7 @@
         BottomRight,
         TopLeft,
         TopRight,
+        Blank,
     }
 
 }

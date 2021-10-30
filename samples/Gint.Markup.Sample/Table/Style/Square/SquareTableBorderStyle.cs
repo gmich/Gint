@@ -1,6 +1,6 @@
 ﻿namespace Gint.Markup.Sample
 {
-    public class ContinuousTableBorderStyle : ITableBorderStyle
+    public class SquareTableBorderStyle : ITableBorderStyle
     {
         public char Get(TableBorderPart border)
         {
