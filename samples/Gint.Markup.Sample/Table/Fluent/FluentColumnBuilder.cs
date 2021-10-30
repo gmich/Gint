@@ -15,7 +15,7 @@ namespace Gint.Markup.Sample
         {
             rows = _rows;
             _rowBuilder = rowBuilder;
-            _content = content;
+            _content = content ?? string.Empty;
         }
 
         public FluentColumnBuilder SpansOverColumns(int numberOfColumns)
