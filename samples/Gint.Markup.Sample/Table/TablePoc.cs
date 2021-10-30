@@ -6,6 +6,9 @@ namespace Gint.Markup.Sample
     {
         public TablePoc()
         {
+            new FluentTablePoc();
+            return;
+
             var table = new Table
             {
                 Header = new Header
@@ -51,7 +54,7 @@ namespace Gint.Markup.Sample
                 }
             };
 
-            new TableRenderer(table, Console.Out, new TableRenderPreferences { TableRenderMiddleware = new ColorRenderMiddleware() }).Render();
+            new TableRenderer(table, new TableRenderPreferences { TableRenderMiddleware = new SectionColorerMiddleware() }).Render(Console.Out);
         }
     }
 

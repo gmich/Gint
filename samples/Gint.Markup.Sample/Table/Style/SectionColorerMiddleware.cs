@@ -2,7 +2,7 @@
 
 namespace Gint.Markup.Sample
 {
-    public class ColorRenderMiddleware : ITableRenderMiddleware
+    public class SectionColorerMiddleware : ITableRenderMiddleware
     {
         public void PostWrite(string text, TableSection section)
         {

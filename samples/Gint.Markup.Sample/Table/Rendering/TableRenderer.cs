@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Gint.Markup.Sample
 {
-    internal class TableRenderer
+    internal class TableRenderer : ITableRenderer
     {
         private readonly TableRenderPreferences tablePreferences;
         private readonly ITableRenderMiddleware tableRenderVisitor;
@@ -16,15 +16,15 @@ namespace Gint.Markup.Sample
         private readonly IHeaderConnectorStyle headerConnector;
         private readonly TableRenderContext renderOptions;
 
-        public Table Table { get; }
-        public TextWriter Writer { get; }
+        internal Table Table { get; }
 
-        public TableRenderer(Table table, TextWriter writer, TableRenderPreferences tablePreferences)
+        private TextWriter writer;
+
+        public TableRenderer(Table table, TableRenderPreferences tablePreferences)
         {
             this.tablePreferences = tablePreferences;
             tableRenderVisitor = tablePreferences.TableRenderMiddleware;
             Table = table;
-            Writer = writer;
             divider = tablePreferences.TableStyle.TablePart;
             border = tablePreferences.TableStyle.TableBorder;
             contentConnector = tablePreferences.TableStyle.ContentConnector;
@@ -32,8 +32,9 @@ namespace Gint.Markup.Sample
             renderOptions = new TableRenderContext(table, tablePreferences);
         }
 
-        public void Render()
+        public void Render(TextWriter writer)
         {
+            this.writer = writer;
             AnalyzeColumns();
 
             RenderBorderTop();
@@ -155,9 +156,9 @@ namespace Gint.Markup.Sample
             }
         }
 
-        public void ChangeLine()
+        private void ChangeLine()
         {
-            Writer.WriteLine();
+            writer.WriteLine();
         }
 
         private void Write(char ch, TableSection section)
@@ -168,13 +169,13 @@ namespace Gint.Markup.Sample
         private void Write(string text, TableSection section)
         {
             var newText = tableRenderVisitor.PreWrite(text, section);
-            Writer.Write(newText);
+            writer.Write(newText);
             tableRenderVisitor.PostWrite(newText, section);
         }
 
         #region Border
 
-        public void RenderBorderTop()
+        private void RenderBorderTop()
         {
             var analyzedColumns = Table.Header?.Row.AnalyzedColumns ?? Table.Content.Rows.First().AnalyzedColumns;
             Write(border.Get(TableBorderPart.TopLeft), TableSection.BorderTop);
@@ -192,11 +193,11 @@ namespace Gint.Markup.Sample
             Write(border.Get(TableBorderPart.TopRight), TableSection.BorderTop);
         }
 
-        public void RenderHeaderBorderLeft(Column column)
+        private void RenderHeaderBorderLeft(Column column)
         {
             RenderBorderLeft(column, headerConnector);
         }
-        public void RenderContentBorderLeft(Column column)
+        private void RenderContentBorderLeft(Column column)
         {
             RenderBorderLeft(column, contentConnector);
         }
@@ -211,12 +212,12 @@ namespace Gint.Markup.Sample
                 Write(contentConnector.Get(TableConnectorPart.Left), TableSection.BorderLeft);
         }
 
-        public void RenderHeaderBorderRight(Column column)
+        private void RenderHeaderBorderRight(Column column)
         {
             RenderBorderRight(column, headerConnector);
         }
 
-        public void RenderContentBorderRight(Column column)
+        private void RenderContentBorderRight(Column column)
         {
             RenderBorderRight(column, contentConnector);
         }
@@ -231,7 +232,7 @@ namespace Gint.Markup.Sample
                 Write(style.Get(TableConnectorPart.Right), TableSection.BorderRight);
         }
 
-        public void RenderBorderBottom()
+        private void RenderBorderBottom()
         {
             var flattenedColumns = Table.Content.Rows.Last().AnalyzedColumns;
 
@@ -256,7 +257,7 @@ namespace Gint.Markup.Sample
 
         #region Header  
 
-        public void RenderRowDivider(Row currentRow, Column[] nextColumns, char rowDivider, TableSection section, IConnectorStyle style)
+        private void RenderRowDivider(Row currentRow, Column[] nextColumns, char rowDivider, TableSection section, IConnectorStyle style)
         {
             var nextColumnConnections = new List<int>();
             int previous = 0;
@@ -311,7 +312,7 @@ namespace Gint.Markup.Sample
             }
         }
 
-        public void RenderHeaderRowDivider()
+        private void RenderHeaderRowDivider()
         {
             RenderRowDivider(
                 currentRow: Table.Header.Row,
@@ -322,12 +323,12 @@ namespace Gint.Markup.Sample
                 );
         }
 
-        public void RenderHeaderColumnDivider()
+        private void RenderHeaderColumnDivider()
         {
             Write(divider.Get(TableDividerPart.HeaderColumn), TableSection.HeaderColumnDivider);
         }
 
-        public void RenderHeaderColumn(Column column)
+        private void RenderHeaderColumn(Column column)
         {
             var rendered = column.Rendered;
             Write(rendered, TableSection.HeaderColumn);
@@ -337,7 +338,7 @@ namespace Gint.Markup.Sample
 
         #region Content
 
-        public void RenderContentRowDivider(int currentColumn)
+        private void RenderContentRowDivider(int currentColumn)
         {
             RenderRowDivider(
                 currentRow: Table.Content.Rows[currentColumn],
@@ -352,7 +353,7 @@ namespace Gint.Markup.Sample
             Write(divider.Get(TableDividerPart.ContentColumn), TableSection.ContentColumnDivider);
         }
 
-        public void RenderContentColumn(Column column)
+        private void RenderContentColumn(Column column)
         {
             var rendered = column.Rendered;
             Write(rendered, TableSection.ContentColumn);

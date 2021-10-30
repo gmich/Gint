@@ -6,8 +6,8 @@ namespace Gint.Markup.Sample
 {
     internal class Table
     {
-        public Header Header { get; init; }
-        public Content Content { get; init; }
+        public Header Header { get; internal set; }
+        public Content Content { get; internal set; }
 
         internal IEnumerable<Column> IterateColumns => (Header?.Row.Columns ?? new Column[0]).Concat(Content.Rows.SelectMany(c => c.Columns));
         internal IEnumerable<Column> IterateFirstRow => Header?.Row.Columns ?? Content.Rows.FirstOrDefault().Columns;
@@ -15,14 +15,13 @@ namespace Gint.Markup.Sample
 
     internal class Content
     {
-        public Alignment Alignment { get; set; } = Alignment.Default;
-        public Row[] Rows { get; init; }
+        public Row[] Rows { get; internal set; }
     }
 
     internal class Header
     {
-        public Alignment Alignment { get; set; } = Alignment.Default;
-        public Row Row { get; init; }
+        public Row Row { get; internal set; }
+        internal int TotalColumns => Row.Columns.Sum(c => c.SpansOverColumns);
     }
 
     internal class Row
@@ -30,6 +29,7 @@ namespace Gint.Markup.Sample
         public Alignment Alignment { get; init; } = Alignment.Default;
         public Column[] Columns { get; init; }
         public List<AnalyzedColumn> AnalyzedColumns { get; internal set; }
+        internal int TotalColumns => Columns.Sum(c => c.SpansOverColumns);
 
     }
 
@@ -50,7 +50,7 @@ namespace Gint.Markup.Sample
 
     internal class Column
     {
-        public int SpansOverColumns { get; init; } = 1;
+        public int SpansOverColumns { get; internal set; } = 1;
         public string Content { get; init; } = string.Empty;
         public Alignment Alignment { get; init; } = Alignment.Default;
         internal string Rendered { get; set; }
