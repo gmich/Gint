@@ -35,7 +35,7 @@ namespace Gint.Markup.Sample
         public void Render(TextWriter writer)
         {
             this.writer = writer;
-            TableAnalyzer.AdjustTable(Table);
+            TableAnalyzer.AdjustTable(Table, renderOptions.CellSize);
             AnalyzeColumns();
 
             RenderBorderTop();

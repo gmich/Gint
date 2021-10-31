@@ -62,15 +62,15 @@ namespace Gint.Markup.Sample
 
     internal class TableAnalyzer
     {
-        public static void AdjustTable(Table table)
+        public static void AdjustTable(Table table, int maxCellSize)
         {
             if(table.HasHeader)
-                table.Header.Rows = AdjustRows(table.Header.Rows);
+                table.Header.Rows = AdjustRows(table.Header.Rows, maxCellSize);
 
-            table.Content.Rows = AdjustRows(table.Content.Rows);
+            table.Content.Rows = AdjustRows(table.Content.Rows, maxCellSize);
         }
 
-        public static Row[] AdjustRows(Row[] rows)
+        public static Row[] AdjustRows(Row[] rows, int maxCellSize)
         {
             List<Row> newRows = new List<Row>();
             Row rowToAnalyze = null;
@@ -83,7 +83,7 @@ namespace Gint.Markup.Sample
                 var originalSkipDivider = row.SkipDivider;
                 do
                 {
-                    (bool AddExtraRow, List<Column> ExtraColumns) = AnalyzeRow(rowToAnalyze);
+                    (bool AddExtraRow, List<Column> ExtraColumns) = AnalyzeRow(rowToAnalyze, maxCellSize);
                     addExtraRow = AddExtraRow;
                     if (addExtraRow)
                     {
@@ -105,7 +105,7 @@ namespace Gint.Markup.Sample
 
             return newRows.ToArray();
         }
-        private static (bool AddExtraRow, List<Column> ExtraColumns) AnalyzeRow(Row row)
+        private static (bool AddExtraRow, List<Column> ExtraColumns) AnalyzeRow(Row row, int maxCellSize)
         {
             bool addExtraRow = false;
             List<Column> extraColumns = new List<Column>();
@@ -118,8 +118,13 @@ namespace Gint.Markup.Sample
                     SkipRowDivider = column.SkipRowDivider,
                     Alignment = column.Alignment,
                 });
+                if(column.Content.Length > maxCellSize)
+                {
+                    column.Content= column.Content.Insert(maxCellSize, Environment.NewLine);
+                }
 
                 var newContent = column.Content.Split(Environment.NewLine);
+
                 if (newContent.Length < 2)
                 {
                     continue;
