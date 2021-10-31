@@ -53,11 +53,14 @@ namespace Gint.Markup.Sample
             table.Header = _rows.Where(c => c.IsHeader).Select(c =>
             new Header
             {
-                Row = new Row
+                Rows = new[]
                 {
-                    SkipDivider = c.SkipRowDivider ?? false,
-                    Alignment = c.Alignment,
-                    Columns = c.Columns.ToArray()
+                    new Row
+                    {
+                        SkipDivider = c.SkipRowDivider ?? false,
+                        Alignment = c.Alignment,
+                        Columns = c.Columns.ToArray()
+                    }
                 }
             }).FirstOrDefault();
 
@@ -68,25 +71,19 @@ namespace Gint.Markup.Sample
                 Columns = c.Columns.ToArray()
             }).ToArray();
 
-            //normalize header column length
-            if(table.Header!=null)
+            void NormalizeColumnLength(Row[] rows)
             {
-                var totalColumns = table.Header.TotalColumns;
-                if(totalColumns< maxColumnsInRow)
+                foreach (var row in rows)
                 {
-                    table.Header.Row.Columns.Last().SpansOverColumns += (maxColumnsInRow - totalColumns);
+                    var totalColumns = row.TotalColumns;
+                    if (totalColumns < maxColumnsInRow)
+                    {
+                        row.Columns.Last().SpansOverColumns += (maxColumnsInRow - totalColumns);
+                    }
                 }
             }
-
-            //normalize content column length
-            foreach(var row in table.Content.Rows)
-            {
-                var totalColumns = row.TotalColumns;
-                if (totalColumns < maxColumnsInRow)
-                {
-                    row.Columns.Last().SpansOverColumns += (maxColumnsInRow - totalColumns);
-                }
-            }
+            NormalizeColumnLength(table.Content.Rows);
+            NormalizeColumnLength(table.Header.Rows);
 
             return new TableRenderer(table, GintTable.TableRenderPreferences);
         }

@@ -41,21 +41,24 @@ namespace Gint.Markup.Sample
             RenderBorderTop();
             ChangeLine();
 
-            if (Table.Header != null)
+            if (Table.HasHeader)
             {
-                RenderHeaderBorderLeft(column: null);
-                RenderHeaderColumns();
-                RenderHeaderBorderRight(column: null);
-
-                ChangeLine();
-
-                if (!Table.Header.Row.SkipDivider)
+                for (int rowIndex = 0; rowIndex < Table.Header.Rows.Length; rowIndex++)
                 {
-                    RenderHeaderBorderLeft(column: Table.Header.Row.Columns?.FirstOrDefault());
-                    RenderHeaderRowDivider();
-                    RenderHeaderBorderRight(column: Table.Header.Row.Columns?.LastOrDefault());
+                    RenderHeaderBorderLeft(column: null);
+                    RenderHeaderColumn(rowIndex);
+                    RenderHeaderBorderRight(column: null);
+
+                    ChangeLine();
+
+                    if (!Table.Header.Rows[rowIndex].SkipDivider)
+                    {
+                        RenderHeaderBorderLeft(column: Table.Header.Rows[rowIndex].Columns?.FirstOrDefault());
+                        RenderHeaderRowDivider();
+                        RenderHeaderBorderRight(column: Table.Header.Rows[rowIndex].Columns?.LastOrDefault());
+                        ChangeLine();
+                    }
                 }
-                ChangeLine();
             }
 
             for (int rowIndex = 0; rowIndex < Table.Content.Rows.Length; rowIndex++)
@@ -82,55 +85,39 @@ namespace Gint.Markup.Sample
 
         private void AnalyzeColumns()
         {
+            void Analyze(Row[] rows, Alignment defaultAlignment)
+            {
+                foreach (var row in rows)
+                {
+                    var contentAnalyzedColumns = new List<AnalyzedColumn>();
+                    foreach (var column in row.Columns)
+                    {
+                        for (int i = 0; i < column.SpansOverColumns; i++)
+                        {
+                            contentAnalyzedColumns.Add(new AnalyzedColumn(
+                                column: column,
+                                skipColumnDivider: (i + 1) < column.SpansOverColumns,
+                                totalCells: renderOptions.TotalWidthWithoutMargin));
+                        }
+                    }
+                    row.AnalyzedColumns = contentAnalyzedColumns;
+                }
+
+                for (int rowIndex = 0; rowIndex < rows.Length; rowIndex++)
+                {
+                    Row row = rows[rowIndex];
+                    for (int i = 0; i < row.Columns.Length; i++)
+                    {
+                        Column column = row.Columns[i];
+                        var rendered = RenderColumn(column, GetAlignment(column, row.Alignment, defaultAlignment));
+                        column.Rendered = rendered;
+                    }
+                }
+            }
             if (Table.Header != null)
-            {
-                for (int i = 0; i < Table.Header.Row.Columns.Length; i++)
-                {
-                    Column column = Table.Header.Row.Columns[i];
-                    var rendered = RenderColumn(column, GetAlignment(column, Table.Header.Row.Alignment, tablePreferences.DefaultHeaderAlignment));
-                    column.Rendered = rendered;
-                }
+                Analyze(Table.Header.Rows, tablePreferences.DefaultHeaderAlignment);
 
-                var headerAnalyzedColumns = new List<AnalyzedColumn>();
-                foreach (var column in Table.Header.Row.Columns)
-                {
-                    for (int i = 0; i < column.SpansOverColumns; i++)
-                    {
-                        headerAnalyzedColumns.Add(new AnalyzedColumn(
-                            column: column,
-                            skipColumnDivider: (i + 1) < column.SpansOverColumns,
-                            totalCells: renderOptions.TotalWidthWithoutMargin));
-                    }
-                }
-                Table.Header.Row.AnalyzedColumns = headerAnalyzedColumns;
-            }
-
-            foreach (var row in Table.Content.Rows)
-            {
-                var contentAnalyzedColumns = new List<AnalyzedColumn>();
-                foreach (var column in row.Columns)
-                {
-                    for (int i = 0; i < column.SpansOverColumns; i++)
-                    {
-                        contentAnalyzedColumns.Add(new AnalyzedColumn(
-                            column: column,
-                            skipColumnDivider: (i + 1) < column.SpansOverColumns,
-                            totalCells: renderOptions.TotalWidthWithoutMargin));
-                    }
-                }
-                row.AnalyzedColumns = contentAnalyzedColumns;
-            }
-
-            for (int rowIndex = 0; rowIndex < Table.Content.Rows.Length; rowIndex++)
-            {
-                Row row = Table.Content.Rows[rowIndex];
-                for (int i = 0; i < row.Columns.Length; i++)
-                {
-                    Column column = row.Columns[i];
-                    var rendered = RenderColumn(column, GetAlignment(column, row.Alignment, tablePreferences.DefaultContentAlignment));
-                    column.Rendered = rendered;
-                }
-            }
+            Analyze(Table.Content.Rows, tablePreferences.DefaultContentAlignment);
         }
 
         private void RenderContentColumn(int j)
@@ -146,14 +133,15 @@ namespace Gint.Markup.Sample
             }
         }
 
-        private void RenderHeaderColumns()
+        private void RenderHeaderColumn(int j)
         {
-            for (int i = 0; i < Table.Header.Row.Columns.Length; i++)
+            Row row = Table.Header.Rows[j];
+            for (int i = 0; i < row.Columns.Length; i++)
             {
-                Column column = Table.Header.Row.Columns[i];
+                Column column = row.Columns[i];
                 RenderHeaderColumn(column);
 
-                if (i < Table.Header.Row.Columns.Length - 1)
+                if (i < row.Columns.Length - 1)
                     RenderHeaderColumnDivider();
             }
         }
@@ -179,7 +167,7 @@ namespace Gint.Markup.Sample
 
         private void RenderBorderTop()
         {
-            var analyzedColumns = Table.Header?.Row.AnalyzedColumns ?? Table.Content.Rows.First().AnalyzedColumns;
+            var analyzedColumns = Table.Header?.Rows.First().AnalyzedColumns ?? Table.Content.Rows.First().AnalyzedColumns;
             Write(border.Get(TableBorderPart.TopLeft), TableSection.BorderTop);
             for (int i = 0; i < analyzedColumns.Count; i++)
             {
@@ -317,7 +305,7 @@ namespace Gint.Markup.Sample
         private void RenderHeaderRowDivider()
         {
             RenderRowDivider(
-                currentRow: Table.Header.Row,
+                currentRow: Table.Header.Rows.Last(),
                 nextColumns: Table.Content.Rows.Length > 0 ? Table.Content.Rows[0].Columns : new Column[0],
                 rowDivider: divider.Get(TableDividerPart.HeaderRow),
                 section: TableSection.HeaderRowDivider,

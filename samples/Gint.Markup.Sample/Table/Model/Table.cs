@@ -10,8 +10,9 @@ namespace Gint.Markup.Sample
         public Header Header { get; internal set; }
         public Content Content { get; internal set; }
 
-        internal IEnumerable<Column> IterateColumns => (Header?.Row.Columns ?? new Column[0]).Concat(Content.Rows.SelectMany(c => c.Columns));
-        internal IEnumerable<Column> IterateFirstRow => Header?.Row.Columns ?? Content.Rows.FirstOrDefault().Columns;
+        internal bool HasHeader => Header != null;
+        internal IEnumerable<Column> IterateColumns => (Header?.Rows.SelectMany(c => c.Columns) ?? new Column[0]).Concat(Content.Rows.SelectMany(c => c.Columns));
+        internal IEnumerable<Column> IterateFirstRow => Header?.Rows.SelectMany(c => c.Columns) ?? Content.Rows.FirstOrDefault().Columns;
     }
 
     internal class Content
@@ -21,8 +22,7 @@ namespace Gint.Markup.Sample
 
     internal class Header
     {
-        public Row Row { get; internal set; }
-        internal int TotalColumns => Row.Columns.Sum(c => c.SpansOverColumns);
+        public Row[] Rows { get; internal set; }
     }
 
     internal class Row
@@ -64,10 +64,19 @@ namespace Gint.Markup.Sample
     {
         public static void AdjustTable(Table table)
         {
+            if(table.HasHeader)
+                table.Header.Rows = AdjustRows(table.Header.Rows);
+
+            table.Content.Rows = AdjustRows(table.Content.Rows);
+        }
+
+        public static Row[] AdjustRows(Row[] rows)
+        {
             List<Row> newRows = new List<Row>();
             Row rowToAnalyze = null;
             bool addExtraRow;
-            foreach (var row in table.Content.Rows)
+
+            foreach (var row in rows)
             {
                 rowToAnalyze = row;
                 newRows.Add(row);
@@ -93,8 +102,8 @@ namespace Gint.Markup.Sample
                 } while (addExtraRow);
                 newRows.Last().SkipDivider = originalSkipDivider;
             }
-            table.Content.Rows = newRows.ToArray();
 
+            return newRows.ToArray();
         }
         private static (bool AddExtraRow, List<Column> ExtraColumns) AnalyzeRow(Row row)
         {
@@ -121,7 +130,7 @@ namespace Gint.Markup.Sample
                     column.Content = newContent[0];
                     extraColumns.Last().Content = string.Join(Environment.NewLine, newContent.Skip(1));
                 }
-           
+
             }
             return (addExtraRow, extraColumns);
         }

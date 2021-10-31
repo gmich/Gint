@@ -13,9 +13,12 @@ namespace Gint.Markup.Sample
             {
                 Header = new Header
                 {
-                    Row = new Row
+                    Rows = new[]
                     {
-                        Columns = new[] { new Column { Content = "header1", SpansOverColumns = 2, Alignment = Alignment.Center }, new Column { Content = "header2..", SkipRowDivider = true }, new Column { Content = "header3.." } }
+                        new Row
+                        {
+                            Columns = new[] { new Column { Content = "header1", SpansOverColumns = 2, Alignment = Alignment.Center }, new Column { Content = "header2..", SkipRowDivider = true }, new Column { Content = "header3.." } }
+                        }
                     }
                 },
                 Content = new Content
