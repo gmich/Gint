@@ -1,6 +1,6 @@
 ﻿namespace Gint.Markup.Sample
 {
-    public class TableStyle
+    public abstract class TableStyle
     {
         public TableStyle(ITableBorderStyle tableBorder, ITableDividerStyle tablePart, IContentConnectorStyle contentConnector, IHeaderConnectorStyle headerConnector)
         {

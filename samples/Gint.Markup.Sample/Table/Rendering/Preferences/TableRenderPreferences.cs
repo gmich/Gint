@@ -7,8 +7,8 @@
         public bool TryFitToScreen { get; set; } = true;
         public int ColumnPaddingLeft { get; set; } = 2;
         public int ColumnPaddingRight { get; set; } = 2;
-        public TableStyle TableStyle { get; set; } = new TableStyle(new SquareTableBorderStyle(), new SquareTableDividerStyle(), new SquareContentConnectorStyle(), new SquareHeaderConnectorStyle());
+        public TableStyle TableStyle { get; set; } = SquareTable.Style;
         public ITableRenderMiddleware TableRenderMiddleware { get; set; } = new NoopRenderMiddleware();
+        public TextOverflow TextOverflow { get; set; } = new TextOverflow();
     }
-
 }
