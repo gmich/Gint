@@ -27,6 +27,7 @@ namespace Gint.Markup.Sample
 
     internal class Row
     {
+        public bool SkipColumns { get; set; } = false;
         public bool SkipDivider { get; set; } = false;
         public Alignment Alignment { get; init; } = Alignment.Default;
         public Column[] Columns { get; init; }

@@ -35,7 +35,6 @@ namespace Gint.Markup.Sample
             this.writer = writer;
             TableAnalyzer.AdjustTable(Table, renderOptions.CellSize, tablePreferences);
             AnalyzeColumns();
-
             RenderBorderTop();
             ChangeLine();
 
@@ -61,12 +60,14 @@ namespace Gint.Markup.Sample
 
             for (int rowIndex = 0; rowIndex < Table.Content.Rows.Length; rowIndex++)
             {
-                RenderContentBorderLeft(column: null);
-                RenderContentColumn(rowIndex);
-                RenderContentBorderRight(column: null);
+                if (!Table.Content.Rows[rowIndex].SkipColumns)
+                {
+                    RenderContentBorderLeft(column: null);
+                    RenderContentColumn(rowIndex);
+                    RenderContentBorderRight(column: null);
 
-                ChangeLine();
-
+                    ChangeLine();
+                }
                 //render all except bottom border
                 if (rowIndex < Table.Content.Rows.Length - 1 && !Table.Content.Rows[rowIndex].SkipDivider)
                 {

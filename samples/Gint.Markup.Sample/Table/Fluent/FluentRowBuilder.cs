@@ -19,6 +19,12 @@ namespace Gint.Markup.Sample
                 _rows.Add(newRow);
             }
         }
+        public FluentRowBuilder RenderEmptyRow()
+        {
+            var builder = AddColumn(" ").NewRow();
+            builder._rows.Last().IsEmpty = true;
+            return builder;
+        }
 
         public FluentColumnBuilder AddColumn(string content)
         {
@@ -66,6 +72,7 @@ namespace Gint.Markup.Sample
 
             table.Content.Rows = _rows.Where(c => !c.IsHeader).Select(c => new Row
             {
+                SkipColumns = c.IsEmpty,
                 SkipDivider = c.SkipRowDivider ?? false,
                 Alignment = c.Alignment,
                 Columns = c.Columns.ToArray()

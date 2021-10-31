@@ -7,6 +7,7 @@ namespace Gint.Markup.Sample
 {
     internal class RowContext
     {
+        internal bool IsEmpty { get; set; }
         internal Alignment Alignment { get; } = Alignment.Default;
         internal bool? SkipRowDivider { get; } = null;
         internal List<Column> Columns { get; } = new List<Column>();
