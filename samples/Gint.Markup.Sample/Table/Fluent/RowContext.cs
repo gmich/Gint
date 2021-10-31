@@ -12,10 +12,10 @@ namespace Gint.Markup.Sample
         internal List<Column> Columns { get; } = new List<Column>();
         internal bool IsHeader { get; }
 
-        public RowContext(Alignment alignment, bool? withRowDivider, bool isHeader)
+        public RowContext(Alignment alignment, bool? skipRowDivider, bool isHeader)
         {
             Alignment = alignment;
-            SkipRowDivider = withRowDivider;
+            SkipRowDivider = skipRowDivider;
             IsHeader = isHeader;
         }
     }

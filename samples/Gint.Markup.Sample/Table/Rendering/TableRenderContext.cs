@@ -23,7 +23,7 @@ namespace Gint.Markup.Sample
 
         private int GetLargestColumnSize(Table table)
         {
-            return table.IterateColumns.Max(c => c.Content.Length / c.SpansOverColumns);
+            return table.IterateColumns.Max(c => c.ContentLength / c.SpansOverColumns);
         }
 
         private int GetCellSizeFitToScreen()

@@ -35,10 +35,10 @@ namespace Gint.Markup.Sample
         public void Render(TextWriter writer)
         {
             this.writer = writer;
+            TableAnalyzer.AdjustTable(Table);
             AnalyzeColumns();
 
             RenderBorderTop();
-            Table.Content.Rows[1].SkipDivider = true;
             ChangeLine();
 
             if (Table.Header != null)
