@@ -158,15 +158,41 @@ namespace Gint.Markup.Sample
         private void Write(string text, TableSection section)
         {
             var textToRender = text;
-            foreach(var middleware in tablePreferences.TableRenderMiddleware)
-            {
-                textToRender =  middleware.PreWrite(textToRender, section);
-            }
+            textToRender = PrerenderMiddleware(section, textToRender);
             writer.Write(textToRender);
+            PostRenderMiddleware(section, textToRender);
+        }
+
+        private void Write(Column column, TableSection section)
+        {
+            var textToRender = column.Rendered;
+            textToRender = PrerenderMiddleware(section, textToRender);
+
+            if (column.PreRender != null)
+                textToRender = column.PreRender(textToRender);
+            writer.Write(textToRender);
+            if (column.PostRender != null)
+                column.PostRender(textToRender);
+
+            PostRenderMiddleware(section, textToRender);
+        }
+
+        private void PostRenderMiddleware(TableSection section, string textToRender)
+        {
             foreach (var middleware in tablePreferences.TableRenderMiddleware)
             {
                 middleware.PostWrite(textToRender, section);
             }
+        }
+
+        private string PrerenderMiddleware(TableSection section, string textToRender)
+        {
+            foreach (var middleware in tablePreferences.TableRenderMiddleware)
+            {
+                textToRender = middleware.PreWrite(textToRender, section);
+            }
+
+            return textToRender;
         }
 
         #region Border
@@ -326,8 +352,7 @@ namespace Gint.Markup.Sample
 
         private void RenderHeaderColumn(Column column)
         {
-            var rendered = column.Rendered;
-            Write(rendered, TableSection.HeaderColumn);
+            Write(column, TableSection.HeaderColumn);
         }
 
         #endregion
@@ -351,8 +376,7 @@ namespace Gint.Markup.Sample
 
         private void RenderContentColumn(Column column)
         {
-            var rendered = column.Rendered;
-            Write(rendered, TableSection.ContentColumn);
+            Write(column, TableSection.ContentColumn);
         }
 
         #endregion

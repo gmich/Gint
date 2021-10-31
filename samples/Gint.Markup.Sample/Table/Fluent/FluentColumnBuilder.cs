@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Gint.Markup.Sample
 {
@@ -10,6 +11,7 @@ namespace Gint.Markup.Sample
         private readonly List<RowContext> rows;
         private readonly RowContext _rowBuilder;
         private readonly string _content;
+        private ConsoleColor? _consoleColor;
 
         internal FluentColumnBuilder(List<RowContext> _rows, RowContext rowBuilder, string content)
         {
@@ -21,6 +23,12 @@ namespace Gint.Markup.Sample
         public FluentColumnBuilder SpansOverColumns(int numberOfColumns)
         {
             _numberOfColumns = numberOfColumns;
+            return this;
+        }
+
+        public FluentColumnBuilder WithColor(ConsoleColor consoleColor)
+        {
+            _consoleColor = consoleColor;
             return this;
         }
 
@@ -65,13 +73,25 @@ namespace Gint.Markup.Sample
 
         private void InternalAddColumn()
         {
-            _rowBuilder.Columns.Add(new Column
+            var column = new Column
             {
                 Alignment = _alignment,
                 Content = _content,
                 SkipRowDivider = _skipRowDivider ?? _rowBuilder.SkipRowDivider ?? false,
                 SpansOverColumns = _numberOfColumns
-            });
+            };
+
+            if(_consoleColor.HasValue)
+            {
+                column.PreRender += str =>
+                {
+                    Console.ForegroundColor = _consoleColor.Value;
+                    return str;
+                };
+                column.PostRender += str => Console.ResetColor();
+            }
+
+            _rowBuilder.Columns.Add(column);
         }
     }
 }
