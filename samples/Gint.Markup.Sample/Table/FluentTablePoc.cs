@@ -7,13 +7,16 @@ namespace Gint.Markup.Sample
         public FluentTablePoc()
         {
 
-            var renderer = GintTable
+            var table = GintTable
                 .WithFirstRowAsHeader()
                     .AddColumn("header1")
                     .AddColumn("header2")
                     .AddColumn("header3")
                  .NewRow()
-                    .RenderEmptyRow()
+                 .RenderEmptyRow()
+                     .AddColumn("column1")
+                     .AddColumn("column2")
+                 .NewRow()
                  .WithRowAlignment(Alignment.Start)
                     .AddColumn("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum")
                     .AddColumn("green content")
@@ -31,7 +34,7 @@ namespace Gint.Markup.Sample
                         {
                             OnOverflow = TextOverflowOption.ChangeLine
                         },
-                        TableStyle = SquareTable.Style,
+                        TableStyle = TableStyle.Square,
                         TryFitToScreen = true,
                         ColumnPaddingLeft = 2,
                         ColumnPaddingRight = 2,
@@ -40,7 +43,7 @@ namespace Gint.Markup.Sample
                     .WithHeaderUppercase()
                 );
 
-            renderer.Render(Console.Out);
+            table.Render(Console.Out);
         }
     }
 

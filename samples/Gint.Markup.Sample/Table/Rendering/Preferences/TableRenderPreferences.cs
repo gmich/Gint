@@ -21,7 +21,7 @@ namespace Gint.Markup.Sample
         public bool TryFitToScreen { get; set; } = true;
         public int ColumnPaddingLeft { get; set; } = 2;
         public int ColumnPaddingRight { get; set; } = 2;
-        public TableStyle TableStyle { get; set; } = SquareTable.Style;
+        public TableStyle TableStyle { get; set; } = TableStyle.Square;
         public List<ITableRenderMiddleware> TableRenderMiddleware { get; set; }
         public TextOverflow TextOverflow { get; set; } = new TextOverflow();
 
