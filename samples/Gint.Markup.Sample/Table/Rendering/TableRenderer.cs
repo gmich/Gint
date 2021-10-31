@@ -9,7 +9,6 @@ namespace Gint.Markup.Sample
     internal class TableRenderer : ITableRenderer
     {
         private readonly TableRenderPreferences tablePreferences;
-        private readonly ITableRenderMiddleware tableRenderVisitor;
         private readonly ITableBorderStyle border;
         private readonly ITableDividerStyle divider;
         private readonly IContentConnectorStyle contentConnector;
@@ -23,7 +22,6 @@ namespace Gint.Markup.Sample
         public TableRenderer(Table table, TableRenderPreferences tablePreferences)
         {
             this.tablePreferences = tablePreferences;
-            tableRenderVisitor = tablePreferences.TableRenderMiddleware;
             Table = table;
             divider = tablePreferences.TableStyle.TablePart;
             border = tablePreferences.TableStyle.TableBorder;
@@ -158,9 +156,16 @@ namespace Gint.Markup.Sample
 
         private void Write(string text, TableSection section)
         {
-            var newText = tableRenderVisitor.PreWrite(text, section);
-            writer.Write(newText);
-            tableRenderVisitor.PostWrite(newText, section);
+            var textToRender = text;
+            foreach(var middleware in tablePreferences.TableRenderMiddleware)
+            {
+                textToRender =  middleware.PreWrite(textToRender, section);
+            }
+            writer.Write(textToRender);
+            foreach (var middleware in tablePreferences.TableRenderMiddleware)
+            {
+                middleware.PostWrite(textToRender, section);
+            }
         }
 
         #region Border

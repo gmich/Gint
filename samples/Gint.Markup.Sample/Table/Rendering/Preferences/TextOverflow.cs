@@ -3,7 +3,7 @@
     public class TextOverflow
     {
         public int? MaxCellsPerColumn { get; set; } = null;
-        public TextOverflowOption Overflow { get; set; } = TextOverflowOption.ChangeLine;
+        public TextOverflowOption OnOverflow { get; set; } = TextOverflowOption.ChangeLine;
 
     }
 

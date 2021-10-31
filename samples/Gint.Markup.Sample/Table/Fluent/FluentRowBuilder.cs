@@ -43,7 +43,7 @@ namespace Gint.Markup.Sample
             return this;
         }
 
-        public ITableRenderer Build()
+        public ITableRenderer Build(TableRenderPreferences tableRenderPreferences = null)
         {
             var table = new Table();
             table.Content = new Content();
@@ -85,7 +85,7 @@ namespace Gint.Markup.Sample
             NormalizeColumnLength(table.Content.Rows);
             NormalizeColumnLength(table.Header.Rows);
 
-            return new TableRenderer(table, GintTable.TableRenderPreferences);
+            return new TableRenderer(table, tableRenderPreferences ?? GintTable.TableRenderPreferences);
         }
     }
 }

@@ -84,7 +84,7 @@ namespace Gint.Markup.Sample
 
         private static string HandleTextOverflow(int maxCellSize, string content, TextOverflow overflow)
         {
-            switch (overflow.Overflow)
+            switch (overflow.OnOverflow)
             {
                 case TextOverflowOption.ChangeLine:
                     if (content.Length > maxCellSize)

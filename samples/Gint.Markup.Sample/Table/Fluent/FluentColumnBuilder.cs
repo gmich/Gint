@@ -51,10 +51,10 @@ namespace Gint.Markup.Sample
             return new FluentRowBuilder(rows, _rowBuilder);
         }
 
-        public ITableRenderer Build()
+        public ITableRenderer Build(TableRenderPreferences tableRenderPreferences = null)
         {
             InternalAddColumn();
-            return new FluentRowBuilder(rows, _rowBuilder).Build();
+            return new FluentRowBuilder(rows, _rowBuilder).Build(tableRenderPreferences);
         }
 
         public FluentColumnBuilder AddColumn(string content)

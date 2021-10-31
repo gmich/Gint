@@ -57,7 +57,7 @@ namespace Gint.Markup.Sample
                 }
             };
 
-            new TableRenderer(table, new TableRenderPreferences { TableRenderMiddleware = new SectionColorerMiddleware() }).Render(Console.Out);
+            new TableRenderer(table, new TableRenderPreferences()).Render(Console.Out);
         }
     }
 

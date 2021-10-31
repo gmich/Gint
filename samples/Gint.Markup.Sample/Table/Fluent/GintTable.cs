@@ -4,7 +4,7 @@ namespace Gint.Markup.Sample
 {
     public static class GintTable
     {
-        public static TableRenderPreferences TableRenderPreferences { get; set; } = new TableRenderPreferences { TableRenderMiddleware = new SectionColorerMiddleware() };
+        public static TableRenderPreferences TableRenderPreferences { get; set; } = new TableRenderPreferences();
 
         public static FluentRowBuilder WithFirstRowAsHeader()
         {
