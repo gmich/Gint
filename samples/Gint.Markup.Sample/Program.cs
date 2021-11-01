@@ -6,9 +6,6 @@ namespace Gint.Markup.Sample
     {
         static void Demo()
         {
-            new TablePoc();
-            Console.ReadLine();
-            return;
             Console.WriteLine("Markup Demo");
             var document = new MarkupDocument();
             var fgred = document.AddFormatWithVariable("fg", "red");
