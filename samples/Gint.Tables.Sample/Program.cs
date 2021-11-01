@@ -75,9 +75,9 @@ namespace Gint.Tables.Sample
                     {
                         TextOverflow = new TextOverflow
                         {
-                            OnOverflow = TextOverflowOption.ChangeLine
+                            OnOverflow = TextOverflowOption.ChangeLine,
                         },
-                        PreferredTableWidth = Console.BufferWidth / 2,
+                        //PreferredTableWidth = Console.BufferWidth / 2,
                         TableStyle = TableStyle.Square,
                         TryFitToScreen = true,
                         ColumnPaddingLeft = 2,

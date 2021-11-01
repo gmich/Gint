@@ -82,14 +82,19 @@ namespace Gint.Tables
             return (addExtraRow, extraColumns);
         }
 
+
         private static string HandleTextOverflow(int maxCellSize, string content, TextOverflow overflow)
         {
+            var columnSize = overflow.MaxCellsPerColumn ?? maxCellSize;
+
+            bool ContentExceedsColumnLength() => content.Length > columnSize;
+
             switch (overflow.OnOverflow)
             {
                 case TextOverflowOption.ChangeLine:
-                    if (content.Length > maxCellSize)
+                    if (ContentExceedsColumnLength())
                     {
-                        var newContent = content.Substring(0, maxCellSize);
+                        var newContent = content.Substring(0, columnSize);
                         int totalIterationsAllowed = maxCellSize / 2;
                         int totalIterations = 0;
                         for (int i = newContent.Length - 1; i >= 0; i--)
@@ -101,19 +106,19 @@ namespace Gint.Tables
 
                             totalIterations++;
                         }
-                        return content.Insert(maxCellSize, Environment.NewLine);
+                        return content.Insert(columnSize, Environment.NewLine);
                     }
                     break;
                 case TextOverflowOption.Ellipsis:
-                    if (content.Length > maxCellSize)
+                    if (ContentExceedsColumnLength())
                     {
-                        return content.Remove(maxCellSize - 3) + "...";
+                        return content.Remove(columnSize - 3) + "...";
                     }
                     break;
                 case TextOverflowOption.Clip:
-                    if (content.Length > maxCellSize)
+                    if (ContentExceedsColumnLength())
                     {
-                        return content.Remove(maxCellSize);
+                        return content.Remove(columnSize);
                     }
                     break;
                 case TextOverflowOption.Render:
