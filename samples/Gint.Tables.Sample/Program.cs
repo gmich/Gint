@@ -6,6 +6,51 @@ namespace Gint.Tables.Sample
     {
         static void Main(string[] args)
         {
+            RenderSimpleTable();
+            RenderComplexTable();
+
+            Console.ReadLine();
+        }
+
+        private static void RenderSimpleTable()
+        {
+            var table = GintTable
+                .WithFirstRowAsHeader()
+                    .AddColumn("header1")
+                    .AddColumn("header2")
+                    .AddColumn("header3")
+                 .NewRow()
+                     .AddColumn("column1")
+                     .AddColumn("column2")
+                     .AddColumn("column3")
+                 .NewRow()
+                     .AddColumn("column1")
+                     .AddColumn("column2")
+                     .AddColumn("column3")
+                 .Build(
+                    new TableRenderPreferences
+                    {
+                        TextOverflow = new TextOverflow
+                        {
+                            OnOverflow = TextOverflowOption.ChangeLine
+                        },
+                        TableStyle = TableStyle.OnlyHeaderUnderline,
+                        TryFitToScreen = false,
+                        ColumnPaddingLeft = 2,
+                        ColumnPaddingRight = 2,
+                    }
+                    .WithColorPallette(border: ConsoleColor.DarkYellow, header: ConsoleColor.DarkGray, content: ConsoleColor.DarkMagenta)
+                    .WithHeaderUppercase()
+                );
+
+            table.Render(Console.Out);
+
+            Console.WriteLine();
+            Console.WriteLine();
+        }
+
+        private static void RenderComplexTable()
+        {
             var table = GintTable
                 .WithFirstRowAsHeader()
                     .AddColumn("header1")
@@ -43,7 +88,8 @@ namespace Gint.Tables.Sample
 
             table.Render(Console.Out);
 
-            Console.ReadLine();
+            Console.WriteLine();
+            Console.WriteLine();
         }
     }
 }

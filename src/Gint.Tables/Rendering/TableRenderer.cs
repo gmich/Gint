@@ -210,7 +210,7 @@ namespace Gint.Tables
                 else if ((i + 1) == analyzedColumns.Count)
                     break;
                 else
-                    Write(headerConnector.Get(TableConnectorPart.Top), TableSection.BorderTop);
+                    Write(border.Get(TableBorderPart.TopConnector), TableSection.BorderTop);
             }
             Write(border.Get(TableBorderPart.TopRight), TableSection.BorderTop);
         }
@@ -231,7 +231,7 @@ namespace Gint.Tables
             else if (column.SkipRowDivider)
                 Write(border.Get(TableBorderPart.Left), TableSection.BorderLeft);
             else
-                Write(contentConnector.Get(TableConnectorPart.Left), TableSection.BorderLeft);
+                Write(border.Get(TableBorderPart.LeftConnector), TableSection.BorderLeft);
         }
 
         private void RenderHeaderBorderRight(Column column)
@@ -251,7 +251,7 @@ namespace Gint.Tables
             else if (column.SkipRowDivider)
                 Write(border.Get(TableBorderPart.Right), TableSection.BorderRight);
             else
-                Write(style.Get(TableConnectorPart.Right), TableSection.BorderRight);
+                Write(border.Get(TableBorderPart.RightConnector), TableSection.BorderRight);
         }
 
         private void RenderBorderBottom()
@@ -268,7 +268,7 @@ namespace Gint.Tables
                 else if ((i + 1) == flattenedColumns.Count)
                     break;
                 else
-                    Write(contentConnector.Get(TableConnectorPart.Bottom), TableSection.BorderBottom);
+                    Write(border.Get(TableBorderPart.BottomConnector), TableSection.BorderBottom);
             }
             Write(border.Get(TableBorderPart.BottomRight), TableSection.BorderBottom);
 

@@ -14,6 +14,10 @@
                 TableBorderPart.BottomLeft => '└',
                 TableBorderPart.Bottom => '-',
                 TableBorderPart.BottomRight => '┘',
+                TableBorderPart.TopConnector => '-',
+                TableBorderPart.LeftConnector => '|',
+                TableBorderPart.RightConnector => '|',
+                TableBorderPart.BottomConnector => '-',
                 _ => throw new System.ArgumentException($"Unknown border style {border}"),
             };
         }
