@@ -17,7 +17,20 @@ namespace Gint.Tables
             TotalColumns = table.IterateFirstRow.Sum(c => c.SpansOverColumns);
             PaddingLeft = preferences.ColumnPaddingLeft;
             PaddingRight = preferences.ColumnPaddingRight;
-            CellSize = preferences.TryFitToScreen ? GetCellSizeFitToScreen() : GetLargestColumnSize(table);
+
+            if (preferences.PreferredTableWidth.HasValue)
+            {
+                CellSize = GetCellSizeForTable(preferences.PreferredTableWidth.Value);
+            }
+            else if (preferences.TryFitToScreen)
+            {
+                CellSize = GetCellSizeForTable(System.Console.BufferWidth);
+            }
+            else
+            {
+                CellSize = GetLargestColumnSize(table);
+            }
+
             TotalWidthWithoutMargin = CellSize + PaddingLeft + PaddingRight;
         }
 
@@ -26,10 +39,10 @@ namespace Gint.Tables
             return table.IterateColumns.Max(c => c.ContentLength / c.SpansOverColumns);
         }
 
-        private int GetCellSizeFitToScreen()
+        private int GetCellSizeForTable(int width)
         {
             var offSet = (PaddingLeft + PaddingRight + ColumnDividerWidth) * TotalColumns + ColumnDividerWidth;
-            var cellSize = (System.Console.BufferWidth - offSet) / TotalColumns;
+            var cellSize = (width - offSet) / TotalColumns;
             return cellSize;
         }
     }
