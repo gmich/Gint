@@ -7,16 +7,18 @@ namespace Gint.Tables
 
     public class TableRenderPreferences
     {
-        private SectionColorerMiddleware SectionColorerMiddleware { get; }
 
         public TableRenderPreferences()
         {
-            SectionColorerMiddleware = new SectionColorerMiddleware();
             TableRenderMiddleware = new List<ITableRenderMiddleware>()
             {
-                SectionColorerMiddleware
+                new SectionColorerMiddleware(this)
             };
         }
+
+        public ConsoleColor HeaderColor { get; set; } = ConsoleColor.Yellow;
+        public ConsoleColor ContentColor { get; set; } = ConsoleColor.DarkCyan;
+        public ConsoleColor BorderColor { get; set; } = ConsoleColor.DarkMagenta;
 
         public Alignment DefaultHeaderAlignment { get; set; } = Alignment.Center;
         public Alignment DefaultContentAlignment { get; set; } = Alignment.Center;
@@ -26,6 +28,24 @@ namespace Gint.Tables
         public int ColumnPaddingRight { get; set; } = 2;
         public TableStyle TableStyle { get; set; } = TableStyle.Square;
 
+        private bool _withHeaderUpperCase = false;
+        public bool WithHeaderUpperCase
+        {
+            get
+            {
+                return _withHeaderUpperCase;
+            }
+            set
+            {
+                if (value)
+                    WithHeaderUppercase();
+                else
+                    WithoutHeaderUppercase();
+
+                _withHeaderUpperCase = value;
+            }
+        }
+
         [JsonIgnore]
         public List<ITableRenderMiddleware> TableRenderMiddleware { get; set; }
         public TextOverflow TextOverflow { get; set; } = new TextOverflow();
@@ -33,27 +53,23 @@ namespace Gint.Tables
 
         public TableRenderPreferences WithColorPallette(ConsoleColor border, ConsoleColor header, ConsoleColor content)
         {
-            SectionColorerMiddleware.Border = border;
-            SectionColorerMiddleware.Header = header;
-            SectionColorerMiddleware.Content = content;
+            BorderColor = border;
+            HeaderColor = header;
+            ContentColor = content;
 
             return this;
         }
 
-        public TableRenderPreferences WithHeaderUppercase()
+        private void WithHeaderUppercase()
         {
             if (!TableRenderMiddleware.Contains(HeaderUppercaseMiddleware.Instance))
                 TableRenderMiddleware.Add(HeaderUppercaseMiddleware.Instance);
-
-            return this;
         }
 
-        public TableRenderPreferences WithoutHeaderUppercase()
+        private void WithoutHeaderUppercase()
         {
             if (TableRenderMiddleware.Contains(HeaderUppercaseMiddleware.Instance))
                 TableRenderMiddleware.Remove(HeaderUppercaseMiddleware.Instance);
-
-            return this;
         }
     }
 }

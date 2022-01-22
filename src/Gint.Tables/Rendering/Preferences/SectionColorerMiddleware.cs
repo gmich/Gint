@@ -2,11 +2,14 @@
 
 namespace Gint.Tables
 {
-    internal class SectionColorerMiddleware : ITableRenderMiddleware
+    public class SectionColorerMiddleware : ITableRenderMiddleware
     {
-        public ConsoleColor Header { get; set; } = ConsoleColor.Yellow;
-        public ConsoleColor Content { get; set; } = ConsoleColor.DarkCyan;
-        public ConsoleColor Border { get; set; } = ConsoleColor.DarkMagenta;
+        private readonly TableRenderPreferences preferences;
+
+        public SectionColorerMiddleware(TableRenderPreferences preferences)
+        {
+            this.preferences = preferences;
+        }
 
         public void PostWrite(string text, TableSection section)
         {
@@ -18,13 +21,13 @@ namespace Gint.Tables
             switch (section)
             {
                 case TableSection.HeaderColumn:
-                    Console.ForegroundColor = Header;
+                    Console.ForegroundColor = preferences.HeaderColor;
                     break;
                 case TableSection.ContentColumn:
-                    Console.ForegroundColor = Content;
+                    Console.ForegroundColor = preferences.ContentColor;
                     break;
                 default:
-                    Console.ForegroundColor = Border;
+                    Console.ForegroundColor = preferences.BorderColor; 
                     break;
             }
             return text;

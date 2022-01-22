@@ -11,7 +11,6 @@ namespace Gint.Tables
         [JsonInclude]
         public Table Table { get; internal set; }
 
-
         public static TableDefinition FromString(string json) => JsonSerializer.Deserialize<TableDefinition>(json);
 
         public override string ToString() => JsonSerializer.Serialize(this);

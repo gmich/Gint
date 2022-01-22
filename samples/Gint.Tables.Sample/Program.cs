@@ -38,9 +38,9 @@ namespace Gint.Tables.Sample
                         TryFitToScreen = false,
                         ColumnPaddingLeft = 2,
                         ColumnPaddingRight = 2,
+                        WithHeaderUpperCase = true,
                     }
                     .WithColorPallette(border: ConsoleColor.DarkYellow, header: ConsoleColor.DarkGray, content: ConsoleColor.DarkMagenta)
-                    .WithHeaderUppercase()
                 )
                 .RenderToConsole();
 
@@ -82,9 +82,9 @@ namespace Gint.Tables.Sample
                         TryFitToScreen = true,
                         ColumnPaddingLeft = 2,
                         ColumnPaddingRight = 2,
+                        WithHeaderUpperCase = true
                     }
                     .WithColorPallette(border: ConsoleColor.DarkYellow, header: ConsoleColor.DarkGray, content: ConsoleColor.DarkMagenta)
-                    .WithHeaderUppercase()
                 )
                 .RenderToConsole();
 
