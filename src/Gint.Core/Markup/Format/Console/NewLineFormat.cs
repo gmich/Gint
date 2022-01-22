@@ -11,9 +11,12 @@ namespace Gint.Markup.Format
             Console.WriteLine();
         }
 
+        public RenderArea GetAreaEstimate(string variable) => new RenderArea(0, 1);
+
         public void Remove()
         {
         }
+
     }
 
 }

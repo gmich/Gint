@@ -13,5 +13,8 @@ namespace Gint.Markup.Format
                 Console.CursorTop = pos;
             }
         }
+
+        public override RenderArea GetAreaEstimate(string variable) => RenderArea.Empty;
+
     }
 }

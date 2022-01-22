@@ -27,5 +27,7 @@ namespace Gint.Markup.Format
 
         public abstract void Apply(string variable);
         public abstract void Remove();
+
+        public RenderArea GetAreaEstimate(string variable) => RenderArea.Empty;
     }
 }

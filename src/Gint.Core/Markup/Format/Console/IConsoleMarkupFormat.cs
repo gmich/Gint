@@ -4,7 +4,7 @@
     {
         string Tag { get; }
         void Apply(string variable);
+        RenderArea GetAreaEstimate(string variable);
         void Remove();
     }
-
 }
