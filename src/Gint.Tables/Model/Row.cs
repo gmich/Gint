@@ -1,15 +1,27 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace Gint.Tables
 {
-    internal class Row
+    public class Row
     {
-        public bool SkipColumns { get; set; } = false;
-        public bool SkipDivider { get; set; } = false;
-        public Alignment Alignment { get; init; } = Alignment.Default;
-        public Column[] Columns { get; init; }
-        public List<AnalyzedColumn> AnalyzedColumns { get; internal set; }
+        [JsonInclude]
+        public bool SkipColumns { get; internal set; } = false;
+
+        [JsonInclude]
+        public bool SkipDivider { get; internal set; } = false;
+
+        [JsonInclude]
+        public Alignment Alignment { get; internal set; } = Alignment.Default;
+
+        [JsonInclude]
+        public Column[] Columns { get; internal set; }
+
+        [JsonIgnore]
+        public List<AnalyzedColumn> AnalyzedColumns { get; set; }
+
+        [JsonIgnore]
         internal int TotalColumns => Columns.Sum(c => c.SpansOverColumns);
     }
 }

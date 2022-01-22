@@ -50,7 +50,7 @@ namespace Gint.Tables
             return this;
         }
 
-        public ITableRenderer Build(TableRenderPreferences tableRenderPreferences = null)
+        public TableDefinition Build(TableRenderPreferences tableRenderPreferences = null)
         {
             var table = new Table();
             table.Content = new Content();
@@ -93,7 +93,11 @@ namespace Gint.Tables
             NormalizeColumnLength(table.Content.Rows);
             NormalizeColumnLength(table.Header.Rows);
 
-            return new TableRenderer(table, tableRenderPreferences ?? GintTable.TableRenderPreferences);
+            return new TableDefinition
+            {
+                TableRenderPreferences = tableRenderPreferences ?? GintTable.TableRenderPreferences,
+                Table = table
+            };
         }
     }
 }

@@ -58,6 +58,7 @@ namespace Gint.Tables
             {
                 extraColumns.Add(new Column
                 {
+                    ForegroundColor = column.ForegroundColor,
                     SpansOverColumns = column.SpansOverColumns,
                     SkipRowDivider = column.SkipRowDivider,
                     Alignment = column.Alignment,

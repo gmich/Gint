@@ -14,7 +14,7 @@ namespace Gint.Tables.Sample
 
         private static void RenderSimpleTable()
         {
-            var table = GintTable
+            GintTable
                 .WithFirstRowAsHeader()
                     .AddColumn("header1")
                     .AddColumn("header2")
@@ -41,9 +41,9 @@ namespace Gint.Tables.Sample
                     }
                     .WithColorPallette(border: ConsoleColor.DarkYellow, header: ConsoleColor.DarkGray, content: ConsoleColor.DarkMagenta)
                     .WithHeaderUppercase()
-                );
+                )
+                .RenderToConsole();
 
-            table.Render(Console.Out);
 
             Console.WriteLine();
             Console.WriteLine();
@@ -51,7 +51,7 @@ namespace Gint.Tables.Sample
 
         private static void RenderComplexTable()
         {
-            var table = GintTable
+            GintTable
                 .WithFirstRowAsHeader()
                     .AddColumn("header1")
                     .AddColumn("header2")
@@ -63,7 +63,7 @@ namespace Gint.Tables.Sample
                  .WithRowAlignment(Alignment.Start)
                     .AddColumn("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum")
                     .AddColumn("green content")
-                        .WithColor(ConsoleColor.Green)
+                        .WithForegroundColor(ConsoleColor.Green)
                     .AddColumn($"centered content")
                         .WithAlignment(Alignment.Center)
                 .NewRow()
@@ -85,9 +85,8 @@ namespace Gint.Tables.Sample
                     }
                     .WithColorPallette(border: ConsoleColor.DarkYellow, header: ConsoleColor.DarkGray, content: ConsoleColor.DarkMagenta)
                     .WithHeaderUppercase()
-                );
-
-            table.Render(Console.Out);
+                )
+                .RenderToConsole();
 
             Console.WriteLine();
             Console.WriteLine();

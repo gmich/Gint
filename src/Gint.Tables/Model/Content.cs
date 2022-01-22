@@ -1,7 +1,7 @@
 ﻿namespace Gint.Tables
 {
-    internal class Content
+    public class Content
     {
-        public Row[] Rows { get; internal set; }
+        public Row[] Rows { get; set; }
     }
 }

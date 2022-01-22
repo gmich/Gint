@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Gint.Tables
 {
+
     public class TableRenderPreferences
     {
         private SectionColorerMiddleware SectionColorerMiddleware { get; }
@@ -23,6 +25,8 @@ namespace Gint.Tables
         public int ColumnPaddingLeft { get; set; } = 2;
         public int ColumnPaddingRight { get; set; } = 2;
         public TableStyle TableStyle { get; set; } = TableStyle.Square;
+
+        [JsonIgnore]
         public List<ITableRenderMiddleware> TableRenderMiddleware { get; set; }
         public TextOverflow TextOverflow { get; set; } = new TextOverflow();
 
@@ -40,7 +44,7 @@ namespace Gint.Tables
         {
             if (!TableRenderMiddleware.Contains(HeaderUppercaseMiddleware.Instance))
                 TableRenderMiddleware.Add(HeaderUppercaseMiddleware.Instance);
-            
+
             return this;
         }
 

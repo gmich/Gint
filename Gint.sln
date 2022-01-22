@@ -29,7 +29,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gint.Quickstart", "samples\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gint.Tables", "src\Gint.Tables\Gint.Tables.csproj", "{3EF609EE-629D-41B7-9FCB-1411D405FC79}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gint.Tables.Sample", "samples\Gint.Tables.Sample\Gint.Tables.Sample.csproj", "{945B6FE0-B6D6-4ACD-8891-437797CB921F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gint.Tables.Sample", "samples\Gint.Tables.Sample\Gint.Tables.Sample.csproj", "{945B6FE0-B6D6-4ACD-8891-437797CB921F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gint.Tables.Markup", "src\Gint.Tables.Markup\Gint.Tables.Markup.csproj", "{C6C41831-161E-43AC-A490-B1B0B3F07A5E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -135,6 +137,14 @@ Global
 		{945B6FE0-B6D6-4ACD-8891-437797CB921F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{945B6FE0-B6D6-4ACD-8891-437797CB921F}.Release|x64.ActiveCfg = Release|Any CPU
 		{945B6FE0-B6D6-4ACD-8891-437797CB921F}.Release|x64.Build.0 = Release|Any CPU
+		{C6C41831-161E-43AC-A490-B1B0B3F07A5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6C41831-161E-43AC-A490-B1B0B3F07A5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6C41831-161E-43AC-A490-B1B0B3F07A5E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C6C41831-161E-43AC-A490-B1B0B3F07A5E}.Debug|x64.Build.0 = Debug|Any CPU
+		{C6C41831-161E-43AC-A490-B1B0B3F07A5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6C41831-161E-43AC-A490-B1B0B3F07A5E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C6C41831-161E-43AC-A490-B1B0B3F07A5E}.Release|x64.ActiveCfg = Release|Any CPU
+		{C6C41831-161E-43AC-A490-B1B0B3F07A5E}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

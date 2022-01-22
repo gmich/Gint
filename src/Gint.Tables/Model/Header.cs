@@ -1,7 +1,10 @@
-﻿namespace Gint.Tables
+﻿using System.Text.Json.Serialization;
+
+namespace Gint.Tables
 {
-    internal class Header
+    public class Header
     {
+        [JsonInclude]
         public Row[] Rows { get; internal set; }
     }
 }

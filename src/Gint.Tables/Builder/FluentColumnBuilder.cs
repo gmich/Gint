@@ -26,7 +26,7 @@ namespace Gint.Tables
             return this;
         }
 
-        public FluentColumnBuilder WithColor(ConsoleColor consoleColor)
+        public FluentColumnBuilder WithForegroundColor(ConsoleColor consoleColor)
         {
             _consoleColor = consoleColor;
             return this;
@@ -59,7 +59,7 @@ namespace Gint.Tables
             return new FluentRowBuilder(rows, _rowBuilder);
         }
 
-        public ITableRenderer Build(TableRenderPreferences tableRenderPreferences = null)
+        public TableDefinition Build(TableRenderPreferences tableRenderPreferences = null)
         {
             InternalAddColumn();
             return new FluentRowBuilder(rows, _rowBuilder).Build(tableRenderPreferences);
@@ -78,18 +78,10 @@ namespace Gint.Tables
                 Alignment = _alignment,
                 Content = _content,
                 SkipRowDivider = _skipRowDivider ?? _rowBuilder.SkipRowDivider ?? false,
-                SpansOverColumns = _numberOfColumns
+                SpansOverColumns = _numberOfColumns,
+                ForegroundColor = _consoleColor
             };
 
-            if(_consoleColor.HasValue)
-            {
-                column.PreRender += str =>
-                {
-                    Console.ForegroundColor = _consoleColor.Value;
-                    return str;
-                };
-                column.PostRender += str => Console.ResetColor();
-            }
 
             _rowBuilder.Columns.Add(column);
         }

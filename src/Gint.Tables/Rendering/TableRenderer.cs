@@ -14,20 +14,20 @@ namespace Gint.Tables
         private readonly IContentConnectorStyle contentConnector;
         private readonly IHeaderConnectorStyle headerConnector;
         private readonly TableRenderContext renderOptions;
-
-        internal Table Table { get; }
+        private Table Table { get; }
 
         private TextWriter writer;
 
-        public TableRenderer(Table table, TableRenderPreferences tablePreferences)
+        public TableRenderer(TableDefinition tableDefinition)
         {
-            this.tablePreferences = tablePreferences;
-            Table = table;
-            divider = tablePreferences.TableStyle.TablePart;
-            border = tablePreferences.TableStyle.TableBorder;
-            contentConnector = tablePreferences.TableStyle.ContentConnector;
-            headerConnector = tablePreferences.TableStyle.HeaderConnector;
-            renderOptions = new TableRenderContext(table, tablePreferences);
+            this.tablePreferences = tableDefinition.TableRenderPreferences;
+            Table = tableDefinition.Table;
+            var styleRenderer = tablePreferences.TableStyle.GetRenderer();
+            divider = styleRenderer.TablePart;
+            border = styleRenderer.TableBorder;
+            contentConnector = styleRenderer.ContentConnector;
+            headerConnector = styleRenderer.HeaderConnector;
+            renderOptions = new TableRenderContext(tableDefinition.Table, tablePreferences);
         }
 
         public void Render(TextWriter writer)
@@ -168,11 +168,13 @@ namespace Gint.Tables
             var textToRender = column.Rendered;
             textToRender = PrerenderMiddleware(section, textToRender);
 
-            if (column.PreRender != null)
-                textToRender = column.PreRender(textToRender);
+            if (column.ForegroundColor != null)
+                Console.ForegroundColor = column.ForegroundColor.Value;
+
             writer.Write(textToRender);
-            if (column.PostRender != null)
-                column.PostRender(textToRender);
+
+            if (column.ForegroundColor != null)
+                Console.ResetColor();
 
             PostRenderMiddleware(section, textToRender);
         }

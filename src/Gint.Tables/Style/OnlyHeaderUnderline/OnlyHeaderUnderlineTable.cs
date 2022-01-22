@@ -1,6 +1,6 @@
 ﻿namespace Gint.Tables
 {
-    public class OnlyHeaderUnderlineTable : TableStyle
+    internal class OnlyHeaderUnderlineTable : TableStyleRenderer
     {
 
         internal OnlyHeaderUnderlineTable() : base(new OnlyHeaderUnderlineTableBorderStyle(), new OnlyHeaderUnderlineTableDividerStyle(), new OnlyHeaderUnderlineConnectorStyle(), new OnlyHeaderUnderlineHeaderConnectorStyle())
@@ -9,7 +9,7 @@
     }
 
 
-    partial class TableStyle
+    internal partial class TableStyleRenderer
     {
         public static OnlyHeaderUnderlineTable OnlyHeaderUnderline { get; } = new OnlyHeaderUnderlineTable();
     }

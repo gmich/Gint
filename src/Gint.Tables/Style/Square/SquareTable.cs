@@ -1,6 +1,6 @@
 ﻿namespace Gint.Tables
 {
-    public class SquareTable : TableStyle
+    internal class SquareTable : TableStyleRenderer
     {
 
         internal SquareTable() : base(new SquareTableBorderStyle(), new SquareTableDividerStyle(), new SquareContentConnectorStyle(), new SquareHeaderConnectorStyle())
@@ -9,7 +9,7 @@
     }
 
 
-    partial class TableStyle
+    partial class TableStyleRenderer
     {
         public static SquareTable Square { get; } = new SquareTable();
     }
