@@ -10,7 +10,5 @@ namespace Gint.Markup.Format
         {
             Console.Write(DateTime.UtcNow.ToString(variable));
         }
-
-        public override RenderArea GetAreaEstimate(string variable) => new RenderArea(18, 1);
     }
 }

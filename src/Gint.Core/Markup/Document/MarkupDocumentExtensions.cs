@@ -2,10 +2,16 @@
 
 namespace Gint
 {
+    using Gint.Tables;
     using Markup;
 
     public static class MarkupDocumentExtensions
     {
+        public static MarkupDocument WriteTable(this MarkupDocument document, TableDefinition tableDefinition)
+        {
+            document.AddFormatTokenWithVariable("table", tableDefinition.ToString());
+            return document;
+        }
         public static MarkupDocument WriteLine(this MarkupDocument document)
         {
             document.AddFormatToken("br");

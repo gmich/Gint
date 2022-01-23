@@ -7,6 +7,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Gint.Markup\Gint.Markup.csproj" />
     <ProjectReference Include="..\Gint.Pipes\Gint.Pipes.csproj" />
+    <ProjectReference Include="..\Gint.Tables\Gint.Tables.csproj" />
   </ItemGroup>
 
 </Project>

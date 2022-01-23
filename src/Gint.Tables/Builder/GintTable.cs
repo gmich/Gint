@@ -4,7 +4,7 @@ namespace Gint.Tables
 {
     public static class GintTable
     {
-        public static TableRenderPreferences TableRenderPreferences { get; set; } = new TableRenderPreferences();
+        public static TableRenderPreferences DefaultTableRenderPreferences { get; set; } = new TableRenderPreferences();
 
         public static FluentRowBuilder WithFirstRowAsHeader()
         {

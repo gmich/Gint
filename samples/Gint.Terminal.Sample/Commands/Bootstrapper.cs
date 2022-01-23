@@ -27,6 +27,7 @@ namespace Gint.Terminal.Sample
                     });
 
 
+            runtime.CommandRegistry.AddDefinition(new ExampleCommand());
             runtime.CommandRegistry.DiscoverAttributeDefinitions(System.Reflection.Assembly.GetExecutingAssembly());
         }
     }

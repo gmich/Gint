@@ -14,7 +14,5 @@ namespace Gint.Markup.Format
             }
         }
 
-        public override RenderArea GetAreaEstimate(string variable) => RenderArea.Empty;
-
     }
 }

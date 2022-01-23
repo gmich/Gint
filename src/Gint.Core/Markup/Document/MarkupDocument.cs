@@ -37,6 +37,11 @@ namespace Gint
                     //escape it by adding it twice
                     tempBuffer.Append(MarkupFormatConsts.FormatTagClose);
                 }
+                if (c == MarkupFormatConsts.FormatSeparator)
+                {
+                    //escape it by adding it twice
+                    tempBuffer.Append(MarkupFormatConsts.FormatSeparator);
+                }
             }
             return tempBuffer.ToString();
         }

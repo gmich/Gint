@@ -95,7 +95,7 @@ namespace Gint.Tables
 
             return new TableDefinition
             {
-                TableRenderPreferences = tableRenderPreferences ?? GintTable.TableRenderPreferences,
+                TableRenderPreferences = tableRenderPreferences ?? GintTable.DefaultTableRenderPreferences,
                 Table = table
             };
         }
