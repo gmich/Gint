@@ -17,7 +17,7 @@ namespace Gint.Terminal.Sample
 
         public Task<CommandResult> Example(CommandExecutionContext ctx)
         {
-            if(ctx.ExecutingCommand.Options.Contains("-t"))
+            if (ctx.ExecutingCommand.Options.Contains("-t"))
             {
                 ctx.Info.Write("Printing an example table...")
                     .WriteLine()
@@ -52,8 +52,8 @@ namespace Gint.Terminal.Sample
                     {
                         OnOverflow = TextOverflowOption.ChangeLine,
                     },
-                                //PreferredTableWidth = Console.BufferWidth / 2,
-                                TableStyle = TableStyle.Square,
+                    //PreferredTableWidth = Console.BufferWidth / 2,
+                    TableStyle = TableStyle.Square,
                     TryFitToScreen = true,
                     ColumnPaddingLeft = 2,
                     ColumnPaddingRight = 2,

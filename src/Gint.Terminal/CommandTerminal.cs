@@ -52,9 +52,7 @@ namespace Gint.Terminal
             OnCommandReady += async (sender, cmd) =>
             {
                 AcceptInput = false;
-                Console.WriteLine();
                 await runtime.Run(cmd);
-                Console.WriteLine();
                 AcceptInput = true;
             };
             return this;

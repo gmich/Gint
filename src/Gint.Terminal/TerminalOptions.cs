@@ -4,6 +4,12 @@
     {
         public bool SuggestionsEnabled { get; init; } = true;
         public bool DisplayErrorCells { get; init; } = false;
+
+        /// <summary>
+        /// Shows parsing and lexing diagnostics.
+        /// 
+        /// Can also be toggled with the key combination: control + shift + d
+        /// </summary>
         public bool DisplayDiagnostics { get; init; } = true;
         public int MaxSuggestionsPerRow { get; init; } = 5;
         public string Prompt { get; init; } = " » ";

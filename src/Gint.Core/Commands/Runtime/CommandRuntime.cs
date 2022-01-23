@@ -110,7 +110,8 @@ namespace Gint
                 Options.RuntimeInfo.Write(prefix)
                     .WithForegroundColor().Red().Write(error)
                     .WriteLine(suffix.ToString())
-                    .WriteLine(diagnostic.Message);
+                    .WriteLine(diagnostic.Message)
+                    .WriteLine();
 
                 Options.RuntimeInfo.Flush();
             }
