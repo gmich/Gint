@@ -6,10 +6,31 @@ namespace Gint.Tables.Sample
     {
         static void Main(string[] args)
         {
+            RenderTableWithDefaults();
             RenderSimpleTable();
             RenderComplexTable();
 
             Console.ReadLine();
+        }
+
+        private static void RenderTableWithDefaults()
+        {
+            GintTable
+                .WithFirstRowAsHeader()
+                    .AddColumn("header1")
+                    .AddColumn("header2")
+                 .NewRow()
+                     .AddColumn("column1")
+                     .AddColumn("column2")
+                 .NewRow()
+                     .AddColumn("column1")
+                     .AddColumn("column2")
+                 .Build()
+                 .RenderToConsole();
+
+
+            Console.WriteLine();
+            Console.WriteLine();
         }
 
         private static void RenderSimpleTable()
@@ -86,7 +107,7 @@ namespace Gint.Tables.Sample
                     }
                     .WithColorPallette(border: ConsoleColor.DarkYellow, header: ConsoleColor.DarkGray, content: ConsoleColor.DarkMagenta)
                 )
-                .RenderToConsole();
+                .Render(Console.Out);
 
             Console.WriteLine();
             Console.WriteLine();

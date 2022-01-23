@@ -22,7 +22,7 @@ namespace Gint.Tables
 
         public Alignment DefaultHeaderAlignment { get; set; } = Alignment.Center;
         public Alignment DefaultContentAlignment { get; set; } = Alignment.Center;
-        public bool TryFitToScreen { get; set; } = true;
+        public bool TryFitToScreen { get; set; } = false;
         public int? PreferredTableWidth { get; set; }
         public int ColumnPaddingLeft { get; set; } = 2;
         public int ColumnPaddingRight { get; set; } = 2;
