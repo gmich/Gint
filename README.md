@@ -7,6 +7,8 @@ A powerful and configurable command line interpreter for .NET with no dependenci
 
 ## Quickstart
 
+![Markup tldr](https://github.com/gmich/Gint/blob/main/resources/gint-quickstart.gif)
+
 ```csharp
     class Program
     {
@@ -51,4 +53,24 @@ A powerful and configurable command line interpreter for .NET with no dependenci
     }
 ```
 
-![Markup tldr](https://github.com/gmich/Gint/blob/main/resources/gint-quickstart.gif)
+## Tables
+
+![Simple table](https://github.com/gmich/Gint/blob/main/resources/simple_table_with_defaults.png)
+
+```csharp
+            GintTable
+                .WithFirstRowAsHeader()
+                    .AddColumn("header1")
+                    .AddColumn("header2")
+                 .NewRow()
+                     .AddColumn("column1")
+                     .AddColumn("column2")
+                 .NewRow()
+                     .AddColumn("column1")
+                     .AddColumn("column2")
+                 .Build()
+                 .RenderToConsole();
+```  
+
+For more info on tables, check the [wiki](https://github.com/gmich/Gint/wiki/Gint-tables).
+
