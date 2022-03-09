@@ -2,12 +2,27 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <Product>Gint</Product>
+    <Authors>Gmich</Authors>
+    <Company>Gmich</Company>
+    <Version>0.9.0</Version>
+    <PackageProjectUrl>https://github.com/gmich/gint</PackageProjectUrl>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <Description>A powerful and configurable command line interpreter</Description>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Gint.Markup\Gint.Markup.csproj" />
     <ProjectReference Include="..\Gint.Pipes\Gint.Pipes.csproj" />
     <ProjectReference Include="..\Gint.Tables\Gint.Tables.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

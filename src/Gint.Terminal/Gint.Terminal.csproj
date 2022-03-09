@@ -5,10 +5,24 @@
     <TargetFramework>net5.0</TargetFramework>
     <AssemblyName>Gint.Terminal</AssemblyName>
     <RootNamespace>Gint.Terminal</RootNamespace>
+    <Authors>Gmich</Authors>
+    <Product>Gint</Product>
+    <PackageProjectUrl>https://github.com/gmich/gint</PackageProjectUrl>
+    <Version>0.9.0</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <Description>A powerful and configurable command line interpreter</Description>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Gint.Core\Gint.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
