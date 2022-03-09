@@ -5,11 +5,33 @@
 A powerful and configurable command line interpreter for .NET with no dependencies.
 
 
+## Nuget Packages
+
+| Package Name  | Version |
+| ------------- |-------------|
+|Gint.Core | [![Gint.Core](https://img.shields.io/nuget/v/gint.core)](https://www.nuget.org/packages/Gint.Core/)                |
+|Gint.Terminal | [![Gint.Terminal](https://img.shields.io/nuget/v/gint.terminal)](https://www.nuget.org/packages/Gint.Terminal/)    |
+|Gint.Tables | [![Gint.Tables](https://img.shields.io/nuget/v/gint.tables)](https://www.nuget.org/packages/Gint.Tables/)          |
+|Gint.Pipes | [![Gint.Pipes](https://img.shields.io/nuget/v/gint.pipes)](https://www.nuget.org/packages/Gint.Pipes/)             |
+|Gint.Markup | [![Gint.Markup](https://img.shields.io/nuget/v/gint.markup)](https://www.nuget.org/packages/Gint.Markup/)          |
+
+
+
 ## Quickstart
 
 ![Markup tldr](https://github.com/gmich/Gint/blob/main/resources/gint-quickstart.gif)
 
+```
+install-package Gint.Terminal
+```
+
 ```csharp
+
+using Gint;
+using Gint.Terminal;
+
+namespace Sample
+{
     class Program
     {
         static void Main(string[] args)
@@ -51,7 +73,10 @@ A powerful and configurable command line interpreter for .NET with no dependenci
             }
         }
     }
+}
 ```
+
+Diagnostics can be toggled with `ctrl+shift+d` or through the `TerminalOptions` in the `CommandTerminal` constructor.
 
 ## Tables
 
