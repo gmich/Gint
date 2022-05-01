@@ -1,4 +1,5 @@
 ﻿using BenchmarkDotNet.Configs;
+using BenchmarkDotNet.Diagnostics.Windows;
 using BenchmarkDotNet.Environments;
 using BenchmarkDotNet.Exporters;
 using BenchmarkDotNet.Jobs;
@@ -12,8 +13,12 @@ namespace Gint.Benchmarks
     {
         static void Main(string[] args)
         {
-            //var markupSummary = BenchmarkRunner.Run<MarkupBenchmark>();
-            var pipesSummary = BenchmarkRunner.Run<PipesBenchmark>();
+            var resultSummary =  BenchmarkSwitcher
+            .FromAssembly(typeof(Program).Assembly)
+            .Run(args,
+                DefaultConfig.Instance
+                    .AddDiagnoser(new EtwProfiler()));
+
             Console.ReadLine();
         }
     }
