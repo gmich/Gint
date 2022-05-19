@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+	<TargetFrameworks>net5.0;net6.0</TargetFrameworks>
     <PackageProjectUrl>https://github.com/gmich/gint</PackageProjectUrl>
     <Company>Gmich</Company>
     <Authors>Gmich</Authors>

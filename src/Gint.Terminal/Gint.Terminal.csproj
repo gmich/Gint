@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
     <AssemblyName>Gint.Terminal</AssemblyName>
     <RootNamespace>Gint.Terminal</RootNamespace>
     <Authors>Gmich</Authors>
